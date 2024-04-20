@@ -1,79 +1,100 @@
-import pandas as pd
+from fractions import Fraction
+import random
 import matplotlib.pyplot as plt
-import numpy as np
 
-# 设定全局字体
-plt.rcParams["font.sans-serif"] = ["SimHei"]
-plt.rcParams["axes.unicode_minus"] = False
+# 基础利益的分式列表
+base_fractions = [
+    Fraction(1, 9),
+    Fraction(1, 8),
+    Fraction(1, 7),
+    Fraction(1, 6),
+    Fraction(1, 5),
+    Fraction(2, 9),
+    Fraction(1, 4),
+    Fraction(2, 7),
+    Fraction(1, 3),
+    Fraction(3, 8),
+    Fraction(2, 5),
+    Fraction(3, 7),
+    Fraction(4, 9),
+    Fraction(1, 2),
+    Fraction(5, 9),
+    Fraction(4, 7),
+    Fraction(3, 5),
+    Fraction(5, 8),
+    Fraction(2, 3),
+    Fraction(5, 7),
+    Fraction(3, 4),
+    Fraction(7, 9),
+    Fraction(4, 5),
+    Fraction(5, 6),
+    Fraction(6, 7),
+    Fraction(7, 8),
+    Fraction(8, 9),
+    Fraction(1, 1),
+    Fraction(10, 9),
+    Fraction(9, 8),
+    Fraction(8, 7),
+    Fraction(7, 6),
+    Fraction(6, 5),
+    Fraction(11, 9),
+    Fraction(5, 4),
+    Fraction(9, 7),
+    Fraction(4, 3),
+    Fraction(11, 8),
+    Fraction(7, 5),
+    Fraction(10, 7),
+    Fraction(13, 9),
+    Fraction(3, 2),
+    Fraction(14, 9),
+    Fraction(11, 7),
+    Fraction(8, 5),
+    Fraction(13, 8),
+    Fraction(5, 3),
+    Fraction(12, 7),
+    Fraction(7, 4),
+    Fraction(16, 9),
+    Fraction(9, 5),
+    Fraction(11, 6),
+    Fraction(13, 7),
+    Fraction(15, 8),
+    Fraction(17, 9),
+    Fraction(2, 1),
+]
 
-# 打开读取 "D:\系统默认\桌面\天河vs海珠.xlsx"
-path = "D:\\系统默认\\桌面\\天河vs海珠.xlsx"
-# 读取第一张表为tianhe，第二张表为haizhu
-tianhe: pd.DataFrame = pd.read_excel(path, sheet_name=0)
-haizhu: pd.DataFrame = pd.read_excel(path, sheet_name=1)
+# 线性组合的次数
+n_combinations = 10000
 
-# 丢弃tianhe中haizhu没有的列数据
-# 直接在drop方法中使用集合操作找出差异列并丢弃
-tianhe = tianhe.drop(columns=set(tianhe.columns) - set(haizhu.columns))
+# 存储结果分母的位数
+combinations = []
+denominator_lengths = []
+N = 2
 
+for _ in range(n_combinations):
+    # 随机选择N个分式进行线性组合
+    fractions_chosen = random.sample(base_fractions, N)
+    combination = sum(fractions_chosen) / N
 
-def draw_about(tianhe: pd.DataFrame, haizhu: pd.DataFrame, column_name: str):
-    plt.figure(figsize=(12, 6))
+    # 约分
+    if combination > 2:
+        combination -= 2
+    combination = combination.limit_denominator()
+    combinations.append(combination)
 
-    # 设置条形图的位置和宽度
-    n_years = len(tianhe["年份"])
-    index = np.arange(n_years)
-    bar_width = 0.1
+    # 获取并存储分母位数
+    denominator_length = len(str(combination.denominator))
+    denominator_lengths.append(denominator_length)
 
-    # 绘制原始数据的条形图
-    plt.bar(index - bar_width, tianhe[column_name], bar_width, label="天河", alpha=0.7)
-    plt.bar(index, haizhu[column_name], bar_width, label="海珠", alpha=0.7)
+# 绘制直方图
+plt.hist(
+    denominator_lengths,
+    bins=range(1, max(denominator_lengths) + 2),
+    edgecolor="black",
+    align="left",
+)
+plt.xlabel("Denominator Length")
+plt.ylabel("Frequency")
+plt.title("Denominator Length Distribution in Linear Combinations")
+plt.show()
 
-    # 计算差值并绘制
-    diff_values = tianhe[column_name] - haizhu[column_name]
-    plt.bar(
-        index + bar_width,
-        diff_values,
-        bar_width,
-        label="差值",
-        color="gray",
-        alpha=0.7,
-    )
-
-    # 绘制原始数据的折线图
-    plt.plot(index, tianhe[column_name], "o-", label="天河折线")
-    plt.plot(index, haizhu[column_name], "o-", label="海珠折线")
-
-    # 绘制差值的折线图
-    plt.plot(index, diff_values, "s--", label="差值折线", color="black")
-
-    # 获取数据的最大值和最小值
-    max_value = max(
-        tianhe[column_name].max(), haizhu[column_name].max(), diff_values.max()
-    )
-    min_value = min(
-        tianhe[column_name].min(), haizhu[column_name].min(), diff_values.min()
-    )
-
-    # 计算数据范围
-    data_range = max_value - min_value
-    # 设置y轴范围，稍微大于数据的最大值和小于最小值
-    plt.ylim(min_value - data_range * 0.1, max_value + data_range * 0.4)
-
-    # 设置图表标题和坐标轴标签
-    plt.title(f"天河vs海珠{column_name}比较")
-    plt.xlabel("年份")
-    plt.ylabel(f"{column_name}（万元）")
-
-    # 设置x轴刻度标签
-    plt.xticks(index, tianhe["年份"])
-    # 添加图例
-    plt.legend(loc="upper left")
-    # 显示网格
-    plt.grid(True)
-    # 显示图形
-    plt.savefig(f"D:\\系统默认\\桌面\\{column_name}.png")
-
-
-for column_name in tianhe.columns[1:]:
-    draw_about(tianhe, haizhu, column_name)
+print(combinations[:10])
