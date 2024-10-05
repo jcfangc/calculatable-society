@@ -1,0 +1,49 @@
+﻿version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    volumes:
+      - ./frontend:/workspace
+    networks:
+      - dev-network
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    volumes:
+      - ./backend:/workspace
+    networks:
+      - dev-network
+    depends_on:
+      - database
+    ports:
+      - "8000:8000"
+    environment:
+      - RUST_LOG=info
+
+  database:
+    build:
+      context: ./database
+      dockerfile: Dockerfile
+    volumes:
+      - ./database/data:/var/lib/postgresql/data # 持久化数据目录
+    networks:
+      - dev-network
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: mydb
+
+networks:
+  dev-network:
+    driver: bridge

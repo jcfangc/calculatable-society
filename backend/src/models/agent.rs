@@ -1,7 +1,7 @@
-use crate::components::component::Component;
+// use crate::component::Component;
 
-struct Agent {
-    id: String,
-    component: Component,
-    event_manager: EventManager,
-}
+// struct Agent {
+//     id: String,
+//     component: Component,
+//     event_manager: EventManager,
+// }
