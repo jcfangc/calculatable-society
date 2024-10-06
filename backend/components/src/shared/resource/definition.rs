@@ -2,7 +2,8 @@ use crate::shared::resource::property::definition::Property;
 use std::collections::HashMap;
 use std::fmt;
 use types::components_types::shared::resource::{
-    resource_amount::ResourceAmount, resource_type_coefficient::ResourceTypeCoefficient,
+    resource_amount::{AllocatableOperation, DebtOperation, InvestmentOperation, ResourceAmount},
+    resource_type_coefficient::ResourceTypeCoefficient,
 };
 
 /// `Resource` 结构体，表示单个资源类型及其数量
@@ -28,45 +29,39 @@ impl Resource {
         }
     }
 
-    /// 获取资源的属性
-    ///
-    /// # 参数
-    /// - `filter`: 可选的属性过滤器
-    ///
-    /// # 返回值
-    /// 返回一个包含属性名称和值的哈希表
-    ///
-    /// # 示例
-    /// ```
-    /// let resource = Resource::new(ResourceTypeCoefficient::new(1, 1), ResourceAmount::new(10).unwrap());
-    /// let properties = resource.get_properties(None);
-    /// ```
-    ///
-    /// # 备注
-    /// 如果 `filter` 存在，使用过滤后的属性列表，否则使用 `PROPERTIES` 中的所有属性
-    pub fn get_properties(&self, filter: Option<Vec<String>>) -> HashMap<String, f64> {
-        let mut properties: HashMap<String, f64> = HashMap::new();
+    /// 获取资源的种类
+    pub fn get_resource_type(&self) -> &ResourceTypeCoefficient {
+        &self.resource_type
+    }
 
-        // 如果 `filter` 存在，使用过滤后的属性列表，否则使用 `PROPERTIES` 中的所有属性
-        let property_names: Vec<&str> = match filter {
-            Some(ref filter_list) => PROPERTIES
-                .keys()
-                .filter(|key| filter_list.contains(&key.to_string()))
-                .copied()
-                .collect(),
-            None => PROPERTIES.keys().copied().collect(),
-        };
+    /// 获取资源的数量
+    pub fn get_amount(&self) -> &ResourceAmount {
+        &self.amount
+    }
 
-        for property_name in property_names {
-            if let Some(property_const) = PROPERTIES.get(property_name) {
-                properties.insert(
-                    property_name.to_string(),
-                    property_const.calculate(&self.resource_type),
-                );
-            }
-        }
+    /// 设置资源的数量
+    pub fn set_amount(&mut self, new_allocatable: u64, new_investment: u64, new_debt: u64) {
+        self.amount
+            .set_allocatable(new_allocatable)
+            .set_investment(new_investment)
+            .set_debt(new_debt)
+            .finalize();
+    }
 
-        return properties;
+    /// 计算资源属性
+    pub fn properties(&self) -> HashMap<Property, f64> {
+        // 检查数据库中是否有记载本资源的属性
+        // 如果有，返回属性
+        // 如果没有，进行计算并存入数据库
+        let property_value_entries = Property::hash_map()
+            .iter()
+            .map(|(property, property_const)| {
+                (*property, property_const.calculate(&self.resource_type))
+            })
+            .collect();
+
+        // 返回属性
+        property_value_entries
     }
 }
 

@@ -1,92 +1,139 @@
 ﻿use std::fmt;
-use std::ops::{AddAssign, SubAssign};
+use std::ops::{AddAssign, DivAssign, MulAssign, SubAssign};
 use tracing::error;
-use validator::ValidationError;
 
 // 自定义 "资源数量" 类型并进行验证
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct ResourceAmount {
-    resource_amount: i64, // 表示资源的数量
+    allocatable: u64, // 表示当前可分配的资源量
+    investment: u64,  // 累积投资总量
+    debt: u64,        // 累积债务总量
+}
+
+impl ResourceAmount {
+    /// 构造函数，创建 `ResourceAmount` 实例
+    pub fn new(allocatable: u64, investment: u64, debt: u64) -> Self {
+        ResourceAmount {
+            allocatable,
+            investment,
+            debt,
+        }
+    }
+
+    /// 初始化 `ResourceAmount` 实例
+    ///
+    /// 创建一个初始的 `ResourceAmount` 实例，所有字段都为 0。
+    pub fn init() -> Self {
+        ResourceAmount {
+            allocatable: 0,
+            investment: 0,
+            debt: 0,
+        }
+    }
+
+    /// 最终设置完成的方法，用于结束链式调用
+    pub fn finalize(&mut self) {
+        // 这里可以执行一些最终的操作，比如打印日志等
+    }
 }
 
 impl AddAssign for ResourceAmount {
-    /// 重载 `+=` 运算符，实现资源数量的加法
-    ///
-    /// 将两个 `ResourceAmount` 实例相加，将结果赋值给左侧的实例。
-    ///
-    /// # 参数
-    /// - `other`: 另一个 `ResourceAmount` 实例
-    ///
-    /// # 示例
-    /// ```
-    /// let mut amount = ResourceAmount::new(10).unwrap();
-    /// amount += ResourceAmount::new(5).unwrap();
-    ///
-    /// assert_eq!(amount, ResourceAmount::new(15).unwrap());
-    /// ```
     fn add_assign(&mut self, other: Self) {
-        self.resource_amount += other.resource_amount;
+        // 将所有字段都进行累加操作
+        self.allocatable += other.allocatable;
+        self.investment += other.investment;
+        self.debt += other.debt;
     }
 }
 
 impl SubAssign for ResourceAmount {
     /// 重载 `-=` 运算符，实现资源数量的减法
-    ///
-    /// 将两个 `ResourceAmount` 实例相减，将结果赋值给左侧的实例。
-    ///
-    /// # 参数
-    /// - `other`: 另一个 `ResourceAmount` 实例
-    ///
-    /// # 示例
-    /// ```
-    /// let mut amount = ResourceAmount::new(10).unwrap();
-    /// amount -= ResourceAmount::new(5).unwrap();
-    ///
-    /// assert_eq!(amount, ResourceAmount::new(5).unwrap());
-    /// ```
     fn sub_assign(&mut self, other: Self) {
-        self.resource_amount -= other.resource_amount;
+        self.allocatable = self.allocatable.saturating_sub(other.allocatable);
+        self.investment = self.investment.saturating_sub(other.investment);
+        self.debt = self.debt.saturating_sub(other.debt);
     }
 }
 
-impl ResourceAmount {
-    /// 构造函数，创建 `ResourceAmount` 实例
-    ///
-    /// 资源数量在创建时必须经过验证，确保其为非负数。如果小于0，将返回验证错误。
-    ///
-    /// # 参数
-    /// - `resource_amount`: 资源的数量，使用 `f64` 表示。
-    ///
-    /// # 返回值
-    /// 返回一个 `Result<Self, ValidationError>`，其中 `Self` 是构造成功的 `ResourceAmount` 实例，`ValidationError` 则是当数量小于0时返回的错误。
-    ///
-    /// # 错误
-    /// 当 `resource_amount` 小于 0.0 时，会返回 `ValidationError`。
-    ///
-    /// # 示例
-    /// ```
-    /// let amount = ResourceAmount::new(10).unwrap();
-    /// ```
-    fn new(resource_amount: i64) -> Result<Self, ValidationError> {
-        if resource_amount < 0 {
-            error!("资源数量不能为负数！");
-            return Err(ValidationError::new("资源数量不能为负数！"));
+impl MulAssign for ResourceAmount {
+    /// 重载 `*=` 运算符，实现资源数量的乘法
+    fn mul_assign(&mut self, other: Self) {
+        self.allocatable *= other.allocatable;
+        self.investment *= other.investment;
+        self.debt *= other.debt;
+    }
+}
+
+impl DivAssign for ResourceAmount {
+    /// 重载 `/=` 运算符，实现资源数量的除法
+    fn div_assign(&mut self, other: Self) {
+        if other.allocatable == 0 || other.investment == 0 || other.debt == 0 {
+            error!("除数不能为 0！");
+            return;
         }
-        Ok(ResourceAmount { resource_amount })
+        self.allocatable /= other.allocatable;
+        self.investment /= other.investment;
+        self.debt /= other.debt;
+    }
+}
+
+// 定义 allocatable 字段的相关行为
+pub trait AllocatableOperation {
+    fn get_allocatable(&self) -> u64;
+    fn set_allocatable(&mut self, new_value: u64) -> &mut Self;
+}
+
+impl AllocatableOperation for ResourceAmount {
+    fn get_allocatable(&self) -> u64 {
+        self.allocatable
+    }
+
+    fn set_allocatable(&mut self, new_value: u64) -> &mut Self {
+        self.allocatable = new_value;
+        self
+    }
+}
+
+// 定义 investment 字段的相关行为
+pub trait InvestmentOperation {
+    fn get_investment(&self) -> u64;
+    fn set_investment(&mut self, new_value: u64) -> &mut Self;
+}
+
+impl InvestmentOperation for ResourceAmount {
+    fn get_investment(&self) -> u64 {
+        self.investment
+    }
+
+    fn set_investment(&mut self, new_value: u64) -> &mut Self {
+        self.investment = new_value;
+        self
+    }
+}
+
+// 定义 debt 字段的相关行为
+pub trait DebtOperation {
+    fn get_debt(&self) -> u64;
+    fn set_debt(&mut self, new_value: u64) -> &mut Self;
+}
+
+impl DebtOperation for ResourceAmount {
+    fn get_debt(&self) -> u64 {
+        self.debt
+    }
+
+    fn set_debt(&mut self, new_value: u64) -> &mut Self {
+        self.debt = new_value;
+        self
     }
 }
 
 impl fmt::Display for ResourceAmount {
-    /// 格式化 `ResourceAmount` 为字符串
-    ///
-    /// 将 `ResourceAmount` 转换为表示数量的字符串。
-    ///
-    /// # 示例
-    /// ```
-    /// let amount = ResourceAmount::new(10).unwrap();
-    /// println!("{}", amount); // 输出 "10"
-    /// ```
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.resource_amount)
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "ResourceAmount {{ allocatable: {}, investment: {}, debt: {} }}",
+            self.allocatable, self.investment, self.debt
+        )
     }
 }
