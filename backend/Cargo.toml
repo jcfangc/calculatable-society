@@ -1,5 +1,5 @@
 [workspace]
-members = ["components", "macros"]
+members = ["components", "macros", "types"]
 
 [package]
 name = "ess"

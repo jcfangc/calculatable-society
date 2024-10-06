@@ -1,4 +1,5 @@
-﻿use macros::for_components::property_map::PropertyMap;
+﻿use macros::PropertyMap;
+use std::fmt::Display;
 
 // /// `property_const!` 宏，用于生成具有频率和相位常量的属性常量
 // ///

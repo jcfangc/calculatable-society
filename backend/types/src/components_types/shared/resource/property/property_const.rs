@@ -1,8 +1,8 @@
-﻿use crate::shared::resource::types::ResourceTypeCoefficient;
+﻿use crate::components_types::shared::resource::resource_type_coefficient::ResourceTypeCoefficient;
 use num::traits::ToPrimitive;
 use std::f64::consts::PI;
 
-/// `Property` 结构体，用于描述物质的属性
+/// `PropertyConst` 结构体，用于描述物质的属性
 ///
 /// 每个属性通过频率常量和相位常量，以及环境因子来描述其物理/化学性质。
 /// - `frequency_constant`: 属性频率的基础常量（a）

@@ -1,7 +1,7 @@
 ﻿use crate::agent_relevant::preference::types::PreferenceValue;
-use crate::shared::resource::types::ResourceTypeCoefficient;
 use std::collections::HashMap;
 use std::fmt;
+use types::components_types::shared::resource::resource_type_coefficient::ResourceTypeCoefficient;
 
 /// `Preference` 结构体，用于管理资源类型到偏好值的映射
 #[derive(Debug)]

@@ -1,7 +1,9 @@
-use crate::shared::resource::property::definition::PROPERTIES;
-use crate::shared::resource::types::{ResourceAmount, ResourceTypeCoefficient};
+use crate::shared::resource::property::definition::Property;
 use std::collections::HashMap;
 use std::fmt;
+use types::components_types::shared::resource::{
+    resource_amount::ResourceAmount, resource_type_coefficient::ResourceTypeCoefficient,
+};
 
 /// `Resource` 结构体，表示单个资源类型及其数量
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]

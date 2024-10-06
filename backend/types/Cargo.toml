@@ -1,13 +1,9 @@
 [package]
-name = "components"
+name = "types"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
 num = { version = "0.4.3", features = ["serde"] }
-once_cell = "1.20.1"
-strum_macros = "0.26.4"
 tracing = "0.1.40"
 validator = "0.18.1"
-macros = { path = "../macros" }
-types = { path = "../types" }
