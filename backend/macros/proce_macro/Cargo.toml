@@ -1,0 +1,15 @@
+[package]
+name = "proce_macro"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+quote = "*"
+syn = { version = "*", features = ["full"] }
+proc-macro2 = "*"
+types = { path = "../../types" }
+app_context = { path = "../../app_context" }
+
+
+[lib]
+proc-macro = true

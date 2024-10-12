@@ -1,5 +1,5 @@
-﻿use crate::agent_relevant::preference::definition::Preference;
-use crate::shared::resource::definition::Resource;
+﻿use crate::agent::preference::Preference;
+use crate::shared::resource::Resource;
 use std::fmt;
 
 /// `Component` 枚举，表示系统中可能存在的多种组件。
@@ -16,8 +16,8 @@ pub enum Component {
 impl fmt::Display for Component {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Component::Resource(resource) => write!(f, "Resource({:?})", resource),
-            Component::Preference(preference) => write!(f, "Preference({:?})", preference),
+            Component::Resource(resource) => write!(f, "Resource({:#?})", resource),
+            Component::Preference(preference) => write!(f, "Preference({:#?})", preference),
         }
     }
 }

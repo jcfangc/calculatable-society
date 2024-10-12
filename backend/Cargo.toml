@@ -1,27 +1,24 @@
 [workspace]
-members = ["components", "macros", "models", "repositories", "types"]
+members = [
+    "app_context",
+    "components",
+    "database",
+    "macros",
+    "models",
+    "repositories",
+    "types",
+]
 
 [package]
 name = "ess"
 version = "0.1.0"
 edition = "2021"
-build = "build.rs"
+
 
 [dependencies]
-sqlx = { version = "0.8.2", features = ["postgres"] }
-axum = "0.7.5"
-fs_extra = "1.3.0"
-# num = { version = "0.4.3", features = ["serde"] }
-# once_cell = "1.19.0"
-# phf = { version = "0.11.2", features = ["macros"] }
-rayon = "1.10.0"
-tokio = { version = "1.40.0", features = ["full"] }
-# tracing = "0.1.40"
-validator = { version = "0.18.1", features = ["derive"] }
-tracing-subscriber = "0.3.18"
-dotenv = { version = "0.15.0" }
+tokio = { version = "*", features = ["full"] }
+database = { path = "database" }
 
-[build-dependencies]
 
 [[bin]]
 name = "ess"

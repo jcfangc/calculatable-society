@@ -4,6 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-num = { version = "0.4.3", features = ["serde"] }
-tracing = "0.1.40"
-validator = "0.18.1"
+num = { version = "*", features = ["serde"] }
+tracing = "*"
+validator = "*"
