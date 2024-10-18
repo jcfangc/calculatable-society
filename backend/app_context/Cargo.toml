@@ -4,5 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-decla_macro = { path = "../macros/decla_macro" }
+database = { path = "../database" }
+dotenvy = "*"
 once_cell = "*"
+sqlx = { version = "*", features = ["postgres"] }

@@ -6,4 +6,4 @@ edition = "2021"
 [dependencies]
 sqlx = { version = "*", features = ["postgres"] }
 num = { version = "*", features = ["serde"] }
-macros = { path = "../macros" }
+proce_macro = { path = "../proce_macro" }

@@ -5,4 +5,4 @@ edition = "2021"
 
 [dependencies]
 sqlx = { version = "*", features = ["postgres"] }
-dotenv = { version = "*" }
+dotenvy = "*"

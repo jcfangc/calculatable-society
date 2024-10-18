@@ -145,7 +145,7 @@ pub fn derive(input: TokenStream) -> TokenStream {
         use #property_const_path;
 
         impl #enum_name {
-            pub fn hash_map() -> &'static Lazy<HashMap<#enum_name, #property_const_path>> {
+            pub fn to_map() -> &'static Lazy<HashMap<#enum_name, #property_const_path>> {
                 static INSTANCE: Lazy<HashMap<#enum_name, #property_const_path>> = Lazy::new(|| {
                     let mut map = HashMap::new();
                     #(#insertions;)*

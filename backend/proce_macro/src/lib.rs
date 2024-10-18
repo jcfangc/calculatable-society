@@ -83,6 +83,70 @@ pub fn property_map_derive(input: TokenStream) -> TokenStream {
 }
 
 use attribute::property_model;
+/// `property_model_attribute` 是一个自定义属性宏，
+/// 用于从外部文件中自动生成与结构体相关的字段。
+///
+/// ### 主要功能
+/// - 自动为给定的结构体生成 `Model` 后缀的结构体。
+/// - 从指定的枚举文件中读取所有枚举变体，并将其作为新生成结构体的字段。
+/// - 自动实现 `sqlx::FromRow` 特性，以便与 SQL 结果映射。
+///
+/// ### 参数
+/// 宏需要一个路径参数，该路径指向包含枚举定义的文件。枚举变体会自动被转换为结构体中的字段，
+/// 每个枚举变体生成一个 `f64` 类型的字段。
+///
+/// - `path`: 包含枚举定义的外部文件的相对路径。
+///
+/// ### 使用方式
+///
+/// 你可以在一个结构体上使用 `#[property_model_attribute]` 属性宏来自动生成对应的带有 `Model` 后缀的结构体。
+/// 该宏会从指定的枚举文件中读取变体，并生成相应的字段。
+///
+/// ```rust
+/// use attribute::property_model_attribute;
+///
+/// #[property_model_attribute(path = "components/src/shared/property.rs")]
+/// pub struct Property {
+///     pub numerator: u32,
+///     pub denominator: u32,
+/// }
+/// ```
+///
+/// ### 示例说明
+///
+/// 假设 `components/src/shared/property.rs` 文件中定义了如下枚举：
+///
+/// ```rust
+/// pub enum Property {
+///     Flammable,
+///     Toxic,
+///     Reactive,
+/// }
+/// ```
+///
+/// 该宏会自动生成以下内容：
+///
+/// ```rust
+/// use sqlx::FromRow;
+///
+/// #[derive(Debug, FromRow)]
+/// pub struct PropertyModel {
+///     pub numerator: u32,
+///     pub denominator: u32,
+///     pub flammable: f64,
+///     pub toxic: f64,
+///     pub reactive: f64,
+/// }
+/// ```
+///
+/// 生成的 `PropertyModel` 结构体中不仅包含原始 `Property` 结构体的字段，
+/// 还包含了从枚举 `Property` 中提取的字段。每个枚举变体都转换为一个 `f64` 类型的字段。
+///
+/// ### 注意事项
+///
+/// - 枚举文件路径必须有效，否则宏会在运行时抛出错误。
+/// - 生成的结构体自动带有 `Model` 后缀。
+/// - 宏使用 `sqlx::FromRow` 来帮助结构体与数据库结果集进行映射。
 #[proc_macro_attribute]
 pub fn property_model_attribute(attr: TokenStream, item: TokenStream) -> TokenStream {
     property_model::attribute(attr, item)

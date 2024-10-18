@@ -6,8 +6,7 @@ edition = "2021"
 [dependencies]
 num = { version = "*", features = ["serde"] }
 once_cell = "*"
-strum_macros = "*"
 tracing = "*"
 validator = "*"
-macros = { path = "../macros" }
+proce_macro = { path = "../proce_macro" }
 types = { path = "../types" }

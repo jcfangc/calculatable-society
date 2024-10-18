@@ -1,9 +1,7 @@
-﻿use macros::property_model_attribute;
-// use sqlx::FromRow;
+﻿use proce_macro::property_model_attribute;
 
 #[property_model_attribute(path = "components/src/shared/property.rs")]
-// #[derive(Debug, FromRow)]
-pub struct PropertyModel {
+pub struct Property {
     pub numerator: u32,
     pub denominator: u32,
 }

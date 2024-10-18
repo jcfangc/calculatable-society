@@ -1,4 +1,4 @@
-﻿use macros::PropertyMap;
+﻿use proce_macro::PropertyMap;
 
 /// 枚举 `Property`，表示物质的属性
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, PropertyMap)]

@@ -53,7 +53,7 @@ impl Resource {
         // 检查数据库中是否有记载本资源的属性
         // 如果有，返回属性
         // 如果没有，进行计算并存入数据库
-        let property_value_entries = Property::hash_map()
+        let property_value_entries = Property::to_map()
             .iter()
             .map(|(property, property_const)| {
                 (*property, property_const.calculate(&self.resource_type))
