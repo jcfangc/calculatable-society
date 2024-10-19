@@ -1,7 +1,7 @@
-﻿use crate::shared::resource::Resource;
+﻿use crate::shared::resource::types::resource_type_coefficient::ResourceTypeCoefficient;
+use crate::shared::resource::Resource;
 use std::collections::HashMap;
 use std::fmt;
-use types::components_types::shared::resource::resource_type_coefficient::ResourceTypeCoefficient;
 
 /// `Resources` 结构体，用于管理多个 `Resource` 对象
 #[derive(Debug)]

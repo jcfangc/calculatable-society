@@ -1,9 +1,0 @@
-[package]
-name = "models"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-sqlx = { version = "*", features = ["postgres"] }
-num = { version = "*", features = ["serde"] }
-proce_macro = { path = "../proce_macro" }

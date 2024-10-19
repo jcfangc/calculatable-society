@@ -8,5 +8,5 @@ num = { version = "*", features = ["serde"] }
 once_cell = "*"
 tracing = "*"
 validator = "*"
-proce_macro = { path = "../proce_macro" }
-types = { path = "../types" }
+utils = { path = "../utils" }
+sqlx = { version = "*", features = ["runtime-tokio-rustls", "macros"] }

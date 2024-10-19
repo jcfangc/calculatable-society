@@ -1,14 +1,5 @@
 [workspace]
-members = [
-    "app_context",
-    "components",
-    "database",
-    "proce_macro",
-    "decla_macro",
-    "models",
-    "repositories",
-    "types",
-]
+members = ["components", "utils"]
 
 [package]
 name = "ess"
@@ -17,7 +8,7 @@ edition = "2021"
 
 
 [dependencies]
-tokio = { version = "*", features = ["full"] }
+# tokio = { version = "*", features = ["full"] }
 
 
 [[bin]]
