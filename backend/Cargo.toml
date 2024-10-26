@@ -1,5 +1,5 @@
 [workspace]
-members = ["components", "utils"]
+members = ["components", "context", "log", "utils"]
 
 [package]
 name = "ess"
@@ -8,8 +8,11 @@ edition = "2021"
 
 
 [dependencies]
-# tokio = { version = "*", features = ["full"] }
-
+tokio = { version = "*", features = ["full"] }
+axum = { version = "*", features = [] }
+log = { path = "./log" }
+context = { path = "./context" }
+tracing = "*"
 
 [[bin]]
 name = "ess"

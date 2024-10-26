@@ -4,19 +4,19 @@ use utils::enum_map;
 enum_map! {
     #[derive(Clone, Copy)]
     pub Property => PropertyConst {
-        Flammable => || PropertyConst::new(1,1),
-        Toxic => || PropertyConst::new(2,2),
-        Reactive => || PropertyConst::new(3,3),
-        Corrosive => || PropertyConst::new(4,4),
-        Oxidizer => || PropertyConst::new(5,5),
-        AcidBase => || PropertyConst::new(6,6),
-        Phase => || PropertyConst::new(7,7),
-        Conductive => || PropertyConst::new(8,8),
-        Magnetic => || PropertyConst::new(9,9),
-        Brittle => || PropertyConst::new(10,10),
-        Malleable => || PropertyConst::new(11,11),
-        Elastic => || PropertyConst::new(12,12),
-        Transparent => || PropertyConst::new(13,13),
+        Flammable => || PropertyConst::new(1,1),        // 可燃性
+        Toxic => || PropertyConst::new(2,2),            // 有毒性
+        Reactive => || PropertyConst::new(3,3),         // 反应性
+        Corrosive => || PropertyConst::new(4,4),        // 腐蚀性
+        Oxidizer => || PropertyConst::new(5,5),         // 氧化性
+        AcidBase => || PropertyConst::new(6,6),         // 酸碱性
+        Phase => || PropertyConst::new(7,7),            // 物态
+        Conductive => || PropertyConst::new(8,8),       // 导电性
+        Magnetic => || PropertyConst::new(9,9),         // 磁性
+        Brittle => || PropertyConst::new(10,10),        // 易碎性
+        Malleable => || PropertyConst::new(11,11),      // 可塑性
+        Elastic => || PropertyConst::new(12,12),        // 弹性
+        Transparent => || PropertyConst::new(13,13),    // 透明性
     }
 }
 
@@ -52,8 +52,26 @@ mod repository {
 
 // Model 模块: 负责定义数据模型，通常是数据库表的抽象结构
 mod model {
-    // 在这里定义你的数据结构。
-    // 例如: struct property { ... }
+    use sqlx::FromRow;
+
+    #[derive(FromRow)]
+    pub struct PropertyModel {
+        pub resource_numerator: u32,
+        pub resource_dominator: u32,
+        pub flammable: f64,
+        pub toxic: f64,
+        pub reactive: f64,
+        pub corrosive: f64,
+        pub oxidizer: f64,
+        pub acid_base: f64,
+        pub phase: f64,
+        pub conductive: f64,
+        pub magnetic: f64,
+        pub brittle: f64,
+        pub malleable: f64,
+        pub elastic: f64,
+        pub transparent: f64,
+    }
 }
 
 // Types 模块: 封装与组件相关的基础类型，便于全局使用

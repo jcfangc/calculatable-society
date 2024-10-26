@@ -27,7 +27,7 @@ pub mod macros {
     ///
     /// ```
     /// enum_map! {
-    ///     /// 文档注释
+    ///     #[derive(Debug, PartialEq, Eq, Hash)] // 可以在这里添加需要的额外属性
     ///     pub EnumName => ValueType {
     ///         Key1 => value_fn1,
     ///         Key2 => value_fn2,
@@ -73,21 +73,21 @@ pub mod macros {
             }
 
             use std::collections::HashMap;
-            use once_cell::sync::Lazy;
+            use tokio::sync::OnceCell; // 使用 tokio 的 OnceCell
+
             impl $name {
-                $vis fn to_map() -> &'static HashMap<$name, $value_type> {
-                    static MAP: Lazy<HashMap<$name, $value_type>> = Lazy::new(
-                        || {
-                            let mut map = HashMap::new();
-                            $(map.insert($name::$key, $value());)*
-                            map
-                        }
-                    );
-                    &MAP
+                // 异步初始化的静态哈希表
+                $vis async fn to_map() -> &'static HashMap<$name, $value_type> {
+                    static MAP: OnceCell<HashMap<$name, $value_type>> = OnceCell::const_new();
+
+                    MAP.get_or_init(|| async {
+                        let mut map = HashMap::new();
+                        $(map.insert($name::$key, $value());)* // 注意，这里 $value() 如果是异步调用，需改为 $value.await
+                        map
+                    }).await
                 }
             }
         };
     }
 }
-
 // Utils 模块的其他辅助功能可以根据项目需求逐步扩展

@@ -5,8 +5,10 @@ edition = "2021"
 
 [dependencies]
 num = { version = "*", features = ["serde"] }
-once_cell = "*"
 tracing = "*"
 validator = "*"
 utils = { path = "../utils" }
 sqlx = { version = "*", features = ["runtime-tokio-rustls", "macros"] }
+rayon = "*"
+tokio = { version = "*", features = ["sync"] }
+context = { path = "../context" }

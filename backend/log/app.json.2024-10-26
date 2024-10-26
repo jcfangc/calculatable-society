@@ -1,0 +1,38 @@
+{
+    "timestamp": "2024-10-26T10:19:44.527246Z",
+    "level": "DEBUG",
+    "fields": {
+        "message": "ESS 程序启动！"
+    },
+    "target": "ess",
+    "filename": "src/main.rs",
+    "line_number": 10,
+    "threadId": "ThreadId(1)"
+}
+{
+    "timestamp": "2024-10-26T10:33:55.583411Z",
+    "level": "DEBUG",
+    "fields": {
+        "message": "ESS 程序启动！"
+    },
+    "target": "ess",
+    "filename": "src/main.rs",
+    "line_number": 10,
+    "threadId": "ThreadId(1)"
+}
+{
+    "timestamp": "2024-10-26T10:34:33.925642Z",
+    "level": "INFO",
+    "fields": {
+        "message": "ESS 程序启动！"
+    },
+    "target": "ess",
+    "filename": "src/main.rs",
+    "line_number": 10,
+    "threadId": "ThreadId(1)"
+}{"timestamp":"2024-10-26T20:07:04.623421Z","level":"WARN","fields":{"message":"Failed to open `.pgpass` file: Os { code: 2, kind: NotFound, message: \"No such file or directory\" }","path":"/home/vscode/.pgpass"},"target":"sqlx_postgres::options::pgpass","filename":"/usr/local/cargo/registry/src/index.crates.io-6f17d22bba15001f/sqlx-postgres-0.8.2/src/options/pgpass.rs","line_number":46,"threadId":"ThreadId(1)"}
+{"timestamp":"2024-10-26T20:10:27.357951Z","level":"WARN","fields":{"message":"Failed to open `.pgpass` file: Os { code: 2, kind: NotFound, message: \"No such file or directory\" }","path":"/home/vscode/.pgpass"},"target":"sqlx_postgres::options::pgpass","filename":"/usr/local/cargo/registry/src/index.crates.io-6f17d22bba15001f/sqlx-postgres-0.8.2/src/options/pgpass.rs","line_number":46,"threadId":"ThreadId(1)"}
+{"timestamp":"2024-10-26T20:10:27.426113Z","level":"INFO","fields":{"message":"ESS启动！"},"target":"ess","filename":"src/main.rs","line_number":19,"threadId":"ThreadId(1)"}
+{"timestamp":"2024-10-26T20:11:22.343397Z","level":"WARN","fields":{"message":"Ignoring path. Permissions are not strict enough","path":"/home/vscode/.pgpass","permissions":"100644"},"target":"sqlx_postgres::options::pgpass","filename":"/usr/local/cargo/registry/src/index.crates.io-6f17d22bba15001f/sqlx-postgres-0.8.2/src/options/pgpass.rs","line_number":63,"threadId":"ThreadId(1)"}
+{"timestamp":"2024-10-26T20:11:22.415110Z","level":"INFO","fields":{"message":"ESS启动！"},"target":"ess","filename":"src/main.rs","line_number":19,"threadId":"ThreadId(1)"}
+{"timestamp":"2024-10-26T20:11:58.811168Z","level":"INFO","fields":{"message":"ESS启动！"},"target":"ess","filename":"src/main.rs","line_number":19,"threadId":"ThreadId(1)"}

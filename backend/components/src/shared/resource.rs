@@ -1,4 +1,5 @@
 use crate::shared::property::Property;
+use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use std::collections::HashMap;
 use std::fmt;
 use types::resource_amount::{
@@ -49,16 +50,15 @@ impl Resource {
     }
 
     /// 计算资源属性
-    pub fn properties(&self) -> HashMap<Property, f64> {
-        // 检查数据库中是否有记载本资源的属性
-        // 如果有，返回属性
-        // 如果没有，进行计算并存入数据库
-        let property_value_entries = Property::to_map()
-            .iter()
+    pub async fn properties(&self) -> HashMap<Property, f64> {
+        // 直接使用 into_par_iter 进行并行计算，避免 Vec 转换
+        let property_value_entries: HashMap<_, _> = Property::to_map()
+            .await
+            .into_par_iter() // 将 HashMap 转换为并行迭代器
             .map(|(property, property_const)| {
                 (*property, property_const.calculate(&self.resource_type))
             })
-            .collect();
+            .collect(); // 将并行结果收集为 HashMap
 
         // 返回属性
         property_value_entries
@@ -96,10 +96,37 @@ mod service {
 
 // Repository 模块: 负责与数据库的交互，执行数据的增删改查操作
 mod repository {
-    // Repository 模块专注于与数据库的交互，处理数据的持久化操作。
-    // 例如: 通过数据库查询获取 resource 数据，或者将新的 resource 插入数据库。
-    // 在这里定义具体的数据访问方法。
-    // 例如: fn get_resource_by_id(id: u32) -> Option<resource> { ... }
+    use super::model::ResourceModel;
+    use context::db::context::DatabaseContext;
+    use context::GLOBAL_APP_CONTEXT;
+
+    pub async fn get_resource(
+        numerator: u32,
+        denominator: u32,
+    ) -> Result<ResourceModel, sqlx::Error> {
+        // 获取数据库连接池
+        let pool = GLOBAL_APP_CONTEXT
+            .get()
+            .expect("AppContext 未初始化")
+            .db_pool()
+            .await;
+
+        // 使用连接池执行查询
+        let result = sqlx::query_as!(
+            ResourceModel,
+            "SELECT numerator as numerator: i32, denominator as denominator: i32, allocatable as allocatable: i64, investment as investment: i64, debt as debt: i64 FROM resource WHERE numerator = $1 AND denominator = $2",
+            numerator as i32,
+            denominator as i32
+        )
+        .fetch_optional(&*pool)
+        .await?;
+
+        if let Some(resource) = result {
+            // 处理找到的数据
+        } else {
+            // 处理没有找到数据的情况
+        }
+    }
 }
 
 // Model 模块: 负责定义数据模型，通常是数据库表的抽象结构
@@ -108,7 +135,6 @@ mod model {
 
     #[derive(FromRow)]
     pub struct ResourceModel {
-        pub id: u32,
         pub numerator: u32,
         pub denominator: u32,
         pub allocatable: u64,

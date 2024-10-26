@@ -1,0 +1,11 @@
+[package]
+name = "log"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tracing-appender = { version = "*" }
+tracing = "*"
+tracing-subscriber = { version = "*", features = ["env-filter", "json"] }
+dotenvy = "*"
+chrono = "*"
