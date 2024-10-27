@@ -1,22 +1,22 @@
-﻿use types::PropertyConst;
+﻿use types::PropertyParam;
 use utils::enum_map;
 
 enum_map! {
     #[derive(Clone, Copy)]
-    pub Property => PropertyConst {
-        Flammable => || PropertyConst::new(1,1),        // 可燃性
-        Toxic => || PropertyConst::new(2,2),            // 有毒性
-        Reactive => || PropertyConst::new(3,3),         // 反应性
-        Corrosive => || PropertyConst::new(4,4),        // 腐蚀性
-        Oxidizer => || PropertyConst::new(5,5),         // 氧化性
-        AcidBase => || PropertyConst::new(6,6),         // 酸碱性
-        Phase => || PropertyConst::new(7,7),            // 物态
-        Conductive => || PropertyConst::new(8,8),       // 导电性
-        Magnetic => || PropertyConst::new(9,9),         // 磁性
-        Brittle => || PropertyConst::new(10,10),        // 易碎性
-        Malleable => || PropertyConst::new(11,11),      // 可塑性
-        Elastic => || PropertyConst::new(12,12),        // 弹性
-        Transparent => || PropertyConst::new(13,13),    // 透明性
+    pub Property => PropertyParam {
+        Flammable => || PropertyParam::new(1,1),        // 可燃性
+        Toxic => || PropertyParam::new(2,2),            // 有毒性
+        Reactive => || PropertyParam::new(3,3),         // 反应性
+        Corrosive => || PropertyParam::new(4,4),        // 腐蚀性
+        Oxidizer => || PropertyParam::new(5,5),         // 氧化性
+        AcidBase => || PropertyParam::new(6,6),         // 酸碱性
+        Phase => || PropertyParam::new(7,7),            // 物态
+        Conductive => || PropertyParam::new(8,8),       // 导电性
+        Magnetic => || PropertyParam::new(9,9),         // 磁性
+        Brittle => || PropertyParam::new(10,10),        // 易碎性
+        Malleable => || PropertyParam::new(11,11),      // 可塑性
+        Elastic => || PropertyParam::new(12,12),        // 弹性
+        Transparent => || PropertyParam::new(13,13),    // 透明性
     }
 }
 
@@ -43,21 +43,59 @@ mod service {
 }
 
 // Repository 模块: 负责与数据库的交互，执行数据的增删改查操作
-mod repository {
-    // Repository 模块专注于与数据库的交互，处理数据的持久化操作。
-    // 例如: 通过数据库查询获取 property 数据，或者将新的 property 插入数据库。
-    // 在这里定义具体的数据访问方法。
-    // 例如: fn get_property_by_id(id: u32) -> Option<property> { ... }
-}
+pub mod repository {
+    use super::model::PropertyModel;
+    use super::Property;
+    use context::db::context::DatabaseContext;
+    use context::GLOBAL_APP_CONTEXT;
+    use sqlx::Error;
+    use std::collections::HashMap;
 
+    /// 根据 `resource_numerator` 和 `resource_dominator` 从数据库获取 `PropertyModel`
+    pub async fn get_properties_by_numerator_and_dominator(
+        resource_numerator: i32,
+        resource_dominator: i32,
+    ) -> Result<HashMap<Property, f64>, Error> {
+        let pool = &*GLOBAL_APP_CONTEXT.get().unwrap().db_pool().await;
+
+        // 使用 sqlx::query_as 函数版本
+        let property_model = sqlx::query_as::<_, PropertyModel>(
+            r#"
+            SELECT 
+                resource_numerator,
+                resource_dominator,
+                flammable, toxic, reactive, 
+                corrosive, oxidizer, acid_base, 
+                phase, conductive, magnetic, 
+                brittle, malleable, elastic, 
+                transparent
+            FROM 
+                properties
+            WHERE 
+                resource_numerator = $1 AND resource_dominator = $2
+            "#,
+        )
+        .bind(resource_numerator)
+        .bind(resource_dominator)
+        .fetch_optional(pool)
+        .await?;
+
+        // 将查询结果转换为 HashMap
+        Ok(property_model
+            .map(|model| model.to_map())
+            .unwrap_or_default())
+    }
+}
 // Model 模块: 负责定义数据模型，通常是数据库表的抽象结构
 mod model {
+    use super::Property;
     use sqlx::FromRow;
+    use std::collections::HashMap;
 
     #[derive(FromRow)]
     pub struct PropertyModel {
-        pub resource_numerator: u32,
-        pub resource_dominator: u32,
+        pub resource_numerator: i32,
+        pub resource_dominator: i32,
         pub flammable: f64,
         pub toxic: f64,
         pub reactive: f64,
@@ -72,15 +110,36 @@ mod model {
         pub elastic: f64,
         pub transparent: f64,
     }
+
+    impl PropertyModel {
+        /// 将 `PropertyModel` 转换为 `HashMap<Property, f64>`
+        pub fn to_map(&self) -> HashMap<Property, f64> {
+            let mut map = HashMap::new();
+            map.insert(Property::Flammable, self.flammable);
+            map.insert(Property::Toxic, self.toxic);
+            map.insert(Property::Reactive, self.reactive);
+            map.insert(Property::Corrosive, self.corrosive);
+            map.insert(Property::Oxidizer, self.oxidizer);
+            map.insert(Property::AcidBase, self.acid_base);
+            map.insert(Property::Phase, self.phase);
+            map.insert(Property::Conductive, self.conductive);
+            map.insert(Property::Magnetic, self.magnetic);
+            map.insert(Property::Brittle, self.brittle);
+            map.insert(Property::Malleable, self.malleable);
+            map.insert(Property::Elastic, self.elastic);
+            map.insert(Property::Transparent, self.transparent);
+            map
+        }
+    }
 }
 
 // Types 模块: 封装与组件相关的基础类型，便于全局使用
 mod types {
-    use crate::shared::resource::types::resource_type_coefficient::ResourceTypeCoefficient;
+    use crate::shared::resources::types::resource_type_coefficient::ResourceTypeCoefficient;
     use num::traits::ToPrimitive;
     use std::f64::consts::PI;
 
-    /// `PropertyConst` 结构体，用于描述物质的属性
+    /// `PropertyParam` 结构体，用于描述物质的属性
     ///
     /// 每个属性通过频率常量和相位常量，以及环境因子来描述其物理/化学性质。
     /// - `frequency_constant`: 属性频率的基础常量（a）
@@ -88,29 +147,29 @@ mod types {
     /// - `environment_frequency_factor`: 环境频率因子（c），用于根据环境影响动态调整频率
     /// - `environment_phase_factor`: 环境相位因子（d），用于根据环境影响动态调整相位
     #[derive(Debug, Copy, Clone, PartialEq, Eq)]
-    pub struct PropertyConst {
+    pub struct PropertyParam {
         pub frequency_constant: i32,           // 频率常量 a
         pub phase_constant: i32,               // 相位常量 b
         pub environment_frequency_factor: i32, // 环境频率因子 c
         pub environment_phase_factor: i32,     // 环境相位因子 d
     }
 
-    impl PropertyConst {
-        /// 构造函数，创建一个新的 `PropertyConst` 实例
+    impl PropertyParam {
+        /// 构造函数，创建一个新的 `PropertyParam` 实例
         ///
         /// # 参数
         /// - `a`: 频率常量（a）
         /// - `b`: 相位常量（b）
         ///
         /// # 返回值
-        /// 返回一个新的 `PropertyConst` 实例
+        /// 返回一个新的 `PropertyParam` 实例
         ///
         /// # 示例
         /// ```
-        /// let property = PropertyConst::new(1, 0);
+        /// let property = PropertyParam::new(1, 0);
         /// ```
         pub fn new(frequency_constant: i32, phase_constant: i32) -> Self {
-            PropertyConst {
+            PropertyParam {
                 frequency_constant,
                 phase_constant,
                 environment_frequency_factor: 0,
@@ -124,11 +183,11 @@ mod types {
         /// - `env_frequency`: 频率常量 `c`
         ///
         /// # 返回值
-        /// 返回带有新的频率常量的 `PropertyConst` 实例，用于动态调整属性。
+        /// 返回带有新的频率常量的 `PropertyParam` 实例，用于动态调整属性。
         ///
         /// # 示例
         /// ```
-        /// let property = PropertyConst::new(1, 0).with_env_frequency(2);
+        /// let property = PropertyParam::new(1, 0).with_env_frequency(2);
         /// ```
         pub fn with_env_frequency(mut self, env_frequency: i32) -> Self {
             self.environment_frequency_factor = env_frequency;
@@ -141,11 +200,11 @@ mod types {
         /// - `env_phase`: 相位常量 `d`
         ///
         /// # 返回值
-        /// 返回带有新的相位常量的 `PropertyConst` 实例，用于动态调整属性。
+        /// 返回带有新的相位常量的 `PropertyParam` 实例，用于动态调整属性。
         ///
         /// # 示例
         /// ```
-        /// let property = PropertyConst::new(1, 0).with_env_phase(0);
+        /// let property = PropertyParam::new(1, 0).with_env_phase(0);
         /// ```
         pub fn with_env_phase(mut self, env_phase: i32) -> Self {
             self.environment_phase_factor = env_phase;

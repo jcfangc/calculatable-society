@@ -12,3 +12,4 @@ sqlx = { version = "*", features = ["runtime-tokio-rustls", "macros"] }
 rayon = "*"
 tokio = { version = "*", features = ["sync"] }
 context = { path = "../context" }
+futures = "*"

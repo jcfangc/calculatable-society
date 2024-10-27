@@ -1,15 +1,15 @@
-﻿use crate::shared::resource::types::resource_type_coefficient::ResourceTypeCoefficient;
+﻿use crate::shared::resources::types::resource_type_coefficient::ResourceTypeCoefficient;
 use std::collections::HashMap;
 use std::fmt;
 use types::PreferenceValue;
 
 /// `Preference` 结构体，用于管理资源类型到偏好值的映射
 #[derive(Debug)]
-pub struct Preference {
+pub struct Preferences {
     preferences: HashMap<ResourceTypeCoefficient, PreferenceValue>, // 使用 PreferenceValue 作为偏好值
 }
 
-impl Preference {
+impl Preferences {
     /// 初始化 `Preference` 实例
     ///
     /// 可以选择传入初始的偏好映射表。如果没有提供初始数据，则使用一个空的 `HashMap`。
@@ -25,7 +25,7 @@ impl Preference {
     /// let preferences = Preference::new(None);
     /// ```
     fn new(preferences: Option<HashMap<ResourceTypeCoefficient, PreferenceValue>>) -> Self {
-        Preference {
+        Preferences {
             preferences: preferences.unwrap_or_else(HashMap::new),
         }
     }
@@ -69,7 +69,7 @@ impl Preference {
     }
 }
 
-impl fmt::Display for Preference {
+impl fmt::Display for Preferences {
     /// 格式化 `Preference` 为字符串
     ///
     /// 将偏好映射表以字符串形式输出。
