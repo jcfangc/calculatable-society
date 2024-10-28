@@ -59,7 +59,7 @@ pub mod repository {
         let pool = &*GLOBAL_APP_CONTEXT.get().unwrap().db_pool().await;
 
         // 使用 sqlx::query_as 函数版本
-        let property_model = sqlx::query_as::<_, PropertyModel>(
+        if let Some(property_model) = sqlx::query_as::<_, PropertyModel>(
             r#"
             SELECT 
                 resource_numerator,
@@ -78,12 +78,12 @@ pub mod repository {
         .bind(resource_numerator)
         .bind(resource_dominator)
         .fetch_optional(pool)
-        .await?;
+        .await?
+        {
+            return Ok(property_model.to_map());
+        }
 
-        // 将查询结果转换为 HashMap
-        Ok(property_model
-            .map(|model| model.to_map())
-            .unwrap_or_default())
+        Err(Error::RowNotFound)
     }
 }
 // Model 模块: 负责定义数据模型，通常是数据库表的抽象结构
@@ -135,7 +135,7 @@ mod model {
 
 // Types 模块: 封装与组件相关的基础类型，便于全局使用
 mod types {
-    use crate::shared::resources::types::resource_type_coefficient::ResourceTypeCoefficient;
+    use crate::shared::resource_type_coefficient::ResourceTypeCoefficient;
     use num::traits::ToPrimitive;
     use std::f64::consts::PI;
 
@@ -148,10 +148,10 @@ mod types {
     /// - `environment_phase_factor`: 环境相位因子（d），用于根据环境影响动态调整相位
     #[derive(Debug, Copy, Clone, PartialEq, Eq)]
     pub struct PropertyParam {
-        pub frequency_constant: i32,           // 频率常量 a
-        pub phase_constant: i32,               // 相位常量 b
-        pub environment_frequency_factor: i32, // 环境频率因子 c
-        pub environment_phase_factor: i32,     // 环境相位因子 d
+        pub frequency_constant: isize,           // 频率常量 a
+        pub phase_constant: isize,               // 相位常量 b
+        pub environment_frequency_factor: isize, // 环境频率因子 c
+        pub environment_phase_factor: isize,     // 环境相位因子 d
     }
 
     impl PropertyParam {
@@ -168,7 +168,7 @@ mod types {
         /// ```
         /// let property = PropertyParam::new(1, 0);
         /// ```
-        pub fn new(frequency_constant: i32, phase_constant: i32) -> Self {
+        pub fn new(frequency_constant: isize, phase_constant: isize) -> Self {
             PropertyParam {
                 frequency_constant,
                 phase_constant,
@@ -189,7 +189,7 @@ mod types {
         /// ```
         /// let property = PropertyParam::new(1, 0).with_env_frequency(2);
         /// ```
-        pub fn with_env_frequency(mut self, env_frequency: i32) -> Self {
+        pub fn with_env_frequency(mut self, env_frequency: isize) -> Self {
             self.environment_frequency_factor = env_frequency;
             return self;
         }
@@ -206,7 +206,7 @@ mod types {
         /// ```
         /// let property = PropertyParam::new(1, 0).with_env_phase(0);
         /// ```
-        pub fn with_env_phase(mut self, env_phase: i32) -> Self {
+        pub fn with_env_phase(mut self, env_phase: isize) -> Self {
             self.environment_phase_factor = env_phase;
             return self;
         }

@@ -8,8 +8,9 @@ num = { version = "*", features = ["serde"] }
 tracing = "*"
 validator = "*"
 utils = { path = "../utils" }
-sqlx = { version = "*", features = ["runtime-tokio-rustls", "macros"] }
+sqlx = { version = "*", features = ["runtime-tokio-rustls", "macros", "uuid"] }
 rayon = "*"
 tokio = { version = "*", features = ["sync"] }
 context = { path = "../context" }
 futures = "*"
+uuid = "*"

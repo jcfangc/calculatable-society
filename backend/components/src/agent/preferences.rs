@@ -1,12 +1,20 @@
-﻿use crate::shared::resources::types::resource_type_coefficient::ResourceTypeCoefficient;
+﻿use crate::agent::preference_value::PreferenceValue;
+use crate::shared::resource_type_coefficient::ResourceTypeCoefficient;
 use std::collections::HashMap;
 use std::fmt;
-use types::PreferenceValue;
 
 /// `Preference` 结构体，用于管理资源类型到偏好值的映射
 #[derive(Debug)]
 pub struct Preferences {
     preferences: HashMap<ResourceTypeCoefficient, PreferenceValue>, // 使用 PreferenceValue 作为偏好值
+}
+
+impl Default for Preferences {
+    fn default() -> Self {
+        Preferences {
+            preferences: HashMap::new(),
+        }
+    }
 }
 
 impl Preferences {
@@ -26,7 +34,7 @@ impl Preferences {
     /// ```
     fn new(preferences: Option<HashMap<ResourceTypeCoefficient, PreferenceValue>>) -> Self {
         Preferences {
-            preferences: preferences.unwrap_or_else(HashMap::new),
+            preferences: preferences.unwrap_or_default(),
         }
     }
 
@@ -108,86 +116,66 @@ mod service {
 
 // Repository 模块: 负责与数据库的交互，执行数据的增删改查操作
 mod repository {
-    // Repository 模块专注于与数据库的交互，处理数据的持久化操作。
-    // 例如: 通过数据库查询获取 preference 数据，或者将新的 preference 插入数据库。
-    // 在这里定义具体的数据访问方法。
-    // 例如: fn get_preference_by_id(id: u32) -> Option<preference> { ... }
+    use super::model::PreferencesModel;
+    use crate::agent::preference_value::PreferenceValue;
+    use crate::shared::resource_type_coefficient::ResourceTypeCoefficient;
+    use context::db::context::DatabaseContext;
+    use context::GLOBAL_APP_CONTEXT;
+    use sqlx::Error;
+    use uuid::Uuid;
+
+    /// 根据 `resource_numerator` 和 `resource_dominator` 从数据库获取 `PropertyModel`
+    pub async fn get_properties_by_numerator_and_dominator(
+        agent_id: Uuid,
+        resource_numerator: i32,
+        resource_dominator: i32,
+    ) -> Result<(ResourceTypeCoefficient, PreferenceValue), Error> {
+        let pool = &*GLOBAL_APP_CONTEXT.get().unwrap().db_pool().await;
+
+        // 使用 sqlx::query_as 函数版本
+        if let Some(preferences_model) = sqlx::query_as::<_, PreferencesModel>(
+            r#"
+            SELECT 
+                agent_id,
+                numerator,
+                denominator,
+                preference
+            FROM
+                preferences
+            WHERE 
+                agent_id = $1 AND numerator = $2 AND denominator = $32
+            "#,
+        )
+        .bind(agent_id)
+        .bind(resource_numerator)
+        .bind(resource_dominator)
+        .fetch_optional(pool)
+        .await?
+        {
+            if let Ok(resource_type_coefficient) = ResourceTypeCoefficient::new(
+                preferences_model.numerator as usize,
+                preferences_model.denominator as usize,
+            ) {
+                if let Ok(preference_value) = PreferenceValue::new(preferences_model.preference) {
+                    return Ok((resource_type_coefficient, preference_value));
+                }
+            }
+        }
+
+        Err(Error::RowNotFound)
+    }
 }
 
 // Model 模块: 负责定义数据模型，通常是数据库表的抽象结构
 mod model {
-    // 在这里定义你的数据结构。
-    // 例如: struct preference { ... }
-}
+    use sqlx::FromRow;
+    use uuid::Uuid;
 
-// Types 模块: 封装与组件相关的基础类型，便于全局使用
-mod types {
-    use std::fmt;
-    use tracing::error;
-
-    /// `PreferenceValue` 结构体，用于表示一个在 0 到 1 之间的偏好值
-    #[derive(Debug, Clone, Copy)]
-    pub struct PreferenceValue {
-        value: f64,
-    }
-
-    impl PreferenceValue {
-        /// 构造函数，创建一个 `PreferenceValue` 实例
-        ///
-        /// 在构造时会验证输入值是否在 0 到 1 之间。如果值不符合要求，将返回错误信息。
-        ///
-        /// # 参数
-        /// - `value`: 偏好值，应该在 0.0 到 1.0 之间。
-        ///
-        /// # 返回值
-        /// 返回一个 `Result<Self, String>`，其中 `Self` 是成功构造的 `PreferenceValue` 实例，`String` 是验证失败时的错误信息。
-        ///
-        /// # 错误
-        /// 当 `value` 不在 0.0 到 1.0 之间时，会返回一个错误信息。
-        ///
-        /// # 示例
-        /// ```
-        /// let preference_value = PreferenceValue::new(0.8).unwrap();
-        /// let invalid_value = PreferenceValue::new(1.5); // 结果会是一个错误
-        /// ```
-        fn new(value: f64) -> Result<Self, String> {
-            if value >= 0.0 && value <= 1.0 {
-                Ok(PreferenceValue { value })
-            } else {
-                error!("偏好值 {} 不在 0 到 1 之间！", value);
-                Err(format!("偏好值 {} 不在 0 到 1 之间！", value))
-            }
-        }
-
-        /// 获取偏好值
-        ///
-        /// 返回当前实例中的偏好值。
-        ///
-        /// # 返回值
-        /// 返回一个 `f64`，表示偏好值。
-        ///
-        /// # 示例
-        /// ```
-        /// let preference_value = PreferenceValue::new(0.5).unwrap();
-        /// let value = preference_value.get_value();
-        /// ```
-        fn get_value(&self) -> f64 {
-            self.value
-        }
-    }
-
-    impl fmt::Display for PreferenceValue {
-        /// 格式化 `PreferenceValue` 为字符串
-        ///
-        /// 将偏好值以字符串形式输出。
-        ///
-        /// # 示例
-        /// ```
-        /// let preference_value = PreferenceValue::new(0.75).unwrap();
-        /// println!("{}", preference_value); // 输出 "0.75"
-        /// ```
-        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-            write!(f, "{}", self.value)
-        }
+    #[derive(FromRow)]
+    pub struct PreferencesModel {
+        pub agent_id: Uuid,
+        pub numerator: i32,
+        pub denominator: i32,
+        pub preference: f64,
     }
 }

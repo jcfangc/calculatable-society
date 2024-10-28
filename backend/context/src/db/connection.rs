@@ -7,9 +7,9 @@ use std::time::Duration;
 
 // 数据库设置和初始化
 pub async fn create_pool(
-    idle_timeout: Option<u64>, // 使用 Option 包装可选参数
-    pool_size: Option<u32>,
-    acquire_timeout: Option<u64>,
+    idle_timeout: Option<usize>, // 使用 Option 包装可选参数
+    pool_size: Option<usize>,
+    acquire_timeout: Option<usize>,
 ) -> Arc<Pool<Postgres>> {
     dotenv().ok();
     // 设置默认值
@@ -20,9 +20,9 @@ pub async fn create_pool(
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
 
     let pool = PgPoolOptions::new()
-        .max_connections(pool_size)
-        .acquire_timeout(Duration::from_secs(acquire_timeout)) // 获取连接的超时时间
-        .idle_timeout(Duration::from_secs(idle_timeout))
+        .max_connections(pool_size as u32)
+        .acquire_timeout(Duration::from_secs(acquire_timeout as u64)) // 获取连接的超时时间
+        .idle_timeout(Duration::from_secs(idle_timeout as u64))
         .connect(&database_url)
         .await
         .expect("Failed to create pool.");

@@ -27,9 +27,9 @@ impl AppContext {
     // 带参数的 with_db_pool 方法，用于初始化并返回修改后的 AppContext 实例
     pub async fn with_db_pool(
         self,
-        idle_timeout: Option<u64>,
-        pool_size: Option<u32>,
-        acquire_timeout: Option<u64>,
+        idle_timeout: Option<usize>,
+        pool_size: Option<usize>,
+        acquire_timeout: Option<usize>,
     ) -> Self {
         let pool = create_pool(idle_timeout, pool_size, acquire_timeout).await;
         self.db_pool.get_or_init(|| async { pool }).await;
