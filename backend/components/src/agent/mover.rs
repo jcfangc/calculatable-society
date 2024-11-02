@@ -1,5 +1,5 @@
 ﻿use crate::agent::location::Location;
-use crate::environment::toroidal_map::ToroidalMap;
+use crate::environment::layer_trait::ToroidalMap;
 use std::fmt;
 
 // 移动结构，表示一个包含偏移量的移动操作

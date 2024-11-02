@@ -45,7 +45,7 @@ pub mod macros {
     /// 该宏生成的 `to_map` 方法可以返回一个静态的 `HashMap`，
     /// 其中包含枚举变体到 `ValueType` 的映射。
     ///
-    /// # 示例
+    /// ### 示例
     ///
     /// ```rust
     /// enum_map! {

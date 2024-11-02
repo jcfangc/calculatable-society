@@ -1,19 +1,29 @@
-﻿use crate::environment::toroidal_map::ToroidalMap;
+﻿use crate::environment::layers::layer_trait::LayerTrait;
+use crate::environment::noise_map::{main::NoiseMap, noise_map_params::NoiseMapParams};
+use ndarray::Array2;
+use std::fmt;
+use std::fmt::{Debug, Display};
 
-// 海拔层特质
-pub trait AltitudeLayer {
-    fn set_altitude(&mut self, x: usize, y: usize, altitude: i32);
-    fn get_altitude(&self, x: usize, y: usize) -> i32;
+#[derive(Debug, Default)]
+struct AltitudeLayer {
+    map: NoiseMap<f32>,
 }
 
-// 为 ToroidalMap 实现海拔层特质
-impl AltitudeLayer for ToroidalMap {
-    fn set_altitude(&mut self, x: usize, y: usize, altitude: i32) {
-        // 设置海拔逻辑
+impl LayerTrait for AltitudeLayer {
+    type LayerValueType = f32;
+
+    fn get_data(&self) -> &Array2<Self::LayerValueType> {
+        &self.map.data
     }
 
-    fn get_altitude(&self, x: usize, y: usize) -> i32 {
-        // 返回海拔
-        0
+    fn get_params(&self) -> &NoiseMapParams {
+        &self.map.params
+    }
+}
+
+impl Display for AltitudeLayer {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        // 直接调用 self.map 的 Display 实现
+        write!(f, "{}", self.map)
     }
 }

@@ -45,7 +45,7 @@ pub fn init_logging() -> WorkerGuard {
 /// 该路径通过读取环境变量 `PROJECT_ROOT` 来确定。如果环境变量未设置，
 /// 则使用默认路径 `/workspaces/EvoScoSim/backend`。
 ///
-/// # 返回值
+/// ### 返回值
 ///
 /// 返回一个字符串，表示项目的根目录路径。
 fn setup_log_dir() -> String {

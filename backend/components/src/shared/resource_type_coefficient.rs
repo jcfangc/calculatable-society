@@ -1,5 +1,4 @@
-﻿
-use num::rational::Ratio;
+﻿use num::rational::Ratio;
 use std::fmt;
 use validator::ValidationError;
 
@@ -16,11 +15,11 @@ pub struct ResourceTypeCoefficient {
 impl ResourceTypeCoefficient {
     /// 构造函数，使用分子和分母创建 `ResourceTypeCoefficient` 实例
     ///
-    /// # 参数
+    /// ### 参数
     /// - `numerator`: 分子，使用 `usize` 表示。
     /// - `denominator`: 分母，使用 `usize` 表示。
     ///
-    /// # 返回值
+    /// ### 返回值
     /// 返回一个 `Result<Self, ValidationError>`，其中 `Self` 是构造成功的 `ResourceTypeCoefficient` 实例，`ValidationError` 则是当分数超出有效范围或无效时返回的错误。
     pub fn new(numerator: usize, denominator: usize) -> Result<Self, ValidationError> {
         if denominator == 0 {
@@ -54,7 +53,7 @@ impl fmt::Display for ResourceTypeCoefficient {
     ///
     /// 将 `ResourceTypeCoefficient` 转换为 "分子/分母" 的格式字符串。
     ///
-    /// # 示例
+    /// ### 示例
     /// ```
     /// let coefficient = ResourceTypeCoefficient::new(Ratio::new(1, 2)).unwrap();
     /// println!("{}", coefficient); // 输出 "1/2"

@@ -17,10 +17,10 @@ pub struct Resources {
 impl Resources {
     /// 构造函数，创建一个 `Resources` 实例
     ///
-    /// # 参数
+    /// ### 参数
     /// - `resources`: 一个可选的初始资源类型系数和资源数量的键值对集合
     ///
-    /// # 返回值
+    /// ### 返回值
     /// 返回一个新的 `Resources` 实例
     pub fn new(resources: Option<HashMap<ResourceTypeCoefficient, ResourceAmount>>) -> Self {
         Resources {
@@ -29,7 +29,7 @@ impl Resources {
     }
     /// 添加或更新资源
     ///
-    /// # 参数
+    /// ### 参数
     /// - `resource_type`: 资源类型系数
     /// - `amount`: 要设置的资源数量
     pub fn set(&mut self, resource_type: ResourceTypeCoefficient, amount: ResourceAmount) {
@@ -38,10 +38,10 @@ impl Resources {
 
     /// 获取特定资源类型的资源数量
     ///
-    /// # 参数
+    /// ### 参数
     /// - `resource_type`: 资源类型系数
     ///
-    /// # 返回值
+    /// ### 返回值
     /// 返回一个 `Option<&ResourceAmount>`，如果存在则返回对应的资源引用，否则返回 `None`
     pub fn get(&self, resource_type: &ResourceTypeCoefficient) -> Option<&ResourceAmount> {
         self.resources.get(resource_type)
@@ -49,7 +49,7 @@ impl Resources {
 
     /// 删除特定资源类型的资源
     ///
-    /// # 参数
+    /// ### 参数
     /// - `resource_type`: 资源类型系数
     pub fn remove(&mut self, resource_type: &ResourceTypeCoefficient) {
         self.resources.remove(resource_type);
@@ -59,7 +59,7 @@ impl Resources {
     ///
     /// 如果资源已经存在，则增加数量；否则，添加新的资源。
     ///
-    /// # 参数
+    /// ### 参数
     /// - `resource_type`: 资源类型系数
     /// - `amount`: 要添加的资源数量
     pub fn add(&mut self, resource_type: ResourceTypeCoefficient, amount: ResourceAmount) {
@@ -74,7 +74,7 @@ impl Resources {
     ///
     /// 如果资源数量大于减少的数量，则减少数量；否则，删除资源。
     ///
-    /// # 参数
+    /// ### 参数
     /// - `resource_type`: 资源类型系数
     /// - `amount`: 要减少的资源数量
     pub fn minus(&mut self, resource_type: ResourceTypeCoefficient, amount: ResourceAmount) {
@@ -89,7 +89,7 @@ impl Resources {
 
     /// 列出所有资源
     ///
-    /// # 返回值
+    /// ### 返回值
     /// 返回一个包含所有资源的向量
     pub fn to_list(&self) -> Vec<(&ResourceTypeCoefficient, &ResourceAmount)> {
         self.resources.iter().collect()

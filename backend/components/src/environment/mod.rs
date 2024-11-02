@@ -1,2 +1,2 @@
 ﻿pub mod layers;
-pub mod toroidal_map;
+pub mod noise_map;
