@@ -1,7 +1,7 @@
 ﻿use crate::shared::property::repository::get_properties_by_numerator_and_dominator;
 use crate::shared::property::Property;
 use crate::shared::resource_amount::ResourceAmount;
-use crate::shared::resource_type_coefficient::ResourceTypeCoefficient;
+use crate::shared::resource_type::ResourceType;
 use futures::future::join_all;
 use std::collections::HashMap;
 use std::fmt;
@@ -11,7 +11,7 @@ use tokio::task;
 #[derive(Debug)]
 pub struct Resources {
     // 使用 HashMap 管理资源类型到资源的映射
-    resources: HashMap<ResourceTypeCoefficient, ResourceAmount>,
+    resources: HashMap<ResourceType, ResourceAmount>,
 }
 
 impl Resources {
@@ -22,7 +22,7 @@ impl Resources {
     ///
     /// ### 返回值
     /// 返回一个新的 `Resources` 实例
-    pub fn new(resources: Option<HashMap<ResourceTypeCoefficient, ResourceAmount>>) -> Self {
+    pub fn new(resources: Option<HashMap<ResourceType, ResourceAmount>>) -> Self {
         Resources {
             resources: resources.unwrap_or_default(),
         }
@@ -32,7 +32,7 @@ impl Resources {
     /// ### 参数
     /// - `resource_type`: 资源类型系数
     /// - `amount`: 要设置的资源数量
-    pub fn set(&mut self, resource_type: ResourceTypeCoefficient, amount: ResourceAmount) {
+    pub fn set(&mut self, resource_type: ResourceType, amount: ResourceAmount) {
         self.resources.insert(resource_type, amount);
     }
 
@@ -43,7 +43,7 @@ impl Resources {
     ///
     /// ### 返回值
     /// 返回一个 `Option<&ResourceAmount>`，如果存在则返回对应的资源引用，否则返回 `None`
-    pub fn get(&self, resource_type: &ResourceTypeCoefficient) -> Option<&ResourceAmount> {
+    pub fn get(&self, resource_type: &ResourceType) -> Option<&ResourceAmount> {
         self.resources.get(resource_type)
     }
 
@@ -51,7 +51,7 @@ impl Resources {
     ///
     /// ### 参数
     /// - `resource_type`: 资源类型系数
-    pub fn remove(&mut self, resource_type: &ResourceTypeCoefficient) {
+    pub fn remove(&mut self, resource_type: &ResourceType) {
         self.resources.remove(resource_type);
     }
 
@@ -62,7 +62,7 @@ impl Resources {
     /// ### 参数
     /// - `resource_type`: 资源类型系数
     /// - `amount`: 要添加的资源数量
-    pub fn add(&mut self, resource_type: ResourceTypeCoefficient, amount: ResourceAmount) {
+    pub fn add(&mut self, resource_type: ResourceType, amount: ResourceAmount) {
         if let Some(existing_resource) = self.resources.get_mut(&resource_type) {
             *existing_resource += amount;
         } else {
@@ -77,7 +77,7 @@ impl Resources {
     /// ### 参数
     /// - `resource_type`: 资源类型系数
     /// - `amount`: 要减少的资源数量
-    pub fn minus(&mut self, resource_type: ResourceTypeCoefficient, amount: ResourceAmount) {
+    pub fn minus(&mut self, resource_type: ResourceType, amount: ResourceAmount) {
         if let Some(existing_resource) = self.resources.get_mut(&resource_type) {
             if *existing_resource > amount {
                 *existing_resource -= amount;
@@ -91,12 +91,12 @@ impl Resources {
     ///
     /// ### 返回值
     /// 返回一个包含所有资源的向量
-    pub fn to_list(&self) -> Vec<(&ResourceTypeCoefficient, &ResourceAmount)> {
+    pub fn to_list(&self) -> Vec<(&ResourceType, &ResourceAmount)> {
         self.resources.iter().collect()
     }
 
     /// 计算单个 `ResourceTypeCoefficient` 的属性值
-    pub async fn get_properties(rtc: &ResourceTypeCoefficient) -> HashMap<Property, f64> {
+    pub async fn get_properties(rtc: &ResourceType) -> HashMap<Property, f64> {
         if let Ok(properties) = get_properties_by_numerator_and_dominator(
             *rtc.resource_type.numer() as i32,
             *rtc.resource_type.denom() as i32,
@@ -121,9 +121,7 @@ impl Resources {
     }
 
     /// 计算所有资源的属性值
-    pub async fn get_all_properties(
-        &self,
-    ) -> HashMap<ResourceTypeCoefficient, HashMap<Property, f64>> {
+    pub async fn get_all_properties(&self) -> HashMap<ResourceType, HashMap<Property, f64>> {
         // 仅在 `all_properties` 中使用 `spawn_blocking`，并移除 `properties_sync` 中的 `spawn_blocking`
         let futures: Vec<_> = self
             .resources
@@ -196,7 +194,7 @@ mod service {
 mod repository {
     use super::model::ResourcesModel;
     use crate::shared::resource_amount::ResourceAmount;
-    use crate::shared::resource_type_coefficient::ResourceTypeCoefficient;
+    use crate::shared::resource_type::ResourceType;
     use context::db::context::DatabaseContext;
     use context::GLOBAL_APP_CONTEXT;
     use sqlx::Error;
@@ -206,7 +204,7 @@ mod repository {
         agent_id: Uuid,
         resource_numerator: i32,
         resource_dominator: i32,
-    ) -> Result<(ResourceTypeCoefficient, ResourceAmount), Error> {
+    ) -> Result<(ResourceType, ResourceAmount), Error> {
         if resource_dominator <= 0 || resource_numerator <= 0 {
             return Err(sqlx::Error::Protocol(
                 "resource_numerator 和 resource_dominator 参数应该为正数".into(),
@@ -237,7 +235,7 @@ mod repository {
         .fetch_optional(pool)
         .await?
         {
-            if let Ok(resource_type_coefficient) = ResourceTypeCoefficient::new(
+            if let Ok(resource_type_coefficient) = ResourceType::try_new(
                 resources_model.numerator as usize,
                 resources_model.denominator as usize,
             ) {

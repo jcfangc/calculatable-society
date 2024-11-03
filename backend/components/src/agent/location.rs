@@ -1,8 +1,9 @@
 ﻿use crate::agent::mover::Mover;
+use serde::Serialize;
 use std::fmt;
 
 // 代理人位置结构
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct Location {
     x: usize,
     y: usize,
@@ -38,6 +39,9 @@ impl Location {
 // 打印代理人位置
 impl fmt::Display for Location {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Location({}, {})", self.x, self.y)
+        match serde_json::to_string_pretty(&self) {
+            Ok(json_str) => write!(f, "{}", json_str),
+            Err(_) => write!(f, "Location {{ x: {}, y: {} }}", self.x, self.y),
+        }
     }
 }

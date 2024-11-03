@@ -1,12 +1,12 @@
 ﻿use crate::agent::preference_value::PreferenceValue;
-use crate::shared::resource_type_coefficient::ResourceTypeCoefficient;
+use crate::shared::resource_type::ResourceType;
 use std::collections::HashMap;
 use std::fmt;
 
 /// `Preference` 结构体，用于管理资源类型到偏好值的映射
 #[derive(Debug)]
 pub struct Preferences {
-    preferences: HashMap<ResourceTypeCoefficient, PreferenceValue>, // 使用 PreferenceValue 作为偏好值
+    preferences: HashMap<ResourceType, PreferenceValue>, // 使用 PreferenceValue 作为偏好值
 }
 
 impl Default for Preferences {
@@ -32,7 +32,7 @@ impl Preferences {
     /// ```
     /// let preferences = Preference::new(None);
     /// ```
-    fn new(preferences: Option<HashMap<ResourceTypeCoefficient, PreferenceValue>>) -> Self {
+    fn new(preferences: Option<HashMap<ResourceType, PreferenceValue>>) -> Self {
         Preferences {
             preferences: preferences.unwrap_or_default(),
         }
@@ -51,7 +51,7 @@ impl Preferences {
     /// let mut preference = Preference::new(None);
     /// preference.set(ResourceTypeCoefficient::new(Ratio::new(1, 1)).unwrap(), PreferenceValue::new(0.8).unwrap());
     /// ```
-    fn set(&mut self, resource_type: ResourceTypeCoefficient, preference_value: PreferenceValue) {
+    fn set(&mut self, resource_type: ResourceType, preference_value: PreferenceValue) {
         self.preferences.insert(resource_type, preference_value);
     }
 
@@ -72,7 +72,7 @@ impl Preferences {
     ///     println!("偏好值: {}", value);
     /// }
     /// ```
-    fn get(&self, resource_type: &ResourceTypeCoefficient) -> Option<&PreferenceValue> {
+    fn get(&self, resource_type: &ResourceType) -> Option<&PreferenceValue> {
         self.preferences.get(resource_type)
     }
 }
@@ -118,7 +118,7 @@ mod service {
 mod repository {
     use super::model::PreferencesModel;
     use crate::agent::preference_value::PreferenceValue;
-    use crate::shared::resource_type_coefficient::ResourceTypeCoefficient;
+    use crate::shared::resource_type::ResourceType;
     use context::db::context::DatabaseContext;
     use context::GLOBAL_APP_CONTEXT;
     use sqlx::Error;
@@ -129,7 +129,7 @@ mod repository {
         agent_id: Uuid,
         resource_numerator: i32,
         resource_dominator: i32,
-    ) -> Result<(ResourceTypeCoefficient, PreferenceValue), Error> {
+    ) -> Result<(ResourceType, PreferenceValue), Error> {
         let pool = &*GLOBAL_APP_CONTEXT.get().unwrap().db_pool().await;
 
         // 使用 sqlx::query_as 函数版本
@@ -152,11 +152,12 @@ mod repository {
         .fetch_optional(pool)
         .await?
         {
-            if let Ok(resource_type_coefficient) = ResourceTypeCoefficient::new(
+            if let Ok(resource_type_coefficient) = ResourceType::try_new(
                 preferences_model.numerator as usize,
                 preferences_model.denominator as usize,
             ) {
-                if let Ok(preference_value) = PreferenceValue::new(preferences_model.preference) {
+                if let Ok(preference_value) = PreferenceValue::try_new(preferences_model.preference)
+                {
                     return Ok((resource_type_coefficient, preference_value));
                 }
             }

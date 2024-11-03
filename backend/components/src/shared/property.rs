@@ -135,7 +135,7 @@ mod model {
 
 // Types 模块: 封装与组件相关的基础类型，便于全局使用
 mod types {
-    use crate::shared::resource_type_coefficient::ResourceTypeCoefficient;
+    use crate::shared::resource_type::ResourceType;
     use num::traits::ToPrimitive;
     use std::f64::consts::PI;
 
@@ -228,7 +228,7 @@ mod types {
         /// - `θ = ResourceTypeCoefficient * π`
         /// - `a` 和 `b` 为基础频率和相位常量
         /// - `c` 和 `d` 为环境频率因子和相位因子
-        pub fn calculate(&self, coefficient: &ResourceTypeCoefficient) -> f64 {
+        pub fn calculate(&self, coefficient: &ResourceType) -> f64 {
             // 计算 θ = 资源类型系数 × π
             let theta = coefficient.resource_type.to_f64().unwrap() * PI;
 
