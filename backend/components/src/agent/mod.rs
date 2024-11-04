@@ -3,3 +3,5 @@ pub mod location;
 pub mod mover;
 pub mod preference_value;
 pub mod preferences;
+pub mod resource_amount;
+pub mod resources;

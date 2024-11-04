@@ -2214,6 +2214,9 @@ dependencies = [
 [[package]]
 name = "utils"
 version = "0.1.0"
+dependencies = [
+ "paste",
+]
 
 [[package]]
 name = "uuid"

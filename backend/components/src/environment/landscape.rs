@@ -1,4 +1,4 @@
-﻿use crate::environment::{layer::Layer, resource_distribution::ResourceDistribution};
+﻿use crate::environment::{layer::Layer, resource_distribution::SubtanceDistribution};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use serde::Serialize;
 use std::collections::HashSet;
@@ -6,7 +6,7 @@ use std::collections::HashSet;
 #[derive(Debug, Clone, Serialize)]
 pub struct Landscape {
     pub layer: Layer,
-    pub resource_distributions: HashSet<ResourceDistribution>,
+    pub resource_distributions: HashSet<SubtanceDistribution>,
 }
 
 impl Landscape {
@@ -17,7 +17,7 @@ impl Landscape {
         }
     }
 
-    pub fn add_resource_distribution(&mut self, resource_distribution: ResourceDistribution) {
+    pub fn add_resource_distribution(&mut self, resource_distribution: SubtanceDistribution) {
         // 检查集合中是否已存在相同的 `resource_type`
         let exists = self
             .resource_distributions

@@ -1,4 +1,4 @@
-﻿use error_handling::ResourceTypeError;
+﻿use error_handling::SubtanceTypeError;
 use num::rational::Ratio;
 use serde::Serialize;
 use std::convert::TryFrom;
@@ -8,35 +8,35 @@ const LOWER_BOUND: Ratio<usize> = Ratio::new_raw(0, 1);
 const UPPER_BOUND: Ratio<usize> = Ratio::new_raw(2, 1);
 
 #[derive(Debug, Clone, Copy, Hash, Eq, PartialEq, Serialize)]
-pub struct ResourceType {
-    pub resource_type: Ratio<usize>,
+pub struct SubtanceType {
+    pub subtance_type: Ratio<usize>,
 }
 
-impl ResourceType {
-    pub fn try_new(numerator: usize, denominator: usize) -> Result<Self, ResourceTypeError> {
+impl SubtanceType {
+    pub fn try_new(numerator: usize, denominator: usize) -> Result<Self, SubtanceTypeError> {
         if denominator == 0 {
-            return Err(ResourceTypeError::ZeroDenominator);
+            return Err(SubtanceTypeError::ZeroDenominator);
         }
 
-        let resource_type = Ratio::new(numerator, denominator);
+        let subtance_type = Ratio::new(numerator, denominator);
 
-        if resource_type < LOWER_BOUND || resource_type > UPPER_BOUND {
-            return Err(ResourceTypeError::OutOfRange);
+        if subtance_type < LOWER_BOUND || subtance_type > UPPER_BOUND {
+            return Err(SubtanceTypeError::OutOfRange);
         }
 
-        Ok(ResourceType { resource_type })
+        Ok(SubtanceType { subtance_type })
     }
 }
 
-impl TryFrom<(usize, usize)> for ResourceType {
-    type Error = ResourceTypeError;
+impl TryFrom<(usize, usize)> for SubtanceType {
+    type Error = SubtanceTypeError;
 
     fn try_from(value: (usize, usize)) -> Result<Self, Self::Error> {
         Self::try_new(value.0, value.1)
     }
 }
 
-impl fmt::Display for ResourceType {
+impl fmt::Display for SubtanceType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match serde_json::to_string_pretty(&self) {
             Ok(json_str) => write!(f, "{}", json_str),
@@ -50,16 +50,16 @@ pub mod error_handling {
     use std::fmt;
 
     #[derive(Debug)]
-    pub enum ResourceTypeError {
+    pub enum SubtanceTypeError {
         ZeroDenominator,
         OutOfRange,
     }
 
-    impl fmt::Display for ResourceTypeError {
+    impl fmt::Display for SubtanceTypeError {
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
             match self {
-                ResourceTypeError::ZeroDenominator => write!(f, "分母不能为零"),
-                ResourceTypeError::OutOfRange => {
+                SubtanceTypeError::ZeroDenominator => write!(f, "分母不能为零"),
+                SubtanceTypeError::OutOfRange => {
                     write!(f, "有效范围：{} - {}", LOWER_BOUND, UPPER_BOUND)
                 }
             }

@@ -1,4 +1,4 @@
 ﻿pub mod property;
-pub mod resource_amount;
-pub mod resource_type;
-pub mod resources;
+pub mod property_param;
+pub mod subtance;
+pub mod subtance_type;
