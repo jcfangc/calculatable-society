@@ -141,6 +141,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "backend_core"
+version = "0.1.0"
+dependencies = [
+ "components",
+ "context",
+ "sqlx",
+ "uuid",
+]
+
+[[package]]
 name = "backtrace"
 version = "0.3.74"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -251,7 +261,6 @@ dependencies = [
  "tokio",
  "tracing",
  "utils",
- "uuid",
  "validator",
 ]
 

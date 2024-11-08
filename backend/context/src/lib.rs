@@ -1,7 +1,7 @@
 pub mod db;
 
 use db::connection::create_pool;
-use db::context::DatabaseContext;
+use db::db_contextd::DatabaseContexted;
 use once_cell::sync::Lazy;
 use sqlx::{Pool, Postgres};
 use std::sync::Arc;
@@ -40,7 +40,7 @@ impl AppContext {
 
 // 为 AppContext 实现 DatabaseContext 特质
 #[async_trait::async_trait]
-impl DatabaseContext for AppContext {
+impl DatabaseContexted for AppContext {
     async fn db_pool(&self) -> Arc<Pool<Postgres>> {
         self.db_pool.get().cloned().expect("数据库连接池未初始化")
     }

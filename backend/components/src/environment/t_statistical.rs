@@ -1,4 +1,4 @@
-﻿pub trait Statistics {
+﻿pub trait Statistical {
     type Item;
     fn min(&self) -> Self::Item;
     fn max(&self) -> Self::Item;

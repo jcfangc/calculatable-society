@@ -8,12 +8,3 @@ enum_map! {
         Phase => || PropertyParam::new(2, 2, None, None),
     }
 }
-
-pub trait PropertyCalculator {
-    async fn calculate(
-        &self,
-        property: Property,
-        frequency_offset: Option<isize>,
-        phase_offset: Option<isize>,
-    ) -> f64;
-}

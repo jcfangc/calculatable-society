@@ -6,36 +6,36 @@ use std::collections::HashSet;
 #[derive(Debug, Clone, Serialize)]
 pub struct Landscape {
     pub layer: Layer,
-    pub resource_distributions: HashSet<SubtanceDistribution>,
+    pub subtance_distributions: HashSet<SubtanceDistribution>,
 }
 
 impl Landscape {
     pub fn new(layer: Layer) -> Self {
         Self {
             layer,
-            resource_distributions: HashSet::new(),
+            subtance_distributions: HashSet::new(),
         }
     }
 
-    pub fn add_resource_distribution(&mut self, resource_distribution: SubtanceDistribution) {
+    pub fn add_resource_distribution(&mut self, subtance_distribution: SubtanceDistribution) {
         // 检查集合中是否已存在相同的 `resource_type`
         let exists = self
-            .resource_distributions
+            .subtance_distributions
             .par_iter()
-            .any(|rd| rd.resource_type == resource_distribution.resource_type);
+            .any(|rd| rd.resource_type == subtance_distribution.resource_type);
 
         // 如果不存在，则插入新的 `resource_distribution`
         if !exists {
-            tracing::debug!(
+            tracing::trace!(
                 "成功插入新的 `resource_distribution`: {:?}",
-                &resource_distribution
+                &subtance_distribution
             );
-            self.resource_distributions.insert(resource_distribution);
+            self.subtance_distributions.insert(subtance_distribution);
         } else {
             // 在 `info` 日志中包含 `resource_type` 的值
-            tracing::info!(
+            tracing::debug!(
                 "已存在相同的 `resource_type`: {:?}，无法插入新的 `resource_distribution`",
-                resource_distribution.resource_type
+                subtance_distribution.resource_type
             );
         }
     }

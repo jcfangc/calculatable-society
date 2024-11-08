@@ -1,5 +1,5 @@
 [workspace]
-members = ["components", "context", "log", "utils"]
+members = ["components", "context", "backend_core", "log", "utils"]
 
 [package]
 name = "ess"

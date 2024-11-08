@@ -1,7 +1,7 @@
 ﻿use crate::environment::layer::Layer;
 use crate::environment::noise_params::NoiseParams;
 use crate::environment::t_noise_generatable::NoiseGeneratable;
-use crate::environment::t_statistics::Statistics;
+use crate::environment::t_statistical::Statistical;
 use crate::shared::subtance_type::SubtanceType;
 use ndarray::Array2;
 use ndarray::Zip;
@@ -64,7 +64,7 @@ impl NoiseGeneratable for SubtanceDistribution {
     }
 }
 
-impl Statistics for SubtanceDistribution {
+impl Statistical for SubtanceDistribution {
     type Item = usize;
 
     #[instrument(skip_all)]

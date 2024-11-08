@@ -1,5 +1,4 @@
 ﻿use crate::agent::resource_amount::ResourceAmount;
-use crate::shared::property::repository::get_properties_by_numerator_and_dominator;
 use crate::shared::property::Property;
 use crate::shared::subtance_type::SubtanceType;
 use futures::future::join_all;
@@ -107,7 +106,7 @@ impl Resources {
         }
 
         // 如果数据库没有匹配项，则进行计算
-        let property_params = Property::to_map().await;
+        let property_params = Property::to_map();
 
         let property_value_entries: HashMap<_, _> = property_params
             .into_iter() // 将 HashMap 转换为并行迭代器
@@ -166,106 +165,5 @@ impl fmt::Display for Resources {
             .map(|(key, amount)| format!("{:?}: {:?}", key, amount))
             .collect();
         write!(f, "{}", resources.join("\n"))
-    }
-}
-// resources 组件
-
-// Route 模块: 定义路由，将 URL 映射到具体的处理方法
-mod route {
-    //Route 模块负责定义连接的路由规则，将 URL 映射到 Controller 中的处理方法。
-    // 例如: Router::new().route("//resources", (handle_resources_))
-}
-
-// Controller 模块: 处理来自客户端的请求，负责连接的生命周期管理
-mod controller {
-    // Controller 负责处理连接的建立、消息收发以及关闭等生命周期操作。
-    // 它接收来自客户端的消息，并将消息传递给 Service 进行业务处理。
-    // 例如: async fn handle_resources_(socket: WebSocket) -> impl IntoResponse { ... }
-}
-
-// Service 模块: 负责处理消息的业务逻辑，调用 Repository 获取或更新数据
-mod service {
-    // Service 处理来自 Controller 的消息，执行具体的业务逻辑。
-    // 例如: 处理收到的消息，更新数据库中的状态或发送响应消息。
-    // 例如: async fn process_resources_message(message: String) -> Result<String, Error> { ... }
-}
-
-// Repository 模块: 负责与数据库的交互，执行数据的增删改查操作
-mod repository {
-    use super::model::ResourcesModel;
-    use crate::agent::resource_amount::ResourceAmount;
-    use crate::shared::subtance_type::SubtanceType;
-    use context::db::context::DatabaseContext;
-    use context::GLOBAL_APP_CONTEXT;
-    use sqlx::Error;
-    use uuid::Uuid;
-
-    pub async fn get_resource_by_id_numerator_and_dominator(
-        agent_id: Uuid,
-        resource_numerator: i32,
-        resource_dominator: i32,
-    ) -> Result<(SubtanceType, ResourceAmount), Error> {
-        if resource_dominator <= 0 || resource_numerator <= 0 {
-            return Err(sqlx::Error::Protocol(
-                "resource_numerator 和 resource_dominator 参数应该为正数".into(),
-            ));
-        }
-
-        let pool = &*GLOBAL_APP_CONTEXT.get().unwrap().db_pool().await;
-
-        // 执行查询
-        if let Some(resources_model) = sqlx::query_as::<_, ResourcesModel>(
-            r#"
-            SELECT 
-                agent_id,
-                numerator,
-                denominator,
-                allocatable,
-                investment,
-                debt
-            FROM 
-                resources
-            WHERE 
-                agent_id = $1 AND numerator = $2 AND denominator = $3
-            "#,
-        )
-        .bind(agent_id)
-        .bind(resource_numerator)
-        .bind(resource_dominator)
-        .fetch_optional(pool)
-        .await?
-        {
-            if let Ok(resource_type_coefficient) = SubtanceType::try_new(
-                resources_model.numerator as usize,
-                resources_model.denominator as usize,
-            ) {
-                let resource_amount = ResourceAmount::new(
-                    resources_model.allocatable as usize,
-                    resources_model.investment as usize,
-                    resources_model.debt as usize,
-                );
-
-                return Ok((resource_type_coefficient, resource_amount));
-            }
-        }
-
-        // 如果没有找到对应的记录，返回一个自定义错误或选择返回一个默认值
-        Err(sqlx::Error::RowNotFound)
-    }
-}
-
-// Model 模块: 负责定义数据模型，通常是数据库表的抽象结构
-mod model {
-    use sqlx::FromRow;
-    use uuid::Uuid;
-
-    #[derive(FromRow)]
-    pub struct ResourcesModel {
-        pub agent_id: Uuid,
-        pub numerator: i32,
-        pub denominator: i32,
-        pub allocatable: i32,
-        pub investment: i32,
-        pub debt: i32,
     }
 }

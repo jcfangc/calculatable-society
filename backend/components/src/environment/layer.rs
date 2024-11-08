@@ -1,5 +1,4 @@
-﻿use crate::environment::t_hexagon::{Hexagon, HexagonDiagonals, HexagonNeighbours};
-use serde::Serialize;
+﻿use serde::Serialize;
 use std::fmt;
 
 const DEFAULT_WIDTH: usize = 255;
@@ -53,8 +52,4 @@ impl fmt::Display for Layer {
             Err(_) => write!(f, "Layer({}, {})", self.width, self.height),
         }
     }
-}
-
-impl Hexagon for Layer {
-    fn neighbours(&self, x: usize, y: usize) -> HexagonNeighbours {}
 }
