@@ -17,6 +17,7 @@ mod types {
 
 // Macros 模块: 定义全局宏规则，简化代码编写
 pub mod macros {
+
     // Macros 模块用于定义全局宏规则，方便在项目中复用代码片段，减少重复代码。
     // 可以定义一些通用的宏，例如自动生成日志记录、统一错误处理等。
     // 例如：macro_rules! log_error { (err:expr) => { println!("Error: {:?}", err); }; }
@@ -72,21 +73,22 @@ pub mod macros {
                 $($key),*
             }
 
+            use once_cell::sync::Lazy;
             use std::collections::HashMap;
-            use tokio::sync::OnceCell; // 使用 tokio 的 OnceCell
 
-            impl $name {
-                // 异步初始化的静态哈希表
-                $vis async fn to_map() -> &'static HashMap<$name, $value_type> {
-                    static MAP: OnceCell<HashMap<$name, $value_type>> = OnceCell::const_new();
+        // 将 MAP 定义在模块级别，移出 impl 块
+        $vis static MAP: Lazy<HashMap<$name, $value_type>> = Lazy::new(|| {
+            let mut map = HashMap::new();
+            $(map.insert($name::$key, $value());)*
+            map
+        });
 
-                    MAP.get_or_init(|| async {
-                        let mut map = HashMap::new();
-                        $(map.insert($name::$key, $value());)* // 注意，这里 $value() 如果是异步调用，需改为 $value.await
-                        map
-                    }).await
-                }
+        impl $name {
+            // 提供一个方法来访问静态的 HashMap
+            $vis fn to_map() -> &'static HashMap<$name, $value_type> {
+                &MAP
             }
+        }
         };
     }
 }

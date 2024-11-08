@@ -1,7 +1,7 @@
-﻿use crate::environment::generatable::Generatable;
-use crate::environment::layer::Layer;
+﻿use crate::environment::layer::Layer;
 use crate::environment::noise_params::NoiseParams;
-use crate::environment::statistics::Statistics;
+use crate::environment::t_noise_generatable::NoiseGeneratable;
+use crate::environment::t_statistics::Statistics;
 use crate::shared::subtance_type::SubtanceType;
 use ndarray::Array2;
 use ndarray::Zip;
@@ -36,7 +36,7 @@ impl SubtanceDistribution {
     }
 }
 
-impl Generatable for SubtanceDistribution {
+impl NoiseGeneratable for SubtanceDistribution {
     #[instrument(skip_all)]
     fn generate_simplex_noise(&mut self) {
         let simplex = OpenSimplex::new(self.noise_params.seed);

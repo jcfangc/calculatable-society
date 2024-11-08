@@ -242,6 +242,7 @@ dependencies = [
  "noise",
  "num",
  "num-traits",
+ "once_cell",
  "rand",
  "rayon",
  "serde",
@@ -2215,7 +2216,7 @@ dependencies = [
 name = "utils"
 version = "0.1.0"
 dependencies = [
- "paste",
+ "once_cell",
 ]
 
 [[package]]

@@ -9,15 +9,11 @@ enum_map! {
     }
 }
 
-// trait Property {
-//     fn with_frequency_offset(&self, env_frequency: isize) -> PropertyParam;
-//     fn with_phase_offset(&self, env_phase: isize) -> PropertyParam;
-//     fn reset_frequency_offset(&self) -> PropertyParam;
-//     fn reset_phase_offset(&self) -> PropertyParam;
-// }
-
-// pub trait Flammable: Property {
-//     fn get_param(&self) -> PropertyParam {
-//         self.property_param;
-//     }
-// }
+pub trait PropertyCalculator {
+    async fn calculate(
+        &self,
+        property: Property,
+        frequency_offset: Option<isize>,
+        phase_offset: Option<isize>,
+    ) -> f64;
+}

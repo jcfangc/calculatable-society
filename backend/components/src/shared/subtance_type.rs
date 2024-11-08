@@ -1,4 +1,6 @@
-﻿use error_handling::SubtanceTypeError;
+﻿use crate::shared::property::Property;
+use crate::shared::property::PropertyCalculator;
+use error_handling::SubtanceTypeError;
 use num::rational::Ratio;
 use serde::Serialize;
 use std::convert::TryFrom;
@@ -42,6 +44,22 @@ impl fmt::Display for SubtanceType {
             Ok(json_str) => write!(f, "{}", json_str),
             Err(e) => write!(f, "将 ResourceType 序列化为 JSON 时出错: {}", e),
         }
+    }
+}
+
+impl PropertyCalculator for SubtanceType {
+    async fn calculate(
+        &self,
+        property: Property,
+        frequency_offset: Option<isize>,
+        phase_offset: Option<isize>,
+    ) -> f64 {
+        let param = Property::to_map().get(&property).unwrap();
+        let property_value = param
+            .with_frequency_offset(frequency_offset.unwrap_or(0))
+            .with_phase_offset(phase_offset.unwrap_or(0))
+            .calculate(self);
+        property_value
     }
 }
 

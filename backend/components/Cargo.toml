@@ -20,3 +20,4 @@ rand = "*"
 num-traits = "*"
 serde = { version = "*", features = ["derive"] }
 serde_json = "*"
+once_cell = "*"
