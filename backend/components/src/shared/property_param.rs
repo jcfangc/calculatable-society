@@ -96,14 +96,16 @@ impl PropertyParam {
     /// - `θ = ResourceTypeCoefficient * π`
     /// - `a` 和 `b` 为基础频率和相位常量
     /// - `c` 和 `d` 为环境频率因子和相位因子
-    pub fn calculate(&self, coefficient: &SubtanceType) -> f64 {
+    pub fn calculate(&self, st: &SubtanceType) -> f64 {
         // 计算 θ = 资源类型系数 × π
-        let theta = coefficient.subtance_type.to_f64().unwrap() * PI;
+        let theta = st.ratio.to_f64().unwrap() * PI;
 
-        // 计算 sin((a + c)θ + (b + d))
-        let result = ((self.frequency_constant + self.frequency_offset) as f64 * theta
+        // 计算 [sin((a + c)θ + (b + d)) + 1] / 2
+        let result = (((self.frequency_constant + self.frequency_offset) as f64 * theta
             + (self.phase_constant + self.phase_offset) as f64)
-            .sin();
+            .sin()
+            + 1.0)
+            / 2.0;
 
         return result;
     }

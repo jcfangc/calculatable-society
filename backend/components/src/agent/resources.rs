@@ -1,7 +1,10 @@
-﻿use crate::agent::resource_amount::ResourceAmount;
+﻿use crate::_commute::t_from_dto::FromDTO;
+use crate::agent::resource_amount::ResourceAmount;
 use crate::shared::property::Property;
 use crate::shared::subtance_type::SubtanceType;
+use backend_core::repository::components_related::shared_related::property_related::get_properties_by_numerator_and_dominator_stream;
 use futures::future::join_all;
+use futures::StreamExt;
 use std::collections::HashMap;
 use std::fmt;
 use tokio::task;
@@ -94,27 +97,44 @@ impl Resources {
         self.resources.iter().collect()
     }
 
-    /// 计算单个 `ResourceTypeCoefficient` 的属性值
-    pub async fn get_properties(rtc: &SubtanceType) -> HashMap<Property, f64> {
-        if let Ok(properties) = get_properties_by_numerator_and_dominator(
-            *rtc.subtance_type.numer() as i32,
-            *rtc.subtance_type.denom() as i32,
+    pub async fn get_properties(subtance_type: &SubtanceType) -> HashMap<Property, f64> {
+        let mut property_value_entries = HashMap::new();
+
+        // 创建异步流，获取属性数据
+        let mut properties_stream = get_properties_by_numerator_and_dominator_stream(
+            *subtance_type.ratio.numer() as i32,
+            *subtance_type.ratio.denom() as i32,
+            None,
         )
-        .await
-        {
-            return properties;
+        .await;
+
+        // 消费异步流，累积结果到 HashMap 中
+        while let Some(batch_result) = properties_stream.next().await {
+            match batch_result {
+                Ok(batch) => {
+                    for (property_params, property_value) in batch {
+                        // 将 DTOPropertyParams 转换为 Property 类型
+                        let property = Property::from_dto(property_params);
+                        property_value_entries.insert(property, property_value);
+                    }
+                }
+                Err(e) => {
+                    tracing::error!("从数据库获取属性时出错: {:?}", e);
+                }
+            }
         }
 
-        // 如果数据库没有匹配项，则进行计算
-        let property_params = Property::to_map();
-
-        let property_value_entries: HashMap<_, _> = property_params
-            .into_iter() // 将 HashMap 转换为并行迭代器
-            .map(|(property, property_const)| {
-                let value = property_const.calculate(rtc);
-                (*property, value)
-            })
-            .collect();
+        // 如果数据库没有匹配项，进行计算填充数据
+        if property_value_entries.is_empty() {
+            let property_params = Property::to_map();
+            property_value_entries = property_params
+                .into_iter()
+                .map(|(property, property_const)| {
+                    let value = property_const.calculate(subtance_type);
+                    (*property, value)
+                })
+                .collect();
+        }
 
         property_value_entries
     }
@@ -126,12 +146,12 @@ impl Resources {
             .resources
             .keys()
             .cloned()
-            .map(|resource_type| {
+            .map(|subtance_type| {
                 task::spawn_blocking(move || {
                     // 在阻塞线程池中同步计算属性
                     let properties = tokio::runtime::Handle::current()
-                        .block_on(Resources::get_properties(&resource_type));
-                    (resource_type, properties)
+                        .block_on(Resources::get_properties(&subtance_type));
+                    (subtance_type, properties)
                 })
             })
             .collect();

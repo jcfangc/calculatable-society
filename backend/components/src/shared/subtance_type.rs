@@ -10,7 +10,7 @@ const UPPER_BOUND: Ratio<usize> = Ratio::new_raw(2, 1);
 
 #[derive(Debug, Clone, Copy, Hash, Eq, PartialEq, Serialize)]
 pub struct SubtanceType {
-    pub subtance_type: Ratio<usize>,
+    pub ratio: Ratio<usize>,
 }
 
 impl SubtanceType {
@@ -25,7 +25,9 @@ impl SubtanceType {
             return Err(SubtanceTypeError::OutOfRange);
         }
 
-        Ok(SubtanceType { subtance_type })
+        Ok(SubtanceType {
+            ratio: subtance_type,
+        })
     }
 
     pub fn property_calculate(

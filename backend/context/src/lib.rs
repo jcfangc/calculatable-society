@@ -41,7 +41,7 @@ impl AppContext {
 // 为 AppContext 实现 DatabaseContext 特质
 #[async_trait::async_trait]
 impl DatabaseContexted for AppContext {
-    async fn db_pool(&self) -> Arc<Pool<Postgres>> {
-        self.db_pool.get().cloned().expect("数据库连接池未初始化")
+    async fn db_pool(&self) -> &Arc<Pool<Postgres>> {
+        self.db_pool.get().expect("数据库连接池未初始化")
     }
 }

@@ -1,10 +1,10 @@
-﻿
+﻿use uuid::Uuid;
 
 struct Agent {
-    id: String,
+    id: Uuid,
     lifespan: u32,
     age: u32,
-    location: Location,
-    resources: Resources,
-    preferences: Preferences,
+    // location: Location,
+    // resources: Resources,
+    // preferences: Preferences,
 }

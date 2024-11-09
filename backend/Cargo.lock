@@ -144,9 +144,13 @@ dependencies = [
 name = "backend_core"
 version = "0.1.0"
 dependencies = [
- "components",
  "context",
+ "futures",
+ "once_cell",
  "sqlx",
+ "tokio",
+ "tokio-stream",
+ "utils",
  "uuid",
 ]
 
@@ -246,6 +250,7 @@ dependencies = [
 name = "components"
 version = "0.1.0"
 dependencies = [
+ "backend_core",
  "context",
  "futures",
  "ndarray",
@@ -261,6 +266,7 @@ dependencies = [
  "tokio",
  "tracing",
  "utils",
+ "uuid",
  "validator",
 ]
 

@@ -4,7 +4,11 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-components = { path = "../components" }
 context = { path = "../context" }
 uuid = "*"
 sqlx = { version = "*", features = ["runtime-tokio-rustls", "macros", "uuid"] }
+futures = "*"
+tokio = { version = "*", features = ["sync"] }
+tokio-stream = "*"
+utils = { path = "../utils" }
+once_cell = "*"
