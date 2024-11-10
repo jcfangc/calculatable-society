@@ -12,3 +12,4 @@ tokio = { version = "*", features = ["sync"] }
 tokio-stream = "*"
 utils = { path = "../utils" }
 once_cell = "*"
+tracing = "*"

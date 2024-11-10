@@ -25,7 +25,7 @@ pub async fn create_pool(
         .idle_timeout(Duration::from_secs(idle_timeout as u64))
         .connect(&database_url)
         .await
-        .expect("Failed to create pool.");
+        .expect("无法构建数据库连接池");
 
     Arc::new(pool) // 使用 Arc 包装 Pool 以确保线程安全
 }

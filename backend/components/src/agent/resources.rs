@@ -2,7 +2,7 @@
 use crate::agent::resource_amount::ResourceAmount;
 use crate::shared::property::Property;
 use crate::shared::subtance_type::SubtanceType;
-use backend_core::repository::components_related::shared_related::property_related::get_properties_by_numerator_and_dominator_stream;
+use backend_core::repository::components_related::shared_related::property_related::get_properties_by_numerator_and_denominator_stream;
 use futures::future::join_all;
 use futures::StreamExt;
 use std::collections::HashMap;
@@ -101,7 +101,7 @@ impl Resources {
         let mut property_value_entries = HashMap::new();
 
         // 创建异步流，获取属性数据
-        let mut properties_stream = get_properties_by_numerator_and_dominator_stream(
+        let mut properties_stream = get_properties_by_numerator_and_denominator_stream(
             *subtance_type.ratio.numer() as i32,
             *subtance_type.ratio.denom() as i32,
             None,

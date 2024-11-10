@@ -1,3 +1,4 @@
+mod _error;
 pub mod db;
 
 use db::connection::create_pool;

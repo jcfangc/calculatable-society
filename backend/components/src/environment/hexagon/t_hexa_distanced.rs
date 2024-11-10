@@ -1,4 +1,4 @@
 ﻿pub trait HexaDistanced {
     fn z(&self) -> isize;
-    fn distance(&self, other: &Self) -> usize;
+    fn distance_to(&self, other: &Self) -> usize;
 }

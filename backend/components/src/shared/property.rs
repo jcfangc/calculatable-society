@@ -6,8 +6,10 @@ use utils::enum_map;
 enum_map! {
     #[derive(Clone, Copy)]
     pub Property => PropertyParam {
+        // 密度
         Density => || PropertyParam::new(1, 1, None, None),
-        Phase => || PropertyParam::new(2, 2, None, None),
+        // 流动性
+        Fluidity => || PropertyParam::new(2, 2, None, None),
     }
 }
 

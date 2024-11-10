@@ -1,16 +1,16 @@
-﻿use crate::environment::{layer::Layer, resource_distribution::SubtanceDistribution};
+﻿use crate::environment::{map_size::MapSize, subtance_distribution::SubtanceDistribution};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use serde::Serialize;
 use std::collections::HashSet;
 
 #[derive(Debug, Clone, Serialize)]
 pub struct Landscape {
-    pub layer: Layer,
+    pub layer: MapSize,
     pub subtance_distributions: HashSet<SubtanceDistribution>,
 }
 
 impl Landscape {
-    pub fn new(layer: Layer) -> Self {
+    pub fn new(layer: MapSize) -> Self {
         Self {
             layer,
             subtance_distributions: HashSet::new(),

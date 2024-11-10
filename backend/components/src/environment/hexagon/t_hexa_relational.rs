@@ -1,4 +1,4 @@
-﻿use crate::environment::coordinate_offset::CoordinateShift;
+﻿use crate::environment::coordinate_shift::CoordinateShift;
 use std::collections::HashMap;
 use std::hash::Hash;
 
