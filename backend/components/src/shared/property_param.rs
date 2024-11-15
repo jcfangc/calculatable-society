@@ -1,4 +1,4 @@
-﻿use crate::shared::subtance_type::SubtanceType;
+﻿use crate::shared::subtance_type::SubstanceType;
 use num::traits::ToPrimitive;
 use std::f64::consts::PI;
 
@@ -96,7 +96,7 @@ impl PropertyParam {
     /// - `θ = ResourceTypeCoefficient * π`
     /// - `a` 和 `b` 为基础频率和相位常量
     /// - `c` 和 `d` 为环境频率因子和相位因子
-    pub fn calculate(&self, st: &SubtanceType) -> f64 {
+    pub fn calculate(&self, st: &SubstanceType) -> f64 {
         // 计算 θ = 资源类型系数 × π
         let theta = st.ratio.to_f64().unwrap() * PI;
 

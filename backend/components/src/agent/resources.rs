@@ -1,7 +1,7 @@
 ﻿use crate::_commute::t_from_dto::FromDTO;
 use crate::agent::resource_amount::ResourceAmount;
 use crate::shared::property::Property;
-use crate::shared::subtance_type::SubtanceType;
+use crate::shared::subtance_type::SubstanceType;
 use backend_core::repository::components_related::shared_related::property_related::get_properties_by_numerator_and_denominator_stream;
 use futures::future::join_all;
 use futures::StreamExt;
@@ -13,7 +13,7 @@ use tokio::task;
 #[derive(Debug)]
 pub struct Resources {
     // 使用 HashMap 管理资源类型到资源的映射
-    resources: HashMap<SubtanceType, ResourceAmount>,
+    resources: HashMap<SubstanceType, ResourceAmount>,
 }
 
 impl Resources {
@@ -24,7 +24,7 @@ impl Resources {
     ///
     /// ### 返回值
     /// 返回一个新的 `Resources` 实例
-    pub fn new(resources: Option<HashMap<SubtanceType, ResourceAmount>>) -> Self {
+    pub fn new(resources: Option<HashMap<SubstanceType, ResourceAmount>>) -> Self {
         Resources {
             resources: resources.unwrap_or_default(),
         }
@@ -34,7 +34,7 @@ impl Resources {
     /// ### 参数
     /// - `resource_type`: 资源类型系数
     /// - `amount`: 要设置的资源数量
-    pub fn set(&mut self, resource_type: SubtanceType, amount: ResourceAmount) {
+    pub fn set(&mut self, resource_type: SubstanceType, amount: ResourceAmount) {
         self.resources.insert(resource_type, amount);
     }
 
@@ -45,7 +45,7 @@ impl Resources {
     ///
     /// ### 返回值
     /// 返回一个 `Option<&ResourceAmount>`，如果存在则返回对应的资源引用，否则返回 `None`
-    pub fn get(&self, resource_type: &SubtanceType) -> Option<&ResourceAmount> {
+    pub fn get(&self, resource_type: &SubstanceType) -> Option<&ResourceAmount> {
         self.resources.get(resource_type)
     }
 
@@ -53,7 +53,7 @@ impl Resources {
     ///
     /// ### 参数
     /// - `resource_type`: 资源类型系数
-    pub fn remove(&mut self, resource_type: &SubtanceType) {
+    pub fn remove(&mut self, resource_type: &SubstanceType) {
         self.resources.remove(resource_type);
     }
 
@@ -64,7 +64,7 @@ impl Resources {
     /// ### 参数
     /// - `resource_type`: 资源类型系数
     /// - `amount`: 要添加的资源数量
-    pub fn add(&mut self, resource_type: SubtanceType, amount: ResourceAmount) {
+    pub fn add(&mut self, resource_type: SubstanceType, amount: ResourceAmount) {
         if let Some(existing_resource) = self.resources.get_mut(&resource_type) {
             *existing_resource += amount;
         } else {
@@ -79,7 +79,7 @@ impl Resources {
     /// ### 参数
     /// - `resource_type`: 资源类型系数
     /// - `amount`: 要减少的资源数量
-    pub fn minus(&mut self, resource_type: SubtanceType, amount: ResourceAmount) {
+    pub fn minus(&mut self, resource_type: SubstanceType, amount: ResourceAmount) {
         if let Some(existing_resource) = self.resources.get_mut(&resource_type) {
             if *existing_resource > amount {
                 *existing_resource -= amount;
@@ -93,11 +93,11 @@ impl Resources {
     ///
     /// ### 返回值
     /// 返回一个包含所有资源的向量
-    pub fn to_list(&self) -> Vec<(&SubtanceType, &ResourceAmount)> {
+    pub fn to_list(&self) -> Vec<(&SubstanceType, &ResourceAmount)> {
         self.resources.iter().collect()
     }
 
-    pub async fn get_properties(subtance_type: &SubtanceType) -> HashMap<Property, f64> {
+    pub async fn get_properties(subtance_type: &SubstanceType) -> HashMap<Property, f64> {
         let mut property_value_entries = HashMap::new();
 
         // 创建异步流，获取属性数据
@@ -140,7 +140,7 @@ impl Resources {
     }
 
     /// 计算所有资源的属性值
-    pub async fn get_all_properties(&self) -> HashMap<SubtanceType, HashMap<Property, f64>> {
+    pub async fn get_all_properties(&self) -> HashMap<SubstanceType, HashMap<Property, f64>> {
         // 仅在 `all_properties` 中使用 `spawn_blocking`，并移除 `properties_sync` 中的 `spawn_blocking`
         let futures: Vec<_> = self
             .resources

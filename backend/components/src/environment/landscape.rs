@@ -1,4 +1,4 @@
-﻿use crate::environment::{map_size::MapSize, subtance_distribution::SubtanceDistribution};
+﻿use crate::environment::{map_size::MapSize, subtance_distribution::SubstanceDistribution};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use serde::Serialize;
 use std::collections::HashSet;
@@ -6,7 +6,7 @@ use std::collections::HashSet;
 #[derive(Debug, Clone, Serialize)]
 pub struct Landscape {
     pub layer: MapSize,
-    pub subtance_distributions: HashSet<SubtanceDistribution>,
+    pub subtance_distributions: HashSet<SubstanceDistribution>,
 }
 
 impl Landscape {
@@ -17,12 +17,12 @@ impl Landscape {
         }
     }
 
-    pub fn add_resource_distribution(&mut self, subtance_distribution: SubtanceDistribution) {
+    pub fn add_resource_distribution(&mut self, subtance_distribution: SubstanceDistribution) {
         // 检查集合中是否已存在相同的 `resource_type`
         let exists = self
             .subtance_distributions
             .par_iter()
-            .any(|rd| rd.resource_type == subtance_distribution.resource_type);
+            .any(|rd| rd.substance_type == subtance_distribution.substance_type);
 
         // 如果不存在，则插入新的 `resource_distribution`
         if !exists {
@@ -35,7 +35,7 @@ impl Landscape {
             // 在 `info` 日志中包含 `resource_type` 的值
             tracing::debug!(
                 "已存在相同的 `resource_type`: {:?}，无法插入新的 `resource_distribution`",
-                subtance_distribution.resource_type
+                subtance_distribution.substance_type
             );
         }
     }

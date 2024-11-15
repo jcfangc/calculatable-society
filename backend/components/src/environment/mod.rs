@@ -9,3 +9,4 @@ pub mod landscape;
 pub mod map_size;
 pub mod noise_params;
 pub mod subtance_distribution;
+pub mod subtance_distribution_state;

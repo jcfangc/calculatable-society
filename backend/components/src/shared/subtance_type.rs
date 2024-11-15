@@ -9,11 +9,11 @@ const LOWER_BOUND: Ratio<usize> = Ratio::new_raw(0, 1);
 const UPPER_BOUND: Ratio<usize> = Ratio::new_raw(2, 1);
 
 #[derive(Debug, Clone, Copy, Hash, Eq, PartialEq, Serialize)]
-pub struct SubtanceType {
+pub struct SubstanceType {
     pub ratio: Ratio<usize>,
 }
 
-impl SubtanceType {
+impl SubstanceType {
     pub fn try_new(numerator: usize, denominator: usize) -> Result<Self, SubtanceTypeError> {
         if denominator == 0 {
             return Err(SubtanceTypeError::ZeroDenominator);
@@ -25,7 +25,7 @@ impl SubtanceType {
             return Err(SubtanceTypeError::OutOfRange);
         }
 
-        Ok(SubtanceType {
+        Ok(SubstanceType {
             ratio: subtance_type,
         })
     }
@@ -45,7 +45,7 @@ impl SubtanceType {
     }
 }
 
-impl TryFrom<(usize, usize)> for SubtanceType {
+impl TryFrom<(usize, usize)> for SubstanceType {
     type Error = SubtanceTypeError;
 
     fn try_from(value: (usize, usize)) -> Result<Self, Self::Error> {
@@ -53,7 +53,7 @@ impl TryFrom<(usize, usize)> for SubtanceType {
     }
 }
 
-impl fmt::Display for SubtanceType {
+impl fmt::Display for SubstanceType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match serde_json::to_string_pretty(&self) {
             Ok(json_str) => write!(f, "{}", json_str),

@@ -1,12 +1,12 @@
 ﻿use crate::agent::preference_value::PreferenceValue;
-use crate::shared::subtance_type::SubtanceType;
+use crate::shared::subtance_type::SubstanceType;
 use std::collections::HashMap;
 use std::fmt;
 
 /// `Preference` 结构体，用于管理资源类型到偏好值的映射
 #[derive(Debug)]
 pub struct Preferences {
-    preferences: HashMap<SubtanceType, PreferenceValue>, // 使用 PreferenceValue 作为偏好值
+    preferences: HashMap<SubstanceType, PreferenceValue>, // 使用 PreferenceValue 作为偏好值
 }
 
 impl Default for Preferences {
@@ -32,7 +32,7 @@ impl Preferences {
     /// ```
     /// let preferences = Preference::new(None);
     /// ```
-    fn new(preferences: Option<HashMap<SubtanceType, PreferenceValue>>) -> Self {
+    fn new(preferences: Option<HashMap<SubstanceType, PreferenceValue>>) -> Self {
         Preferences {
             preferences: preferences.unwrap_or_default(),
         }
@@ -51,7 +51,7 @@ impl Preferences {
     /// let mut preference = Preference::new(None);
     /// preference.set(ResourceTypeCoefficient::new(Ratio::new(1, 1)).unwrap(), PreferenceValue::new(0.8).unwrap());
     /// ```
-    fn set(&mut self, resource_type: SubtanceType, preference_value: PreferenceValue) {
+    fn set(&mut self, resource_type: SubstanceType, preference_value: PreferenceValue) {
         self.preferences.insert(resource_type, preference_value);
     }
 
@@ -72,7 +72,7 @@ impl Preferences {
     ///     println!("偏好值: {}", value);
     /// }
     /// ```
-    fn get(&self, resource_type: &SubtanceType) -> Option<&PreferenceValue> {
+    fn get(&self, resource_type: &SubstanceType) -> Option<&PreferenceValue> {
         self.preferences.get(resource_type)
     }
 }
