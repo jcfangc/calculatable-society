@@ -1,6 +1,6 @@
 ﻿use crate::shared::subtance_type::SubstanceType;
 use num::traits::ToPrimitive;
-use std::f64::consts::PI;
+use std::f64::{consts::PI, EPSILON};
 
 /// `PropertyParam` 结构体，用于描述物质的属性
 ///
@@ -84,7 +84,7 @@ impl PropertyParam {
     /// 根据资源类型系数来计算属性值，θ = 资源类型系数 × π
     ///
     /// ### 参数
-    /// - `coefficient`: 资源类型系数 `ResourceTypeCoefficient`，表示资源类型与属性的关系
+    /// - `coefficient`: 资源类型系数 `SubstanceType`，表示资源类型与属性的关系
     ///
     /// ### 返回值
     /// 返回计算后的属性值，基于频率和相位常量与资源类型系数的组合。
@@ -93,7 +93,7 @@ impl PropertyParam {
     /// `sin((a + c)θ + (b + d))`
     ///
     /// 其中：
-    /// - `θ = ResourceTypeCoefficient * π`
+    /// - `θ = SubstanceType * π`
     /// - `a` 和 `b` 为基础频率和相位常量
     /// - `c` 和 `d` 为环境频率因子和相位因子
     pub fn calculate(&self, st: &SubstanceType) -> f64 {
@@ -107,6 +107,7 @@ impl PropertyParam {
             + 1.0)
             / 2.0;
 
-        return result;
+        // 取值范围为 [0, 1]，但是添加了一个极小值，避免出现 0 的情况
+        return result + EPSILON;
     }
 }

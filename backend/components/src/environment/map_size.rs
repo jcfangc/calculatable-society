@@ -5,7 +5,7 @@ const DEFAULT_WIDTH: usize = 255; // 默认宽度常量
 const DEFAULT_HEIGHT: usize = DEFAULT_WIDTH; // 默认高度常量，设为与宽度相同
 
 /// 地图参数结构体
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Copy)]
 pub struct MapSize {
     height: usize, // 地图高度
     width: usize,  // 地图宽度

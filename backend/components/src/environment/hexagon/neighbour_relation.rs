@@ -2,7 +2,7 @@
 use crate::environment::hexagon::t_hexa_relational::HexaRelational;
 use std::collections::HashMap;
 
-#[derive(Clone, Copy, Eq, PartialEq, Hash)]
+#[derive(Clone, Copy, Eq, PartialEq, Hash, Debug)]
 pub enum NeighbourRelation {
     Degree0,
     Degree60,

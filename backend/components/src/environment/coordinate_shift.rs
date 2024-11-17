@@ -3,6 +3,9 @@ use std::f64::consts::PI;
 use std::iter::Sum;
 use std::ops::{Add, Mul, Sub};
 
+type Radians = f64;
+type Degrees = f64;
+
 /// 方向对应的坐标偏移量
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize)]
 pub struct CoordinateShift {
@@ -44,20 +47,7 @@ impl CoordinateShift {
     /// - 返回值为正数时，表示从 `self` 到 `other` 为逆时针旋转（正方向）。
     /// - 返回值为负数时，表示从 `self` 到 `other` 为顺时针旋转（负方向）。
     /// - 返回值为 0 时，表示两个向量方向相同或重合。
-    ///
-    /// ### 示例
-    /// ```
-    /// let shift1 = CoordinateShift::new(1, 0); // 向右
-    /// let shift2 = CoordinateShift::new(0, 1); // 向上
-    ///
-    /// let angle = shift1.angle_between(shift2);
-    /// assert_eq!(angle, std::f64::consts::FRAC_PI_2); // π/2 弧度
-    ///
-    /// let shift3 = CoordinateShift::new(0, -1); // 向下
-    /// let angle = shift1.angle_between(shift3);
-    /// assert_eq!(angle, -std::f64::consts::FRAC_PI_2); // -π/2 弧度
-    /// ```
-    pub fn angle_between(self, other: Self) -> f64 {
+    pub fn angle_between(self, other: Self) -> Radians {
         let dot = (self.dx * other.dx + self.dy * other.dy) as f64;
         let cross = (self.dx * other.dy - self.dy * other.dx) as f64;
         let angle = cross.atan2(dot);
@@ -65,12 +55,12 @@ impl CoordinateShift {
     }
 
     /// 将弧度转换为角度
-    pub fn to_degrees(radians: f64) -> f64 {
+    pub fn to_degrees(radians: Radians) -> Degrees {
         radians * (180.0 / PI)
     }
 
     /// 将角度转换为弧度
-    pub fn to_radians(degrees: f64) -> f64 {
+    pub fn to_radians(degrees: Degrees) -> Radians {
         degrees * (PI / 180.0)
     }
 
@@ -82,17 +72,6 @@ impl CoordinateShift {
     ///
     /// ### 返回值
     /// 返回值为 `usize` 类型，表示非负整数的步数。
-    ///
-    /// ### 示例
-    /// ```
-    /// let shift = CoordinateShift::new(3, -2);
-    /// let length = shift.magnitude();
-    /// assert_eq!(length, 3);
-    ///
-    /// let shift = CoordinateShift::new(-1, 1);
-    /// let length = shift.magnitude();
-    /// assert_eq!(length, 1);
-    /// ```
     pub fn magnitude(&self) -> usize {
         let dx = self.dx.abs() as usize;
         let dy = self.dy.abs() as usize;

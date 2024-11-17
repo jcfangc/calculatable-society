@@ -18,8 +18,10 @@ impl Mover {
 
     // 应用移动到指定地图，并返回更新后的位置，支持链式调用
     pub fn on(mut self, map: &Landscape) -> Location {
-        let new_x = (self.location.x() as isize + self.dx).rem_euclid(map.layer.width() as isize);
-        let new_y = (self.location.y() as isize + self.dy).rem_euclid(map.layer.height() as isize);
+        let new_x =
+            (self.location.x() as isize + self.dx).rem_euclid(map.map_size().width() as isize);
+        let new_y =
+            (self.location.y() as isize + self.dy).rem_euclid(map.map_size().height() as isize);
 
         self.location = Location::new(new_x as usize, new_y as usize);
 

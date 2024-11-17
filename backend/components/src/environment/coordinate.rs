@@ -5,6 +5,7 @@ use crate::environment::map_size::MapSize;
 use std::collections::HashMap;
 use std::ops::{Add, Mul, Sub};
 
+#[derive(Clone, Copy, Eq, PartialEq, Hash)]
 pub struct Coordinate {
     /// 行坐标
     y: usize,
