@@ -5,7 +5,7 @@ use std::fmt;
 
 /// `Preference` 结构体，用于管理资源类型到偏好值的映射
 #[derive(Debug)]
-pub struct Preferences {
+pub(crate) struct Preferences {
     preferences: HashMap<SubstanceType, PreferenceValue>, // 使用 PreferenceValue 作为偏好值
 }
 

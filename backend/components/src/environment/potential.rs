@@ -5,25 +5,25 @@ use serde::Serialize;
 use std::collections::HashSet;
 
 #[derive(Debug, Clone, Serialize)]
-pub struct Potential {
+pub(crate) struct Potential {
     potential_distribution: Array2<f64>,
 }
 
 impl Potential {
     /// 创建新的 `Potential`
-    pub fn new(map_size: (usize, usize)) -> Self {
+    pub(crate) fn new(map_size: (usize, usize)) -> Self {
         Self {
             potential_distribution: Array2::<f64>::zeros(map_size),
         }
     }
 
     /// 获取当前的势能分布
-    pub fn distribution(&self) -> &Array2<f64> {
+    pub(crate) fn distribution(&self) -> &Array2<f64> {
         &self.potential_distribution
     }
 
     /// 更新势能分布
-    pub fn update(
+    pub(crate) fn update(
         &mut self,
         subtance_distributions: &HashSet<SubstanceDistribution>,
         map_size: (usize, usize),
@@ -73,14 +73,14 @@ impl Potential {
         let molar_mass =
             Property::calculate_property(Property::MolarMass, substance_dist.substance_type());
 
-        // 获取本物质分布所代表物质的属性：密度（假设密度非零）
+        // 获取本物质分布所代表物质的属性：密度（密度非零）
         let density =
             Property::calculate_property(Property::Density, substance_dist.substance_type());
 
         // 用摩尔质量除以密度，得到一摩尔物质的体积（高度）
         let molar_height = molar_mass / density;
 
-        // 将物质分布的每个网格单元的质量乘以一摩尔物质的体积，得到势能分布
+        // 将物质分布的每个网格单元的摩尔量乘以一摩尔物质的体积，得到势能分布
         Array2::from_shape_vec(
             map_size, // 将分布结果按照地图大小转换为二维数组
             substance_dist

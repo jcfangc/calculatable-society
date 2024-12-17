@@ -5,7 +5,7 @@ use std::fmt;
 
 /// `PreferenceValue` 结构体，用于表示一个在 0 到 1 之间的偏好值
 #[derive(Debug, Clone, Copy, Serialize)]
-pub struct PreferenceValue {
+pub(crate) struct PreferenceValue {
     value: f64,
 }
 
@@ -20,7 +20,7 @@ impl PreferenceValue {
     /// ### 返回值
     /// 返回一个 `Result<Self, PreferenceValueError>`，其中 `Self` 是成功构造的 `PreferenceValue` 实例，
     /// `PreferenceValueError` 是验证失败时的错误类型。
-    pub fn try_new(value: f64) -> Result<Self, PreferenceValueError> {
+    pub(crate) fn try_new(value: f64) -> Result<Self, PreferenceValueError> {
         if value >= 0.0 && value <= 1.0 {
             Ok(PreferenceValue { value })
         } else {
@@ -30,7 +30,7 @@ impl PreferenceValue {
     }
 
     /// 获取偏好值
-    pub fn get_value(&self) -> f64 {
+    pub(crate) fn get_value(&self) -> f64 {
         self.value
     }
 }
@@ -53,12 +53,12 @@ impl fmt::Display for PreferenceValue {
     }
 }
 
-pub mod error_handling {
+pub(crate) mod error_handling {
     use std::fmt;
 
     /// `PreferenceValueError` 枚举，用于表示构造 `PreferenceValue` 时的错误类型
     #[derive(Debug)]
-    pub enum PreferenceValueError {
+    pub(crate) enum PreferenceValueError {
         OutOfRange,
     }
 

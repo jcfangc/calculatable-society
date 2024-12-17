@@ -1,12 +1,13 @@
-﻿pub mod t_noise_generatable;
-pub mod t_statistical;
+﻿pub(crate) mod t_indexed;
+pub(crate) mod t_noise_generatable;
+pub(crate) mod t_statistical;
 
-pub mod coordinate;
-pub mod coordinate_shift;
-pub mod diffusion_engine;
-pub mod hexagon;
-pub mod landscape;
-pub mod map_size;
-pub mod noise_params;
-pub mod potential;
-pub mod subtance_distribution;
+pub(crate) mod coordinate;
+pub(crate) mod coordinate_shift;
+pub(crate) mod diffuse_info;
+pub(crate) mod hexagon;
+pub(crate) mod landscape;
+pub(crate) mod map_size;
+pub(crate) mod noise_params;
+pub(crate) mod potential;
+pub(crate) mod subtance_distribution;

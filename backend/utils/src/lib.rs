@@ -10,13 +10,13 @@ mod middleware {
 // Types 模块: 封装基础类型，便于全局使用
 mod types {
     // Types 模块封装基础类型，例如 ID、UUID、时间戳等，统一管理类型。
-    // 例如: pub struct UserId(pub u32);
+    // 例如: pub(crate) struct UserId(pub(crate) u32);
     // 在项目中通过定义新类型来区分不同用途的基础类型，增强代码的可读性和安全性。
-    // 例如: pub struct Timestamp(pub i64);
+    // 例如: pub(crate) struct Timestamp(pub(crate) i64);
 }
 
 // Macros 模块: 定义全局宏规则，简化代码编写
-pub mod macros {
+pub(crate) mod macros {
 
     // Macros 模块用于定义全局宏规则，方便在项目中复用代码片段，减少重复代码。
     // 可以定义一些通用的宏，例如自动生成日志记录、统一错误处理等。
@@ -29,7 +29,7 @@ pub mod macros {
     /// ```
     /// enum_map! {
     ///     #[derive(Debug, PartialEq, Eq, Hash)] // 可以在这里添加需要的额外属性
-    ///     pub EnumName => ValueType {
+    ///     pub(crate) EnumName => ValueType {
     ///         Key1 => value_fn1,
     ///         Key2 => value_fn2,
     ///         Key3 => value_fn3,
@@ -50,7 +50,7 @@ pub mod macros {
     ///
     /// ```rust
     /// enum_map! {
-    ///     pub ExampleEnum => i32 {
+    ///     pub(crate) ExampleEnum => i32 {
     ///         A => || 1,
     ///         B => || 2,
     ///         C => || 3,

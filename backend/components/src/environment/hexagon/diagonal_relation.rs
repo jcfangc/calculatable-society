@@ -2,8 +2,8 @@
 use crate::environment::hexagon::t_hexa_relational::HexaRelational;
 use std::collections::HashMap;
 
-#[derive(Clone, Copy, Eq, PartialEq, Hash)]
-pub enum DiagonalRelation {
+#[derive(Clone, Copy, Eq, PartialEq, Hash, Debug)]
+pub(crate) enum DiagonalRelation {
     Degree30,
     Degree90,
     Degree150,

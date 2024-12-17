@@ -3,7 +3,7 @@ use utils::enum_map;
 
 enum_map! {
     #[derive(Clone, Copy)]
-    pub Property => PropertyParam {
+    pub(crate) Property => PropertyParam {
         Flammable => || PropertyParam::new(1,1),        // 可燃性
         Toxic => || PropertyParam::new(2,2),            // 有毒性
         Reactive => || PropertyParam::new(3,3),         // 反应性
@@ -43,7 +43,7 @@ mod service {
 }
 
 // Repository 模块: 负责与数据库的交互，执行数据的增删改查操作
-pub mod repository {
+pub(crate) mod repository {
     use super::model::PropertyModel;
     use super::Property;
     use context::db::context::DatabaseContext;
@@ -52,7 +52,7 @@ pub mod repository {
     use std::collections::HashMap;
 
     /// 根据 `resource_numerator` 和 `resource_dominator` 从数据库获取 `PropertyModel`
-    pub async fn get_properties_by_numerator_and_dominator(
+    pub(crate) async fn get_properties_by_numerator_and_dominator(
         resource_numerator: i32,
         resource_dominator: i32,
     ) -> Result<HashMap<Property, f64>, Error> {
@@ -94,27 +94,27 @@ mod model {
     use std::collections::HashMap;
 
     #[derive(FromRow)]
-    pub struct PropertyModel {
-        pub resource_numerator: i32,
-        pub resource_dominator: i32,
-        pub flammable: f64,
-        pub toxic: f64,
-        pub reactive: f64,
-        pub corrosive: f64,
-        pub oxidizer: f64,
-        pub acid_base: f64,
-        pub phase: f64,
-        pub conductive: f64,
-        pub magnetic: f64,
-        pub brittle: f64,
-        pub malleable: f64,
-        pub elastic: f64,
-        pub transparent: f64,
+    pub(crate) struct PropertyModel {
+        pub(crate) resource_numerator: i32,
+        pub(crate) resource_dominator: i32,
+        pub(crate) flammable: f64,
+        pub(crate) toxic: f64,
+        pub(crate) reactive: f64,
+        pub(crate) corrosive: f64,
+        pub(crate) oxidizer: f64,
+        pub(crate) acid_base: f64,
+        pub(crate) phase: f64,
+        pub(crate) conductive: f64,
+        pub(crate) magnetic: f64,
+        pub(crate) brittle: f64,
+        pub(crate) malleable: f64,
+        pub(crate) elastic: f64,
+        pub(crate) transparent: f64,
     }
 
     impl PropertyModel {
         /// 将 `PropertyModel` 转换为 `HashMap<Property, f64>`
-        pub fn to_map(&self) -> HashMap<Property, f64> {
+        pub(crate) fn to_map(&self) -> HashMap<Property, f64> {
             let mut map = HashMap::new();
             map.insert(Property::Flammable, self.flammable);
             map.insert(Property::Toxic, self.toxic);
@@ -148,11 +148,11 @@ mod types {
     /// - `environment_frequency_factor`: 环境频率因子（c），用于根据环境影响动态调整频率
     /// - `environment_phase_factor`: 环境相位因子（d），用于根据环境影响动态调整相位
     #[derive(Debug, Copy, Clone, PartialEq, Eq)]
-    pub struct PropertyParam {
-        pub frequency_constant: isize, // 频率常量 a
-        pub phase_constant: isize,     // 相位常量 b
-        pub frequency_offset: isize,   // 环境频率因子 c
-        pub phase_offset: isize,       // 环境相位因子 d
+    pub(crate) struct PropertyParam {
+        pub(crate) frequency_constant: isize, // 频率常量 a
+        pub(crate) phase_constant: isize,     // 相位常量 b
+        pub(crate) frequency_offset: isize,   // 环境频率因子 c
+        pub(crate) phase_offset: isize,       // 环境相位因子 d
     }
 
     impl PropertyParam {
@@ -169,7 +169,7 @@ mod types {
         /// ```
         /// let property = PropertyParam::new(1, 0);
         /// ```
-        pub fn new(frequency_constant: isize, phase_constant: isize) -> Self {
+        pub(crate) fn new(frequency_constant: isize, phase_constant: isize) -> Self {
             PropertyParam {
                 frequency_constant,
                 phase_constant,
@@ -190,7 +190,7 @@ mod types {
         /// ```
         /// let property = PropertyParam::new(1, 0).with_env_frequency(2);
         /// ```
-        pub fn with_frequency_offset(mut self, env_frequency: isize) -> Self {
+        pub(crate) fn with_frequency_offset(mut self, env_frequency: isize) -> Self {
             self.frequency_offset = env_frequency;
             return self;
         }
@@ -207,7 +207,7 @@ mod types {
         /// ```
         /// let property = PropertyParam::new(1, 0).with_env_phase(0);
         /// ```
-        pub fn with_phase_offset(mut self, env_phase: isize) -> Self {
+        pub(crate) fn with_phase_offset(mut self, env_phase: isize) -> Self {
             self.phase_offset = env_phase;
             return self;
         }
@@ -229,7 +229,7 @@ mod types {
         /// - `θ = ResourceTypeCoefficient * π`
         /// - `a` 和 `b` 为基础频率和相位常量
         /// - `c` 和 `d` 为环境频率因子和相位因子
-        pub fn calculate(&self, coefficient: &SubtanceType) -> f64 {
+        pub(crate) fn calculate(&self, coefficient: &SubtanceType) -> f64 {
             // 计算 θ = 资源类型系数 × π
             let theta = coefficient.subtance_type.to_f64().unwrap() * PI;
 

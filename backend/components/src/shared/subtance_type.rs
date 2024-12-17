@@ -9,12 +9,12 @@ const LOWER_BOUND: Ratio<usize> = Ratio::new_raw(0, 1);
 const UPPER_BOUND: Ratio<usize> = Ratio::new_raw(2, 1);
 
 #[derive(Debug, Clone, Copy, Hash, Eq, PartialEq, Serialize)]
-pub struct SubstanceType {
-    pub ratio: Ratio<usize>,
+pub(crate) struct SubstanceType {
+    pub(crate) ratio: Ratio<usize>,
 }
 
 impl SubstanceType {
-    pub fn try_new(numerator: usize, denominator: usize) -> Result<Self, SubtanceTypeError> {
+    pub(crate) fn try_new(numerator: usize, denominator: usize) -> Result<Self, SubtanceTypeError> {
         if denominator == 0 {
             return Err(SubtanceTypeError::ZeroDenominator);
         }
@@ -30,7 +30,7 @@ impl SubstanceType {
         })
     }
 
-    pub fn property_calculate(
+    pub(crate) fn property_calculate(
         &self,
         property: Property,
         frequency_offset: Option<isize>,
@@ -62,12 +62,12 @@ impl fmt::Display for SubstanceType {
     }
 }
 
-pub mod error_handling {
+pub(crate) mod error_handling {
     use super::{LOWER_BOUND, UPPER_BOUND};
     use std::fmt;
 
     #[derive(Debug)]
-    pub enum SubtanceTypeError {
+    pub(crate) enum SubtanceTypeError {
         ZeroDenominator,
         OutOfRange,
     }

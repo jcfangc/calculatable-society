@@ -1,8 +1,14 @@
-﻿// use crate::environment::diffusion_engine::DiffusionEngine;
-// use crate::environment::env_dynamic::t_env_dynamic::EnvDynamic;
+﻿use crate::environment::coordinate::Coordinate;
+use crate::environment::diffuse_info::DiffuseInfo;
+use crate::environment::hexagon::hex_block::HexBlock;
 use crate::environment::hexagon::hex_unit::HexUnit;
+use crate::environment::hexagon::indexed_unit_change::IndexedUnitChange;
+use crate::environment::hexagon::neighbour_relation::NeighbourRelation;
+use crate::environment::hexagon::unit_change::UnitChange;
 use crate::environment::map_size::MapSize;
 use crate::environment::noise_params::NoiseParams;
+use crate::environment::potential::Potential;
+use crate::environment::t_indexed::Indexed;
 use crate::environment::t_noise_generatable::NoiseGeneratable;
 use crate::environment::t_statistical::Statistical;
 use crate::shared::subtance_type::SubstanceType;
@@ -10,12 +16,17 @@ use ndarray::{Array2, Zip};
 use noise::{NoiseFn, OpenSimplex};
 use rayon::prelude::*;
 use serde::Serialize;
+use std::array;
+use std::{
+    collections::HashMap,
+    hash::{Hash, Hasher},
+};
 use tracing::instrument;
 
 const ENLARGE_FACTOR: usize = 255;
 
-#[derive(Debug, Clone, Serialize, PartialEq, Eq, Hash)]
-pub struct SubstanceDistribution {
+#[derive(Debug, Clone, Serialize, Eq)]
+pub(crate) struct SubstanceDistribution {
     substance_type: SubstanceType,
     distribution: Array2<HexUnit>,
     noise_params: NoiseParams,
@@ -23,7 +34,7 @@ pub struct SubstanceDistribution {
 
 impl SubstanceDistribution {
     #[instrument(skip_all)]
-    pub fn new(
+    pub(crate) fn new(
         substance_type: SubstanceType,
         map_size: MapSize,
         noise_params: Option<NoiseParams>,
@@ -38,19 +49,187 @@ impl SubstanceDistribution {
         }
     }
 
-    pub fn substance_type(&self) -> &SubstanceType {
+    pub(crate) fn substance_type(&self) -> &SubstanceType {
         &self.substance_type
     }
 
-    pub fn distribution(&self) -> &Array2<HexUnit> {
+    pub(crate) fn distribution(&self) -> &Array2<HexUnit> {
         &self.distribution
     }
 
-    pub fn noise_params(&self) -> &NoiseParams {
+    pub(crate) fn noise_params(&self) -> &NoiseParams {
         &self.noise_params
     }
 
-    pub fn diffuse(&mut self) {}
+    /// 对整个网格执行扩散逻辑的主函数。
+    /// 1. 使用 `compute_changes` 并行计算所有单元格及其邻居的变化量。
+    /// 2. 使用 `apply_changes` 串行地将变化量应用到分布中，从而更新每个单元格的状态。
+    pub(crate) fn diffuse(&mut self, now_potential: &Potential) {
+        // 1. 并行计算变化量：获取每个格子和其邻居的变化结果。
+        let changes = self.compute_changes(now_potential);
+
+        // 2. 串行应用变化量：将变化写入 self.distribution 中，完成分布的更新。
+        self.apply_changes(changes);
+    }
+
+    /// 并行计算所有单元格及其邻居的变化量。
+    ///
+    /// 返回值是一个 `Vec<(IndexedUnitChange, [IndexedUnitChange; 6])>`:
+    /// - `IndexedUnitChange`：表示中心单元格的变化量以及其行列坐标。
+    /// - `[IndexedUnitChange; 6]`：表示该中心格子6个邻居的变化量（固定数量），
+    ///   其中每个 `IndexedUnitChange` 中也包含行列坐标和变化信息。
+    ///
+    /// 整个过程：
+    /// - 使用 `indexed_iter()` 获取分布中的每个单元格及其索引 `(row_index, col_index)`。
+    /// - `par_bridge()` 将普通迭代器转换为并行迭代器，在多核环境下并行处理每个格子。
+    /// - 对每个单元格构造 `HexBlock<DiffuseInfo>`（中心+邻居），调用 `old_unit.diffuse(...)` 获得 `HexBlock<UnitChange>`.
+    /// - 将结果组装为 `(IndexedUnitChange, [IndexedUnitChange; 6])` 返回。
+    fn compute_changes(
+        &self,
+        now_potential: &Potential,
+    ) -> Vec<(IndexedUnitChange, [IndexedUnitChange; 6])> {
+        self.distribution
+            .indexed_iter()
+            .par_bridge() // 并行化处理每个单元格
+            .map(|((row_index, col_index), old_unit)| {
+                // 为当前单元格构造扩散所需的上下文信息块
+                let (block_of_info, relations_map) =
+                    self.build_hex_block_of_info(row_index, col_index, now_potential, old_unit);
+
+                // 调用当前单元格的扩散方法，得到中心和邻居的变化量（HexBlock<UnitChange>）
+                let block_of_change = old_unit.diffuse(&block_of_info);
+
+                // 构建中心格子的变化信息
+                let center_change =
+                    IndexedUnitChange::new(row_index, col_index, *block_of_change.center());
+
+                // 将邻居变化量从 HashMap 转换为一个固定长度数组 [IndexedUnitChange; 6]
+                // 我们假定有且仅有6个邻居，顺序由迭代枚举 (enumerate) 来保持一致。
+                let neighbour_changes: [IndexedUnitChange; 6] = array::from_fn(|i| {
+                    let (relation, unit_change) = block_of_change
+                        .neighbors()
+                        .iter()
+                        .nth(i) // 使用索引 i 获取第 i 个元素
+                        .expect("邻居关系缺失！");
+                    let neighbour_coord = relations_map.get(relation).expect("邻居关系缺失！");
+                    IndexedUnitChange::new(neighbour_coord.y(), neighbour_coord.x(), *unit_change)
+                });
+
+                // 返回中心变化和6个邻居变化
+                (center_change, neighbour_changes)
+            })
+            .collect()
+    }
+
+    /// 根据给定的行列索引和当前势能，构建包含中心和邻居信息的 HexBlock<DiffuseInfo>。
+    ///
+    /// 返回：
+    /// - `HexBlock<DiffuseInfo>`：中心单元+邻居单元的势能和状态信息构成的上下文块，用于扩散计算。
+    /// - `HashMap<NeighbourRelation, Coordinate>`：邻居关系到坐标的映射表，供后续获取邻居坐标使用。
+    fn build_hex_block_of_info(
+        &self,
+        row_index: usize,
+        col_index: usize,
+        now_potential: &Potential,
+        old_unit: &HexUnit,
+    ) -> (
+        HexBlock<DiffuseInfo>,
+        HashMap<NeighbourRelation, Coordinate>,
+    ) {
+        // 当前格子的坐标
+        let current_coord = Coordinate::new(row_index, col_index);
+
+        // 获取邻居关系与坐标的映射表（如 Relation::Degree60 -> (row, col)）
+        let relations_map = current_coord.get_relations_map::<NeighbourRelation>();
+
+        // 构建邻居单元的 DiffuseInfo Map
+        // DiffuseInfo 包含邻居单元的状态和它的势能
+        let neighbors_map: HashMap<NeighbourRelation, DiffuseInfo> = relations_map
+            .iter()
+            .map(|(relation, neighbour_coord)| {
+                // 获取邻居单元格状态
+                let neighbour_unit = self
+                    .distribution
+                    .get([neighbour_coord.y(), neighbour_coord.x()])
+                    .expect("邻居单元格越界");
+
+                // 获取邻居单元的势能值
+                let neighbour_potential = now_potential
+                    .distribution()
+                    .get([neighbour_coord.y(), neighbour_coord.x()])
+                    .expect("邻居势能分布越界");
+
+                // 构造邻居的 DiffuseInfo
+                (
+                    *relation,
+                    DiffuseInfo::new(*neighbour_unit, *neighbour_potential),
+                )
+            })
+            .collect();
+
+        // 中心单元的势能值
+        let center_potential = now_potential
+            .distribution()
+            .get([row_index, col_index])
+            .expect("中心单元势能分布越界");
+        let center_info = DiffuseInfo::new(*old_unit, *center_potential);
+
+        // 构建HexBlock：由中心信息和邻居信息共同组成扩散所需的上下文
+        let block_of_info = HexBlock::new(center_info, neighbors_map);
+
+        (block_of_info, relations_map)
+    }
+
+    /// 将并行计算得到的变化量应用到 distribution 上，从而完成对所有单元格状态的更新。
+    ///
+    /// 参数：
+    /// - `changes`: 来自 `compute_changes` 的返回值，一个包含多组 (中心变化, 邻居变化数组) 的列表。
+    ///
+    /// 流程：
+    /// 1. 使用 `fold` 将所有变化量汇总到 `change_dist` 数组中。
+    ///    `change_dist` 是一个与 `self.distribution` 同尺寸的二维数组，每个元素是 `UnitChange` 的累积。
+    /// 2. 遍历 `change_dist` 与 `self.distribution`，将累积的变化量应用到实际的单元格中。
+    fn apply_changes(&mut self, changes: Vec<(IndexedUnitChange, [IndexedUnitChange; 6])>) {
+        // 初始化 change_dist 为与 distribution 同大小的 UnitChange 数组，全部默认值
+        let change_dist = changes.iter().fold(
+            Array2::from_elem(self.distribution.dim(), UnitChange::default()),
+            |mut acc, (center_change, neighbour_changes)| {
+                // 应用中心变化量到 acc 中指定坐标处
+                acc[[center_change.y(), center_change.x()]]
+                    .accumulate_change(center_change.change());
+
+                // 应用邻居变化量
+                for nb_change in neighbour_changes.iter() {
+                    acc[[nb_change.y(), nb_change.x()]].accumulate_change(nb_change.change());
+                }
+
+                acc
+            },
+        );
+
+        // 将所有计算出的变更应用到 self.distribution
+        // 使用 Zip 将 distribution 与 change_dist 对应位置打包在一起
+        Zip::from(&mut self.distribution)
+            .and(&change_dist)
+            .for_each(|unit, change| {
+                // 每个单元格应用对应的变化量
+                unit.fit_change(*change);
+            });
+    }
+}
+
+// 自定义 Hash
+impl Hash for SubstanceDistribution {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.substance_type.hash(state); // 仅使用 substance_type 的哈希值
+    }
+}
+
+// 自定义 PartialEq
+impl PartialEq for SubstanceDistribution {
+    fn eq(&self, other: &Self) -> bool {
+        self.substance_type == other.substance_type // 仅比较 substance_type
+    }
 }
 
 impl NoiseGeneratable for SubstanceDistribution {

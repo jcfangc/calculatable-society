@@ -6,7 +6,7 @@ use std::sync::Arc;
 use std::time::Duration;
 
 // 数据库设置和初始化
-pub async fn create_pool(
+pub(crate) async fn create_pool(
     idle_timeout: Option<usize>, // 使用 Option 包装可选参数
     pool_size: Option<usize>,
     acquire_timeout: Option<usize>,

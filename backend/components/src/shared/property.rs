@@ -6,7 +6,7 @@ use utils::enum_map;
 
 enum_map! {
     #[derive(Clone, Copy)]
-    pub Property => PropertyParam {
+    pub(crate) Property => PropertyParam {
         // 摩尔质量
         MolarMass => || PropertyParam::new(1, 1, None, None),
         // 密度
@@ -25,7 +25,7 @@ impl Property {
     ///
     /// ### 返回值
     /// 返回计算后的属性值。
-    pub fn calculate_property(property: Property, substance_type: &SubstanceType) -> f64 {
+    pub(crate) fn calculate_property(property: Property, substance_type: &SubstanceType) -> f64 {
         // 从静态映射中获取对应的属性参数
         Property::to_map()
             .get(&property)

@@ -4,7 +4,7 @@ use std::ops::{AddAssign, DivAssign, MulAssign, SubAssign};
 
 // 自定义 "资源数量" 类型并进行验证
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub struct ResourceAmount {
+pub(crate) struct ResourceAmount {
     allocatable: usize, // 表示当前可分配的资源量
     investment: usize,  // 累积投资总量
     debt: usize,        // 累积债务总量
@@ -12,7 +12,7 @@ pub struct ResourceAmount {
 
 impl ResourceAmount {
     /// 构造函数，创建 `ResourceAmount` 实例
-    pub fn new(allocatable: usize, investment: usize, debt: usize) -> Self {
+    pub(crate) fn new(allocatable: usize, investment: usize, debt: usize) -> Self {
         ResourceAmount {
             allocatable,
             investment,
@@ -23,7 +23,7 @@ impl ResourceAmount {
     /// 初始化 `ResourceAmount` 实例
     ///
     /// 创建一个初始的 `ResourceAmount` 实例，所有字段都为 0。
-    pub fn init() -> Self {
+    pub(crate) fn init() -> Self {
         ResourceAmount {
             allocatable: 0,
             investment: 0,
@@ -32,7 +32,7 @@ impl ResourceAmount {
     }
 
     /// 最终设置完成的方法，用于结束链式调用
-    pub fn finalize(&mut self) {
+    pub(crate) fn finalize(&mut self) {
         // 这里可以执行一些最终的操作，比如打印日志等
     }
 }
@@ -78,7 +78,7 @@ impl DivAssign for ResourceAmount {
 }
 
 // 定义 allocatable 字段的相关行为
-pub trait AllocatableOperation {
+pub(crate) trait AllocatableOperation {
     fn get_allocatable(&self) -> usize;
     fn set_allocatable(&mut self, new_value: usize) -> &mut Self;
 }
@@ -95,7 +95,7 @@ impl AllocatableOperation for ResourceAmount {
 }
 
 // 定义 investment 字段的相关行为
-pub trait InvestmentOperation {
+pub(crate) trait InvestmentOperation {
     fn get_investment(&self) -> usize;
     fn set_investment(&mut self, new_value: usize) -> &mut Self;
 }
@@ -112,7 +112,7 @@ impl InvestmentOperation for ResourceAmount {
 }
 
 // 定义 debt 字段的相关行为
-pub trait DebtOperation {
+pub(crate) trait DebtOperation {
     fn get_debt(&self) -> usize;
     fn set_debt(&mut self, new_value: usize) -> &mut Self;
 }

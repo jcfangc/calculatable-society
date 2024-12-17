@@ -1,12 +1,14 @@
 ﻿use crate::environment::coordinate_shift::CoordinateShift;
 use crate::environment::hexagon::t_hexa_distanced::HexaDistanced;
 use crate::environment::hexagon::t_hexa_relational::HexaRelational;
-use crate::environment::map_size::MapSize;
+use crate::environment::t_indexed::Indexed;
+use crate::game_context::GAME_CONTEXT;
+use serde::Serialize;
 use std::collections::HashMap;
 use std::ops::{Add, Mul, Sub};
 
-#[derive(Clone, Copy, Eq, PartialEq, Hash)]
-pub struct Coordinate {
+#[derive(Clone, Copy, Eq, PartialEq, Hash, Debug, Serialize)]
+pub(crate) struct Coordinate {
     /// 行坐标
     y: usize,
     /// 列坐标
@@ -15,81 +17,74 @@ pub struct Coordinate {
 
 impl Coordinate {
     /// 创建一个新的坐标
-    pub fn new(y: usize, x: usize) -> Self {
+    pub(crate) fn new(y: usize, x: usize) -> Self {
         Self { y, x }
     }
 
-    /// 计算本坐标在指定方向上的新坐标
-    fn get_coordinate_shifted_by_relation<R>(
-        &self,
-        height_width: (usize, usize),
-        relation: R,
-    ) -> Self
-    where
-        R: HexaRelational,
-    {
-        // 获取方向的坐标偏移
-        let coordinate_shift = R::from_relation_to_coordinate_shift()[&relation];
-
-        // 计算新的 y 和 x 坐标，考虑宽高的环绕（模数）效果
-        let new_y =
-            (self.y as isize + coordinate_shift.dy()).rem_euclid(height_width.0 as isize) as usize;
-        let new_x =
-            (self.x as isize + coordinate_shift.dx()).rem_euclid(height_width.1 as isize) as usize;
-
-        // 返回新的坐标
-        Self::new(new_y, new_x)
+    /// 获取当前地图的宽高信息
+    fn get_map_size() -> (usize, usize) {
+        let global_context = GAME_CONTEXT.read().expect("未能获取读锁");
+        global_context
+            .map_size()
+            .expect("地图尺寸未在游戏上下文中设置")
+            .as_tuple()
     }
 
-    /// 获取几何关系对应的坐标
-    ///
+    /// 计算几何关系对应的坐标映射
     /// 该方法会根据传入的关系类型 `R` 返回一个包含各个方向对应坐标的映射表。
-    /// 目前，`R` 可能表示邻居关系或对角关系。
-    pub fn get_relations_map<R>(&self, height_width: (usize, usize)) -> HashMap<R, Coordinate>
+    pub(crate) fn get_relations_map<R>(&self) -> HashMap<R, Self>
     where
         R: HexaRelational,
     {
-        // 从关系类型 `R` 获取方向到坐标偏移的映射表
+        // 获取地图的宽高信息
+        let (height, width) = Self::get_map_size();
+
+        // 遍历方向与偏移量的映射，计算每个方向对应的新坐标
         R::from_relation_to_coordinate_shift()
             .iter()
-            .map(|(&relation, _)| {
-                // 对每个关系 (例如邻居或对角)，计算该方向上的新坐标
-                let relation_coordinate =
-                    Self::get_coordinate_shifted_by_relation(self, height_width, relation);
-                // 将关系和新坐标作为键值对加入到 HashMap 中
-                (relation, relation_coordinate)
+            .map(|(&relation, coordinate_shift)| {
+                // 计算新的 y 和 x 坐标，考虑宽高的环绕（模数）效果
+                let new_y =
+                    (self.y as isize + coordinate_shift.dy()).rem_euclid(height as isize) as usize;
+                let new_x =
+                    (self.x as isize + coordinate_shift.dx()).rem_euclid(width as isize) as usize;
+
+                // 返回方向与新的坐标
+                (relation, Self::new(new_y, new_x))
             })
-            .collect::<HashMap<R, Coordinate>>() // 收集所有键值对，生成最终的 HashMap
+            .collect()
     }
 
     /// 缩放坐标
-    pub fn scale(&self, scale: usize) -> Self {
+    pub(crate) fn scale(&self, scale: usize) -> Self {
         Self::new(self.y * scale, self.x * scale)
     }
 
     /// 带环绕效果的加法运算
-    fn add_wrapping(self, other: Self, map_size: &MapSize) -> Self {
+    fn add_wrapping(self, other: Self) -> Self {
+        let (height, width) = Self::get_map_size();
         Self {
-            y: (self.y + other.y) % map_size.height(),
-            x: (self.x + other.x) % map_size.width(),
+            y: (self.y + other.y) % height,
+            x: (self.x + other.x) % width,
         }
     }
+
     /// 带环绕效果的减法运算
-    fn sub_wrapping(self, other: Self, map_size: &MapSize) -> Self {
+    fn sub_wrapping(self, other: Self) -> Self {
+        let (height, width) = Self::get_map_size();
         Self {
-            y: ((self.y as isize - other.y as isize).rem_euclid(map_size.height() as isize))
-                as usize,
-            x: ((self.x as isize - other.x as isize).rem_euclid(map_size.width() as isize))
-                as usize,
+            y: ((self.y as isize - other.y as isize).rem_euclid(height as isize)) as usize,
+            x: ((self.x as isize - other.x as isize).rem_euclid(width as isize)) as usize,
         }
     }
 
-    pub fn x(&self) -> &usize {
-        &self.x
-    }
-
-    pub fn y(&self) -> &usize {
-        &self.y
+    /// 带环绕效果的乘法运算
+    fn mul_wrapping(self, scalar: usize) -> Self {
+        let (height, width) = Self::get_map_size();
+        Self {
+            y: (self.y * scalar) % height,
+            x: (self.x * scalar) % width,
+        }
     }
 }
 
@@ -108,41 +103,43 @@ impl HexaDistanced for Coordinate {
     }
 }
 
-impl Add<(Self, &MapSize)> for Coordinate {
+impl Add<Self> for Coordinate {
     type Output = Self;
 
-    fn add(self, (other, map_size): (Self, &MapSize)) -> Self {
-        self.add_wrapping(other, map_size)
+    fn add(self, other: Self) -> Self {
+        self.add_wrapping(other)
     }
 }
 
-impl Add<(CoordinateShift, &MapSize)> for Coordinate {
+impl Add<CoordinateShift> for Coordinate {
     type Output = Self;
 
-    fn add(self, (shift, map_size): (CoordinateShift, &MapSize)) -> Self {
+    fn add(self, shift: CoordinateShift) -> Self {
+        let (height, width) = Self::get_map_size();
         Self {
-            y: ((self.y as isize + shift.dy()).rem_euclid(map_size.height() as isize)) as usize,
-            x: ((self.x as isize + shift.dx()).rem_euclid(map_size.width() as isize)) as usize,
+            y: ((self.y as isize + shift.dy()).rem_euclid(height as isize)) as usize,
+            x: ((self.x as isize + shift.dx()).rem_euclid(width as isize)) as usize,
         }
     }
 }
 
-impl Sub<(CoordinateShift, &MapSize)> for Coordinate {
-    type Output = Self;
+impl Add<Coordinate> for CoordinateShift {
+    type Output = Coordinate;
 
-    fn sub(self, (shift, map_size): (CoordinateShift, &MapSize)) -> Self {
-        Self {
-            y: ((self.y as isize - shift.dy()).rem_euclid(map_size.height() as isize)) as usize,
-            x: ((self.x as isize - shift.dx()).rem_euclid(map_size.width() as isize)) as usize,
+    fn add(self, coord: Coordinate) -> Coordinate {
+        let (height, width) = Coordinate::get_map_size();
+        Coordinate {
+            y: ((coord.y as isize + self.dy()).rem_euclid(height as isize)) as usize,
+            x: ((coord.x as isize + self.dx()).rem_euclid(width as isize)) as usize,
         }
     }
 }
 
-impl Sub<(Self, &MapSize)> for Coordinate {
+impl Sub<Self> for Coordinate {
     type Output = Self;
 
-    fn sub(self, (other, map_size): (Self, &MapSize)) -> Self {
-        self.sub_wrapping(other, map_size)
+    fn sub(self, other: Self) -> Self {
+        self.sub_wrapping(other)
     }
 }
 
@@ -150,17 +147,16 @@ impl Mul<usize> for Coordinate {
     type Output = Self;
 
     fn mul(self, scalar: usize) -> Self {
-        Self {
-            y: self.y * scalar,
-            x: self.x * scalar,
-        }
+        self.mul_wrapping(scalar)
     }
 }
 
-impl Mul for Coordinate {
-    type Output = usize;
+impl Indexed for Coordinate {
+    fn y(&self) -> usize {
+        self.y
+    }
 
-    fn mul(self, other: Self) -> usize {
-        self.y * other.y + self.x * other.x
+    fn x(&self) -> usize {
+        self.x
     }
 }

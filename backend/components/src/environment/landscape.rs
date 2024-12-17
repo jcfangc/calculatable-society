@@ -1,21 +1,23 @@
 ﻿use crate::environment::potential::Potential;
 use crate::environment::{map_size::MapSize, subtance_distribution::SubstanceDistribution};
-use crate::shared::property::Property;
+use crate::game_context::GameContext;
 use ndarray::parallel::prelude::*;
-use ndarray::{Array2, Zip};
-use rayon::prelude::*;
 use serde::Serialize;
 use std::collections::HashSet;
 
 #[derive(Debug, Clone, Serialize)]
-pub struct Landscape {
+pub(crate) struct Landscape {
     map_size: MapSize,
     subtance_distributions: HashSet<SubstanceDistribution>,
     potential: Potential,
 }
 
 impl Landscape {
-    pub fn new(map_size: MapSize) -> Self {
+    pub(crate) fn new(map_size: MapSize) -> Self {
+        // 更新全局上下文中的 map_size
+        GameContext::update_global_map_size(map_size.clone());
+
+        // 创建新的 Landscape
         Self {
             map_size,
             subtance_distributions: HashSet::new(),
@@ -23,19 +25,22 @@ impl Landscape {
         }
     }
 
-    pub fn map_size(&self) -> &MapSize {
+    pub(crate) fn map_size(&self) -> &MapSize {
         &self.map_size
     }
 
-    pub fn subtance_distributions(&self) -> &HashSet<SubstanceDistribution> {
+    pub(crate) fn subtance_distributions(&self) -> &HashSet<SubstanceDistribution> {
         &self.subtance_distributions
     }
 
-    pub fn potential(&self) -> &Array2<f64> {
-        &self.potential.distribution()
+    pub(crate) fn potential(&self) -> &Potential {
+        &self.potential
     }
 
-    pub fn add_resource_distribution(&mut self, subtance_distribution: SubstanceDistribution) {
+    pub(crate) fn add_resource_distribution(
+        &mut self,
+        subtance_distribution: SubstanceDistribution,
+    ) {
         // 检查集合中是否已存在相同的 `resource_type`
         let exists = self
             .subtance_distributions
@@ -58,43 +63,40 @@ impl Landscape {
         }
     }
 
-    pub fn update_potential_distribution(&mut self) {
+    pub(crate) fn update_potential_distribution(&mut self) {
         // 计算势能分布
         self.potential
             .update(&self.subtance_distributions, self.map_size.as_tuple());
     }
 
-    pub fn diffuse(&mut self) {
-        // 计算扩散后的新状态
-        let updated_distributions = self.calculate_diffusion();
-
+    pub(crate) fn diffuse(&mut self) {
         // 更新当前状态
-        self.update_distributions(updated_distributions);
-    }
-
-    /// 计算扩散后的新物质分布状态
-    fn calculate_diffusion(&self) -> Vec<SubstanceDistribution> {
-        // 将 HashSet 转换为 Vec
-        let substance_vec: Vec<SubstanceDistribution> =
-            self.subtance_distributions.par_iter().cloned().collect();
-
-        // 并行遍历物质分布并计算新状态
-        substance_vec
-            .into_par_iter()
-            .map(|mut substance_dist| {
-                // 调用物质分布层的扩散逻辑
-                substance_dist.diffuse();
-                substance_dist
-            })
-            .collect()
+        self.update_distributions(None);
     }
 
     /// 更新物质分布集合
-    fn update_distributions(&mut self, updated_distributions: Vec<SubstanceDistribution>) {
-        // 清空当前 HashSet
-        self.subtance_distributions.clear();
+    fn update_distributions(
+        &mut self,
+        updated_distributions: Option<HashSet<SubstanceDistribution>>,
+    ) {
+        if let Some(distributions) = updated_distributions {
+            // 如果提供了更新的分布，直接使用
+            self.subtance_distributions = distributions;
+        } else {
+            // 如果没有提供，调用 `calculate_diffusion` 进行计算
+            self.subtance_distributions = self.calculate_diffusion();
+        }
+    }
 
-        // 将更新后的分布加入 HashSet
-        self.subtance_distributions = updated_distributions.into_iter().collect();
+    /// 计算扩散后的新物质分布状态
+    fn calculate_diffusion(&self) -> HashSet<SubstanceDistribution> {
+        self.subtance_distributions
+            .par_iter()
+            .map(|substance_dist| {
+                let mut updated = substance_dist.clone();
+                updated.diffuse(self.potential());
+                updated
+            })
+            .collect() // Rayon 的并行收集可以直接构建 HashSet
     }
 }

@@ -10,11 +10,11 @@ use std::f64::{consts::PI, EPSILON};
 /// - `environment_frequency_factor`: 环境频率因子（c），用于根据环境影响动态调整频率
 /// - `environment_phase_factor`: 环境相位因子（d），用于根据环境影响动态调整相位
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub struct PropertyParam {
-    pub frequency_constant: isize, // 频率常量 a
-    pub phase_constant: isize,     // 相位常量 b
-    pub frequency_offset: isize,   // 环境频率因子 c
-    pub phase_offset: isize,       // 环境相位因子 d
+pub(crate) struct PropertyParam {
+    pub(crate) frequency_constant: isize, // 频率常量 a
+    pub(crate) phase_constant: isize,     // 相位常量 b
+    pub(crate) frequency_offset: isize,   // 环境频率因子 c
+    pub(crate) phase_offset: isize,       // 环境相位因子 d
 }
 
 impl PropertyParam {
@@ -31,7 +31,7 @@ impl PropertyParam {
     /// ```
     /// let property = PropertyParam::new(1, 0);
     /// ```
-    pub fn new(
+    pub(crate) fn new(
         frequency_constant: isize,
         phase_constant: isize,
         frequency_offset: Option<isize>,
@@ -57,7 +57,7 @@ impl PropertyParam {
     /// ```
     /// let property = PropertyParam::new(1, 0).with_env_frequency(2);
     /// ```
-    pub fn with_frequency_offset(mut self, env_frequency: isize) -> Self {
+    pub(crate) fn with_frequency_offset(mut self, env_frequency: isize) -> Self {
         self.frequency_offset = env_frequency;
         return self;
     }
@@ -74,7 +74,7 @@ impl PropertyParam {
     /// ```
     /// let property = PropertyParam::new(1, 0).with_env_phase(0);
     /// ```
-    pub fn with_phase_offset(mut self, env_phase: isize) -> Self {
+    pub(crate) fn with_phase_offset(mut self, env_phase: isize) -> Self {
         self.phase_offset = env_phase;
         return self;
     }
@@ -96,7 +96,7 @@ impl PropertyParam {
     /// - `θ = SubstanceType * π`
     /// - `a` 和 `b` 为基础频率和相位常量
     /// - `c` 和 `d` 为环境频率因子和相位因子
-    pub fn calculate(&self, st: &SubstanceType) -> f64 {
+    pub(crate) fn calculate(&self, st: &SubstanceType) -> f64 {
         // 计算 θ = 资源类型系数 × π
         let theta = st.ratio.to_f64().unwrap() * PI;
 

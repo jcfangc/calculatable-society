@@ -1,4 +1,4 @@
-﻿pub mod property;
-pub mod property_param;
-pub mod subtance;
-pub mod subtance_type;
+﻿pub(crate) mod property;
+pub(crate) mod property_param;
+pub(crate) mod subtance;
+pub(crate) mod subtance_type;

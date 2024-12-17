@@ -8,29 +8,29 @@ type Degrees = f64;
 
 /// 方向对应的坐标偏移量
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize)]
-pub struct CoordinateShift {
+pub(crate) struct CoordinateShift {
     dy: isize,
     dx: isize,
 }
 
 impl CoordinateShift {
     /// 创建一个新的坐标偏移量
-    pub fn new(dy: isize, dx: isize) -> Self {
+    pub(crate) fn new(dy: isize, dx: isize) -> Self {
         Self { dy, dx }
     }
 
     /// 获取坐标偏移量的相反方向
-    pub fn reverse(&self) -> Self {
+    pub(crate) fn reverse(&self) -> Self {
         Self::new(-self.dy, -self.dx)
     }
 
     /// 获取 dy 坐标偏移量
-    pub fn dy(&self) -> isize {
+    pub(crate) fn dy(&self) -> isize {
         self.dy
     }
 
     /// 获取 dx 坐标偏移量
-    pub fn dx(&self) -> isize {
+    pub(crate) fn dx(&self) -> isize {
         self.dx
     }
 
@@ -47,7 +47,7 @@ impl CoordinateShift {
     /// - 返回值为正数时，表示从 `self` 到 `other` 为逆时针旋转（正方向）。
     /// - 返回值为负数时，表示从 `self` 到 `other` 为顺时针旋转（负方向）。
     /// - 返回值为 0 时，表示两个向量方向相同或重合。
-    pub fn angle_between(self, other: Self) -> Radians {
+    pub(crate) fn angle_between(self, other: Self) -> Radians {
         let dot = (self.dx * other.dx + self.dy * other.dy) as f64;
         let cross = (self.dx * other.dy - self.dy * other.dx) as f64;
         let angle = cross.atan2(dot);
@@ -55,12 +55,12 @@ impl CoordinateShift {
     }
 
     /// 将弧度转换为角度
-    pub fn to_degrees(radians: Radians) -> Degrees {
+    pub(crate) fn to_degrees(radians: Radians) -> Degrees {
         radians * (180.0 / PI)
     }
 
     /// 将角度转换为弧度
-    pub fn to_radians(degrees: Degrees) -> Radians {
+    pub(crate) fn to_radians(degrees: Degrees) -> Radians {
         degrees * (PI / 180.0)
     }
 
@@ -72,7 +72,7 @@ impl CoordinateShift {
     ///
     /// ### 返回值
     /// 返回值为 `usize` 类型，表示非负整数的步数。
-    pub fn magnitude(&self) -> usize {
+    pub(crate) fn magnitude(&self) -> usize {
         let dx = self.dx.abs() as usize;
         let dy = self.dy.abs() as usize;
         let dz = (-(self.dx + self.dy)).abs() as usize; // 第三个方向，用于六边形坐标系统

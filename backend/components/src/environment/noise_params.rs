@@ -6,24 +6,24 @@ use std::hash::{Hash, Hasher};
 const DEFAULT_SCALE_RANGE: std::ops::Range<f64> = 1.0..10.0;
 
 #[derive(Debug, Clone, Serialize)]
-pub struct NoiseParams {
-    pub seed: u32,
-    pub scale: f64,
+pub(crate) struct NoiseParams {
+    pub(crate) seed: u32,
+    pub(crate) scale: f64,
 }
 
 impl NoiseParams {
-    pub fn new(seed: Option<u32>, scale: Option<f64>) -> Self {
+    pub(crate) fn new(seed: Option<u32>, scale: Option<f64>) -> Self {
         Self {
             seed: seed.unwrap_or_else(Self::default_seed),
             scale: scale.unwrap_or_else(Self::default_scale),
         }
     }
 
-    pub fn default_seed() -> u32 {
+    pub(crate) fn default_seed() -> u32 {
         rand::thread_rng().gen::<u32>()
     }
 
-    pub fn default_scale() -> f64 {
+    pub(crate) fn default_scale() -> f64 {
         rand::thread_rng().gen_range(DEFAULT_SCALE_RANGE)
     }
 }

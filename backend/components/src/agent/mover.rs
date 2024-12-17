@@ -5,19 +5,19 @@ use std::fmt;
 
 // 移动结构，表示一个包含偏移量的移动操作
 #[derive(Debug, Serialize)]
-pub struct Mover {
+pub(crate) struct Mover {
     location: Location,
     dx: isize,
     dy: isize,
 }
 
 impl Mover {
-    pub fn new(location: Location, dx: isize, dy: isize) -> Self {
+    pub(crate) fn new(location: Location, dx: isize, dy: isize) -> Self {
         Mover { location, dx, dy }
     }
 
     // 应用移动到指定地图，并返回更新后的位置，支持链式调用
-    pub fn on(mut self, map: &Landscape) -> Location {
+    pub(crate) fn on(mut self, map: &Landscape) -> Location {
         let new_x =
             (self.location.x() as isize + self.dx).rem_euclid(map.map_size().width() as isize);
         let new_y =
@@ -29,19 +29,19 @@ impl Mover {
     }
 
     // 不可变借用访问方法
-    pub fn get_ref(&self) -> &Self {
+    pub(crate) fn get_ref(&self) -> &Self {
         self
     }
 
-    pub fn location(&self) -> &Location {
+    pub(crate) fn location(&self) -> &Location {
         self.location.get_ref()
     }
 
-    pub fn dx(&self) -> isize {
+    pub(crate) fn dx(&self) -> isize {
         self.dx
     }
 
-    pub fn dy(&self) -> isize {
+    pub(crate) fn dy(&self) -> isize {
         self.dy
     }
 }

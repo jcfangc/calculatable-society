@@ -2,7 +2,7 @@
 use thiserror::Error;
 
 #[derive(Error, Debug)]
-pub enum ContextError {
+pub(crate) enum ContextError {
     // #[error("数据库连接池初始化失败")]
     // DBInitError(#[from] SqlxError),
 
