@@ -4,12 +4,12 @@ use std::collections::HashMap;
 
 #[derive(Clone, Copy, Eq, PartialEq, Hash, Debug)]
 pub(crate) enum NeighbourRelation {
-    Degree0,
-    Degree60,
-    Degree120,
-    Degree180,
-    Degree240,
-    Degree300,
+    Degree0 = 0,
+    Degree60 = 60,
+    Degree120 = 120,
+    Degree180 = 180,
+    Degree240 = 240,
+    Degree300 = 300,
 }
 
 impl HexaRelational for NeighbourRelation {

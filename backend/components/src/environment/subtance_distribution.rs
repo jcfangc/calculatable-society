@@ -97,14 +97,14 @@ impl SubstanceDistribution {
                     self.build_hex_block_of_info(row_index, col_index, now_potential, old_unit);
 
                 // 调用当前单元格的扩散方法，得到中心和邻居的变化量（HexBlock<UnitChange>）
-                let block_of_change = old_unit.diffuse(&block_of_info);
+                let block_of_change = old_unit.diffuse(self.substance_type, &block_of_info);
 
                 // 构建中心格子的变化信息
                 let center_change =
                     IndexedUnitChange::new(row_index, col_index, *block_of_change.center());
 
                 // 将邻居变化量从 HashMap 转换为一个固定长度数组 [IndexedUnitChange; 6]
-                // 我们假定有且仅有6个邻居，顺序由迭代枚举 (enumerate) 来保持一致。
+                // 我们假定有且仅有6个邻居，使用 from_fn 创建数组
                 let neighbour_changes: [IndexedUnitChange; 6] = array::from_fn(|i| {
                     let (relation, unit_change) = block_of_change
                         .neighbors()

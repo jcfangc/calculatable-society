@@ -2,7 +2,7 @@
 use crate::environment::hexagon::t_hexa_distanced::HexaDistanced;
 use crate::environment::hexagon::t_hexa_relational::HexaRelational;
 use crate::environment::t_indexed::Indexed;
-use crate::game_context::GAME_CONTEXT;
+use crate::game_context::GameContext;
 use serde::Serialize;
 use std::collections::HashMap;
 use std::ops::{Add, Mul, Sub};
@@ -21,15 +21,6 @@ impl Coordinate {
         Self { y, x }
     }
 
-    /// 获取当前地图的宽高信息
-    fn get_map_size() -> (usize, usize) {
-        let global_context = GAME_CONTEXT.read().expect("未能获取读锁");
-        global_context
-            .map_size()
-            .expect("地图尺寸未在游戏上下文中设置")
-            .as_tuple()
-    }
-
     /// 计算几何关系对应的坐标映射
     /// 该方法会根据传入的关系类型 `R` 返回一个包含各个方向对应坐标的映射表。
     pub(crate) fn get_relations_map<R>(&self) -> HashMap<R, Self>
@@ -37,7 +28,7 @@ impl Coordinate {
         R: HexaRelational,
     {
         // 获取地图的宽高信息
-        let (height, width) = Self::get_map_size();
+        let (height, width) = GameContext::get_map_size().as_tuple();
 
         // 遍历方向与偏移量的映射，计算每个方向对应的新坐标
         R::from_relation_to_coordinate_shift()
@@ -62,7 +53,7 @@ impl Coordinate {
 
     /// 带环绕效果的加法运算
     fn add_wrapping(self, other: Self) -> Self {
-        let (height, width) = Self::get_map_size();
+        let (height, width) = GameContext::get_map_size().as_tuple();
         Self {
             y: (self.y + other.y) % height,
             x: (self.x + other.x) % width,
@@ -71,7 +62,7 @@ impl Coordinate {
 
     /// 带环绕效果的减法运算
     fn sub_wrapping(self, other: Self) -> Self {
-        let (height, width) = Self::get_map_size();
+        let (height, width) = GameContext::get_map_size().as_tuple();
         Self {
             y: ((self.y as isize - other.y as isize).rem_euclid(height as isize)) as usize,
             x: ((self.x as isize - other.x as isize).rem_euclid(width as isize)) as usize,
@@ -80,7 +71,7 @@ impl Coordinate {
 
     /// 带环绕效果的乘法运算
     fn mul_wrapping(self, scalar: usize) -> Self {
-        let (height, width) = Self::get_map_size();
+        let (height, width) = GameContext::get_map_size().as_tuple();
         Self {
             y: (self.y * scalar) % height,
             x: (self.x * scalar) % width,
@@ -115,7 +106,7 @@ impl Add<CoordinateShift> for Coordinate {
     type Output = Self;
 
     fn add(self, shift: CoordinateShift) -> Self {
-        let (height, width) = Self::get_map_size();
+        let (height, width) = GameContext::get_map_size().as_tuple();
         Self {
             y: ((self.y as isize + shift.dy()).rem_euclid(height as isize)) as usize,
             x: ((self.x as isize + shift.dx()).rem_euclid(width as isize)) as usize,
@@ -127,7 +118,7 @@ impl Add<Coordinate> for CoordinateShift {
     type Output = Coordinate;
 
     fn add(self, coord: Coordinate) -> Coordinate {
-        let (height, width) = Coordinate::get_map_size();
+        let (height, width) = GameContext::get_map_size().as_tuple();
         Coordinate {
             y: ((coord.y as isize + self.dy()).rem_euclid(height as isize)) as usize,
             x: ((coord.x as isize + self.dx()).rem_euclid(width as isize)) as usize,

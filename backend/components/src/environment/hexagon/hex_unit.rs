@@ -1,7 +1,9 @@
 ﻿use crate::environment::coordinate_shift::CoordinateShift;
 use crate::environment::diffuse_info::DiffuseInfo;
 use crate::environment::hexagon::hex_block::HexBlock;
+use crate::environment::hexagon::neighbour_relation::NeighbourRelation;
 use crate::environment::hexagon::unit_change::UnitChange;
+use crate::shared::subtance_type::SubstanceType;
 use serde::Serialize;
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Copy, Serialize)]
@@ -46,7 +48,38 @@ impl HexUnit {
         self.movement = self.movement + unit_change.movement_change();
     }
 
-    pub(crate) fn diffuse(&self, block_info: &HexBlock<DiffuseInfo>) -> HexBlock<UnitChange> {}
+    pub(crate) fn diffuse(
+        &self,
+        subtance_type: SubstanceType,
+        block_info: &HexBlock<DiffuseInfo>,
+    ) -> HexBlock<UnitChange> {
+        let directions = [
+            (NeighbourRelation::Degree0, NeighbourRelation::Degree180),
+            (NeighbourRelation::Degree60, NeighbourRelation::Degree240),
+            (NeighbourRelation::Degree120, NeighbourRelation::Degree300),
+        ];
+
+        let reduced_potential: [(NeighbourRelation, f64); 3] = directions.map(|(dir_a, dir_b)| {
+            let potential_a = block_info
+                .neighbors()
+                .get(&dir_a)
+                .unwrap_or_else(|| panic!("{:?} 角度邻居不存在于信息块中", dir_a))
+                .potential();
+
+            let potential_b = block_info
+                .neighbors()
+                .get(&dir_b)
+                .unwrap_or_else(|| panic!("{:?} 角度邻居不存在于信息块中", dir_b))
+                .potential();
+
+            let delta = potential_a - potential_b;
+            if delta > 0.0 {
+                (dir_a, delta)
+            } else {
+                (dir_b, -delta)
+            }
+        });
+    }
 }
 
 impl Default for HexUnit {

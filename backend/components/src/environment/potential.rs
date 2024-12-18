@@ -1,4 +1,5 @@
 ﻿use crate::environment::subtance_distribution::SubstanceDistribution;
+use crate::game_context::GameContext;
 use crate::shared::property::Property;
 use ndarray::{parallel::prelude::*, Array2};
 use serde::Serialize;
@@ -80,13 +81,16 @@ impl Potential {
         // 用摩尔质量除以密度，得到一摩尔物质的体积（高度）
         let molar_height = molar_mass / density;
 
+        // 获取重力常数
+        let gravity_const = GameContext::get_gravity_const();
+
         // 将物质分布的每个网格单元的摩尔量乘以一摩尔物质的体积，得到势能分布
         Array2::from_shape_vec(
             map_size, // 将分布结果按照地图大小转换为二维数组
             substance_dist
                 .distribution()
                 .par_iter() // 并行遍历物质分布中的单元
-                .map(|hex_unit| hex_unit.mole() as f64 * molar_height) // 计算单元势能
+                .map(|hex_unit| hex_unit.mole() as f64 * molar_height * gravity_const) // 计算单元势能
                 .collect::<Vec<f64>>(), // 收集结果为向量
         )
         .expect("未能从向量创建势能分布") // 确保向量长度与地图形状匹配

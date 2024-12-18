@@ -1,14 +1,16 @@
 ﻿use crate::environment::map_size::MapSize;
 use once_cell::sync::Lazy;
 use std::sync::{Arc, RwLock};
+use std::sync::{PoisonError, RwLockReadGuard, RwLockWriteGuard};
+use thiserror::Error;
 use uuid::Uuid;
 
 /// 游戏上下文
 #[derive(Debug, Default)]
 pub struct GameContext {
-    map_size: Option<MapSize>, // 地图大小，可选
+    map_size: Option<MapSize>,     // 地图大小，可选
     civilization_id: Option<Uuid>, // 文明编号，使用 UUID
-                               // 其他可选字段...
+    gravity_const: Option<f64>,    // 重力常数
 }
 
 impl GameContext {
@@ -17,65 +19,102 @@ impl GameContext {
         Self {
             map_size: None,
             civilization_id: None,
+            gravity_const: None,
         }
     }
+}
 
-    /// 更新全局上下文中的地图大小
+// ========================================
+// 更新游戏上下文相关方法
+// ========================================
+impl GameContext {
+    /// 通用更新方法
+    fn update_global<F>(update_fn: F)
+    where
+        F: FnOnce(&mut GameContext),
+    {
+        let global_context = GAME_CONTEXT.clone();
+        let mut context = global_context.write().expect("未能获取读锁");
+        update_fn(&mut context);
+    }
+
     pub fn update_global_map_size(map_size: MapSize) {
-        let global_context = GAME_CONTEXT.clone();
-        let mut context = global_context
-            .write()
-            .expect("Failed to acquire write lock");
-
-        // 更新 map_size
-        context.map_size = Some(map_size);
+        Self::update_global(|context| context.map_size = Some(map_size));
     }
 
-    /// 设置文明编号到全局上下文
     pub fn update_global_civilization_id(civilization_id: Uuid) {
-        let global_context = GAME_CONTEXT.clone();
-        let mut context = global_context
-            .write()
-            .expect("Failed to acquire write lock");
-
-        // 更新文明编号
-        context.civilization_id = Some(civilization_id);
+        Self::update_global(|context| context.civilization_id = Some(civilization_id));
     }
 
-    /// 设置地图大小
+    pub fn update_global_gravity_const(gravity_const: f64) {
+        Self::update_global(|context| context.gravity_const = Some(gravity_const));
+    }
+}
+
+// ========================================
+// 设置游戏上下文相关方法
+// ========================================
+impl GameContext {
     pub fn with_map_size(mut self, map_size: MapSize) -> Self {
         self.map_size = Some(map_size);
         self
     }
 
-    /// 设置文明编号
-    pub fn with_civilization_id(mut self, civilization_id: Uuid) -> Self {
-        self.civilization_id = Some(civilization_id);
-        self
-    }
-
-    /// 生成一个新的文明编号并设置
-    pub fn generate_new_civilization_id(mut self) -> Self {
+    pub fn with_civilization_id(mut self) -> Self {
         self.civilization_id = Some(Uuid::new_v4());
         self
     }
 
-    /// 获取地图大小
-    pub fn map_size(&self) -> Option<MapSize> {
-        self.map_size.clone()
+    pub fn with_gravity_const(mut self, gravity_const: Option<f64>) -> Self {
+        self.gravity_const = Some(gravity_const.unwrap_or(10.0));
+        self
+    }
+}
+
+// ========================================
+// 获取游戏上下文相关方法
+// ========================================
+impl GameContext {
+    fn get_global_field<T, F>(field_accessor: F, field_name: &'static str) -> T
+    where
+        F: FnOnce(&GameContext) -> Option<T>,
+    {
+        let context = GAME_CONTEXT
+            .read()
+            .unwrap_or_else(|e| panic!("{}", GameContextError::ReadLockFailed(e)));
+
+        field_accessor(&context)
+            .unwrap_or_else(|| panic!("{}", GameContextError::ContextFieldNotSet(field_name)))
     }
 
-    /// 获取文明编号
-    pub fn civilization_id(&self) -> Option<Uuid> {
-        self.civilization_id
+    pub fn get_map_size() -> MapSize {
+        Self::get_global_field(|ctx| ctx.map_size.clone(), "map_size")
     }
 
-    /// 获取全局实例的只读引用
-    pub fn global_instance() -> Arc<RwLock<GameContext>> {
-        GAME_CONTEXT.clone()
+    pub fn get_civilization_id() -> Uuid {
+        Self::get_global_field(|ctx| ctx.civilization_id, "civilization_id")
+    }
+
+    pub fn get_gravity_const() -> f64 {
+        Self::get_global_field(|ctx| ctx.gravity_const, "gravity_const")
     }
 }
 
 /// 全局游戏上下文实例
-pub static GAME_CONTEXT: Lazy<Arc<RwLock<GameContext>>> =
+static GAME_CONTEXT: Lazy<Arc<RwLock<GameContext>>> =
     Lazy::new(|| Arc::new(RwLock::new(GameContext::new())));
+
+#[derive(Debug, Error)]
+pub enum GameContextError {
+    /// 获取全局上下文的读锁失败
+    #[error("Failed to acquire a read lock on the global game context")]
+    ReadLockFailed(#[source] PoisonError<RwLockReadGuard<'static, GameContext>>),
+
+    /// 获取全局上下文的写锁失败
+    #[error("Failed to acquire a write lock on the global game context")]
+    WriteLockFailed(#[source] PoisonError<RwLockWriteGuard<'static, GameContext>>),
+
+    /// 请求的上下文数据尚未设置（例如 map_size 或 civilization_id）
+    #[error("Requested context data not available: {0}")]
+    ContextFieldNotSet(&'static str),
+}

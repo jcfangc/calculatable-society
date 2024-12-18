@@ -22,3 +22,4 @@ serde_json = "*"
 once_cell = "*"
 backend_core = { path = "../backend_core" }
 uuid = { version = "*", features = ["v4"] }
+thiserror = "*"
