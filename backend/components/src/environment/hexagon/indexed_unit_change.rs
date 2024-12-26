@@ -1,4 +1,4 @@
-﻿use crate::environment::hexagon::unit_change::UnitChange;
+use crate::environment::hexagon::unit_change::UnitChange;
 use crate::environment::t_indexed::Indexed;
 
 #[derive(Debug, Clone, Copy)]

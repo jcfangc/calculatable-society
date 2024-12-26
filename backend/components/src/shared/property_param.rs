@@ -1,4 +1,4 @@
-﻿use crate::shared::subtance_type::SubstanceType;
+use crate::shared::subtance_type::SubstanceType;
 use num::traits::ToPrimitive;
 use std::f64::{consts::PI, EPSILON};
 
@@ -90,7 +90,7 @@ impl PropertyParam {
     /// 返回计算后的属性值，基于频率和相位常量与资源类型系数的组合。
     ///
     /// ### 计算公式
-    /// `sin((a + c)θ + (b + d))`
+    /// `[sin((a + c)θ + (b + d)) + 1] / 2`
     ///
     /// 其中：
     /// - `θ = SubstanceType * π`
@@ -108,6 +108,6 @@ impl PropertyParam {
             / 2.0;
 
         // 取值范围为 [0, 1]，但是添加了一个极小值，避免出现 0 的情况
-        return result + EPSILON;
+        result.min(1.0).max(EPSILON)
     }
 }

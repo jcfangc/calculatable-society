@@ -1,4 +1,4 @@
-﻿use uuid::Uuid;
+use uuid::Uuid;
 
 struct Agent {
     id: Uuid,

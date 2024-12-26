@@ -1,4 +1,4 @@
-﻿// 以下概念是 component 的子概念
+// 以下概念是 component 的子概念
 pub(crate) mod agent;
 pub(crate) mod location;
 pub(crate) mod mover;

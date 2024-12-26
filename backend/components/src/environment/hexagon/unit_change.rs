@@ -1,4 +1,4 @@
-﻿use crate::environment::coordinate_shift::CoordinateShift;
+use crate::environment::cartesian_vec_2d::CartesianVec2D;
 use serde::Serialize;
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Copy, Serialize)]
@@ -6,12 +6,12 @@ pub(crate) struct UnitChange {
     /// 本单元所含物质的摩尔数
     mole_change: isize,
     /// 本单元当下保持的运动状态
-    movement_change: CoordinateShift,
+    movement_change: CartesianVec2D,
 }
 
 impl UnitChange {
     /// 创建一个新的单元变化
-    pub(crate) fn new(mole_change: isize, movement_change: CoordinateShift) -> Self {
+    pub(crate) fn new(mole_change: isize, movement_change: CartesianVec2D) -> Self {
         Self {
             mole_change,
             movement_change,
@@ -24,7 +24,7 @@ impl UnitChange {
     }
 
     /// 获取运动状态变化
-    pub(crate) fn movement_change(&self) -> CoordinateShift {
+    pub(crate) fn movement_change(&self) -> CartesianVec2D {
         self.movement_change
     }
 
@@ -34,7 +34,7 @@ impl UnitChange {
     }
 
     /// 设置运动状态变化
-    pub(crate) fn set_movement_change(&mut self, movement_change: CoordinateShift) {
+    pub(crate) fn set_movement_change(&mut self, movement_change: CartesianVec2D) {
         self.movement_change = movement_change;
     }
 
@@ -50,7 +50,7 @@ impl UnitChange {
     }
 
     /// 累积运动状态变化
-    pub(crate) fn accumulate_movement_change(&mut self, movement_change: CoordinateShift) {
+    pub(crate) fn accumulate_movement_change(&mut self, movement_change: CartesianVec2D) {
         self.movement_change = self.movement_change + movement_change;
     }
 
@@ -65,7 +65,7 @@ impl Default for UnitChange {
     fn default() -> Self {
         Self {
             mole_change: 0,
-            movement_change: CoordinateShift::new(0, 0),
+            movement_change: CartesianVec2D::new(0.0, 0.0),
         }
     }
 }

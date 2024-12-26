@@ -1,4 +1,4 @@
-﻿use sqlx::postgres::Postgres;
+use sqlx::postgres::Postgres;
 use sqlx::Pool;
 use std::sync::Arc;
 

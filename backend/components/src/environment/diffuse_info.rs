@@ -1,4 +1,4 @@
-﻿use crate::environment::hexagon::hex_unit::HexUnit;
+use crate::environment::hexagon::hex_unit::HexUnit;
 
 #[derive(Clone, Debug)]
 pub(crate) struct DiffuseInfo {

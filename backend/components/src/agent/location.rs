@@ -1,4 +1,4 @@
-﻿use crate::agent::mover::Mover;
+use crate::agent::mover::Mover;
 use serde::Serialize;
 use std::fmt;
 

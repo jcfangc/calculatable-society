@@ -1,5 +1,6 @@
-﻿use serde::Serialize;
-use std::f64::consts::PI;
+use crate::environment::cartesian_vec_2d::CartesianVec2D;
+use crate::game_context::GameContext;
+use serde::Serialize;
 use std::iter::Sum;
 use std::ops::{Add, Mul, Sub};
 
@@ -7,13 +8,13 @@ type Radians = f64;
 type Degrees = f64;
 
 /// 方向对应的坐标偏移量
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize)]
-pub(crate) struct CoordinateShift {
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Default)]
+pub(crate) struct HexDisplacement {
     dy: isize,
     dx: isize,
 }
 
-impl CoordinateShift {
+impl HexDisplacement {
     /// 创建一个新的坐标偏移量
     pub(crate) fn new(dy: isize, dx: isize) -> Self {
         Self { dy, dx }
@@ -34,34 +35,16 @@ impl CoordinateShift {
         self.dx
     }
 
-    /// 计算两个坐标偏移量之间的角度差（以弧度为单位）
-    ///
-    /// ### 参数
-    /// - `self`：第一个向量（当前实例）。
-    /// - `other`：第二个向量。
+    /// 将当前偏移量变换到笛卡尔空间
     ///
     /// ### 返回值
-    /// 返回从 `self` 到 `other` 的有符号角度差（以弧度为单位），范围为 [-π, π]。
-    ///
-    /// ### 符号意义
-    /// - 返回值为正数时，表示从 `self` 到 `other` 为逆时针旋转（正方向）。
-    /// - 返回值为负数时，表示从 `self` 到 `other` 为顺时针旋转（负方向）。
-    /// - 返回值为 0 时，表示两个向量方向相同或重合。
-    pub(crate) fn angle_between(self, other: Self) -> Radians {
-        let dot = (self.dx * other.dx + self.dy * other.dy) as f64;
-        let cross = (self.dx * other.dy - self.dy * other.dx) as f64;
-        let angle = cross.atan2(dot);
-        angle
-    }
+    /// 返回对应的笛卡尔坐标系中的向量。
+    pub(crate) fn to_cartesian(&self) -> CartesianVec2D {
+        // 获取基础向量并进行线性组合
+        let x_component = GameContext::get_x_base_vector().scale(self.dx as f64);
+        let y_component = GameContext::get_y_base_vector().scale(self.dy as f64);
 
-    /// 将弧度转换为角度
-    pub(crate) fn to_degrees(radians: Radians) -> Degrees {
-        radians * (180.0 / PI)
-    }
-
-    /// 将角度转换为弧度
-    pub(crate) fn to_radians(degrees: Degrees) -> Radians {
-        degrees * (PI / 180.0)
+        x_component + y_component
     }
 
     /// 计算当前坐标偏移量的模长
@@ -81,7 +64,7 @@ impl CoordinateShift {
 }
 
 // 实现加法运算
-impl Add for CoordinateShift {
+impl Add for HexDisplacement {
     type Output = Self;
 
     fn add(self, other: Self) -> Self::Output {
@@ -90,7 +73,7 @@ impl Add for CoordinateShift {
 }
 
 // 实现减法运算
-impl Sub for CoordinateShift {
+impl Sub for HexDisplacement {
     type Output = Self;
 
     fn sub(self, other: Self) -> Self::Output {
@@ -99,7 +82,7 @@ impl Sub for CoordinateShift {
 }
 
 // 实现标量相乘
-impl Mul<isize> for CoordinateShift {
+impl Mul<isize> for HexDisplacement {
     type Output = Self;
 
     fn mul(self, scalar: isize) -> Self::Output {
@@ -108,7 +91,7 @@ impl Mul<isize> for CoordinateShift {
 }
 
 // 实现浮点数标量相乘：CoordinateShift * f64
-impl Mul<f64> for CoordinateShift {
+impl Mul<f64> for HexDisplacement {
     type Output = Self;
 
     fn mul(self, scalar: f64) -> Self::Output {
@@ -120,11 +103,11 @@ impl Mul<f64> for CoordinateShift {
 }
 
 // 实现浮点数标量相乘：f64 * CoordinateShift
-impl Mul<CoordinateShift> for f64 {
-    type Output = CoordinateShift;
+impl Mul<HexDisplacement> for f64 {
+    type Output = HexDisplacement;
 
-    fn mul(self, shift: CoordinateShift) -> CoordinateShift {
-        CoordinateShift::new(
+    fn mul(self, shift: HexDisplacement) -> HexDisplacement {
+        HexDisplacement::new(
             (shift.dy as f64 * self).round() as isize,
             (shift.dx as f64 * self).round() as isize,
         )
@@ -132,7 +115,7 @@ impl Mul<CoordinateShift> for f64 {
 }
 
 // 实现 Sum trait 以支持 .sum() 操作
-impl Sum for CoordinateShift {
+impl Sum for HexDisplacement {
     fn sum<I>(iter: I) -> Self
     where
         I: Iterator<Item = Self>,

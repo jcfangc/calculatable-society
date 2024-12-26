@@ -1,4 +1,4 @@
-﻿use serde::Serialize;
+use serde::Serialize;
 use std::fmt;
 
 const DEFAULT_WIDTH: usize = 255; // 默认宽度常量

@@ -1,4 +1,4 @@
-﻿use error_handling::PreferenceValueError;
+use error_handling::PreferenceValueError;
 use serde::Serialize;
 use std::convert::TryFrom;
 use std::fmt;

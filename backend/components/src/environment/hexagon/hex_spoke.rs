@@ -1,6 +1,7 @@
-﻿use crate::environment::hexagon::diagonal_relation::DiagonalRelation;
+use crate::environment::hexagon::diagonal_relation::DiagonalRelation;
 use std::collections::HashMap;
 
+/// 作为一个盛放 中心单元 + 对角单元 相关数据<T>的容器
 #[derive(Clone, Debug)]
 pub struct HexSpoke<T> {
     center: T,

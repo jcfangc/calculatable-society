@@ -1,17 +1,18 @@
-﻿use crate::environment::coordinate::Coordinate;
-use crate::environment::diffuse_info::DiffuseInfo;
-use crate::environment::hexagon::hex_block::HexBlock;
-use crate::environment::hexagon::hex_unit::HexUnit;
-use crate::environment::hexagon::indexed_unit_change::IndexedUnitChange;
-use crate::environment::hexagon::neighbour_relation::NeighbourRelation;
-use crate::environment::hexagon::unit_change::UnitChange;
-use crate::environment::map_size::MapSize;
-use crate::environment::noise_params::NoiseParams;
-use crate::environment::potential::Potential;
-use crate::environment::t_indexed::Indexed;
-use crate::environment::t_noise_generatable::NoiseGeneratable;
-use crate::environment::t_statistical::Statistical;
-use crate::shared::subtance_type::SubstanceType;
+use crate::environment::{
+    diffuse_info::DiffuseInfo,
+    hexagon::{
+        hex_block::HexBlock, hex_coord::HexCoord, hex_unit::HexUnit,
+        indexed_unit_change::IndexedUnitChange, neighbour_relation::NeighbourRelation,
+        unit_change::UnitChange,
+    },
+    map_size::MapSize,
+    noise_params::NoiseParams,
+    potential::Potential,
+    t_indexed::Indexed,
+    t_noise_generatable::NoiseGeneratable,
+    t_statistical::Statistical,
+};
+use crate::shared::{property::Property, subtance_type::SubstanceType};
 use ndarray::{Array2, Zip};
 use noise::{NoiseFn, OpenSimplex};
 use rayon::prelude::*;
@@ -97,7 +98,9 @@ impl SubstanceDistribution {
                     self.build_hex_block_of_info(row_index, col_index, now_potential, old_unit);
 
                 // 调用当前单元格的扩散方法，得到中心和邻居的变化量（HexBlock<UnitChange>）
-                let block_of_change = old_unit.diffuse(self.substance_type, &block_of_info);
+                let fluidity =
+                    Property::calculate_property(Property::Fluidity, &self.substance_type);
+                let block_of_change = old_unit.diffuse(fluidity, &block_of_info);
 
                 // 构建中心格子的变化信息
                 let center_change =
@@ -121,10 +124,10 @@ impl SubstanceDistribution {
             .collect()
     }
 
-    /// 根据给定的行列索引和当前势能，构建包含中心和邻居信息的 HexBlock<DiffuseInfo>。
+    /// 根据给定的行列索引和当前势能场强，构建包含中心和邻居信息的 HexBlock<DiffuseInfo>。
     ///
     /// 返回：
-    /// - `HexBlock<DiffuseInfo>`：中心单元+邻居单元的势能和状态信息构成的上下文块，用于扩散计算。
+    /// - `HexBlock<DiffuseInfo>`：中心单元+邻居单元的势能场强和状态信息构成的上下文块，用于扩散计算。
     /// - `HashMap<NeighbourRelation, Coordinate>`：邻居关系到坐标的映射表，供后续获取邻居坐标使用。
     fn build_hex_block_of_info(
         &self,
@@ -132,18 +135,15 @@ impl SubstanceDistribution {
         col_index: usize,
         now_potential: &Potential,
         old_unit: &HexUnit,
-    ) -> (
-        HexBlock<DiffuseInfo>,
-        HashMap<NeighbourRelation, Coordinate>,
-    ) {
+    ) -> (HexBlock<DiffuseInfo>, HashMap<NeighbourRelation, HexCoord>) {
         // 当前格子的坐标
-        let current_coord = Coordinate::new(row_index, col_index);
+        let current_coord = HexCoord::new(row_index, col_index);
 
         // 获取邻居关系与坐标的映射表（如 Relation::Degree60 -> (row, col)）
         let relations_map = current_coord.get_relations_map::<NeighbourRelation>();
 
         // 构建邻居单元的 DiffuseInfo Map
-        // DiffuseInfo 包含邻居单元的状态和它的势能
+        // DiffuseInfo 包含邻居单元的状态和它的势能场强
         let neighbors_map: HashMap<NeighbourRelation, DiffuseInfo> = relations_map
             .iter()
             .map(|(relation, neighbour_coord)| {
@@ -153,11 +153,11 @@ impl SubstanceDistribution {
                     .get([neighbour_coord.y(), neighbour_coord.x()])
                     .expect("邻居单元格越界");
 
-                // 获取邻居单元的势能值
+                // 获取邻居单元的势能场强值
                 let neighbour_potential = now_potential
                     .distribution()
                     .get([neighbour_coord.y(), neighbour_coord.x()])
-                    .expect("邻居势能分布越界");
+                    .expect("邻居势能场强分布越界");
 
                 // 构造邻居的 DiffuseInfo
                 (
@@ -167,11 +167,11 @@ impl SubstanceDistribution {
             })
             .collect();
 
-        // 中心单元的势能值
+        // 中心单元的势能场强值
         let center_potential = now_potential
             .distribution()
             .get([row_index, col_index])
-            .expect("中心单元势能分布越界");
+            .expect("中心单元势能场强分布越界");
         let center_info = DiffuseInfo::new(*old_unit, *center_potential);
 
         // 构建HexBlock：由中心信息和邻居信息共同组成扩散所需的上下文

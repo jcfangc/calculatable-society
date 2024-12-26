@@ -1,4 +1,4 @@
-﻿use crate::environment::potential::Potential;
+use crate::environment::potential::Potential;
 use crate::environment::{map_size::MapSize, subtance_distribution::SubstanceDistribution};
 use crate::game_context::GameContext;
 use ndarray::parallel::prelude::*;
@@ -64,7 +64,7 @@ impl Landscape {
     }
 
     pub(crate) fn update_potential_distribution(&mut self) {
-        // 计算势能分布
+        // 计算势能场强分布
         self.potential
             .update(&self.subtance_distributions, self.map_size.as_tuple());
     }

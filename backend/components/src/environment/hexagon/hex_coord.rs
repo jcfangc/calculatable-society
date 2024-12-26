@@ -1,4 +1,4 @@
-﻿use crate::environment::coordinate_shift::CoordinateShift;
+use crate::environment::hexagon::hex_displacemant::HexDisplacement;
 use crate::environment::hexagon::t_hexa_distanced::HexaDistanced;
 use crate::environment::hexagon::t_hexa_relational::HexaRelational;
 use crate::environment::t_indexed::Indexed;
@@ -8,14 +8,14 @@ use std::collections::HashMap;
 use std::ops::{Add, Mul, Sub};
 
 #[derive(Clone, Copy, Eq, PartialEq, Hash, Debug, Serialize)]
-pub(crate) struct Coordinate {
+pub(crate) struct HexCoord {
     /// 行坐标
     y: usize,
     /// 列坐标
     x: usize,
 }
 
-impl Coordinate {
+impl HexCoord {
     /// 创建一个新的坐标
     pub(crate) fn new(y: usize, x: usize) -> Self {
         Self { y, x }
@@ -79,14 +79,14 @@ impl Coordinate {
     }
 }
 
-impl HexaDistanced for Coordinate {
+impl HexaDistanced for HexCoord {
     /// 立方体坐标下的隐藏第三轴
     fn z(&self) -> isize {
         -(self.x as isize + self.y as isize)
     }
 
     /// 计算两坐标之间的六边形距离
-    fn distance_to(&self, other: &Coordinate) -> usize {
+    fn distance_to(&self, other: &HexCoord) -> usize {
         let dx = (self.x as isize - other.x as isize).abs();
         let dy = (self.y as isize - other.y as isize).abs();
         let dz = (self.z() - other.z()).abs();
@@ -94,7 +94,7 @@ impl HexaDistanced for Coordinate {
     }
 }
 
-impl Add<Self> for Coordinate {
+impl Add<Self> for HexCoord {
     type Output = Self;
 
     fn add(self, other: Self) -> Self {
@@ -102,10 +102,10 @@ impl Add<Self> for Coordinate {
     }
 }
 
-impl Add<CoordinateShift> for Coordinate {
+impl Add<HexDisplacement> for HexCoord {
     type Output = Self;
 
-    fn add(self, shift: CoordinateShift) -> Self {
+    fn add(self, shift: HexDisplacement) -> Self {
         let (height, width) = GameContext::get_map_size().as_tuple();
         Self {
             y: ((self.y as isize + shift.dy()).rem_euclid(height as isize)) as usize,
@@ -114,19 +114,19 @@ impl Add<CoordinateShift> for Coordinate {
     }
 }
 
-impl Add<Coordinate> for CoordinateShift {
-    type Output = Coordinate;
+impl Add<HexCoord> for HexDisplacement {
+    type Output = HexCoord;
 
-    fn add(self, coord: Coordinate) -> Coordinate {
+    fn add(self, coord: HexCoord) -> HexCoord {
         let (height, width) = GameContext::get_map_size().as_tuple();
-        Coordinate {
+        HexCoord {
             y: ((coord.y as isize + self.dy()).rem_euclid(height as isize)) as usize,
             x: ((coord.x as isize + self.dx()).rem_euclid(width as isize)) as usize,
         }
     }
 }
 
-impl Sub<Self> for Coordinate {
+impl Sub<Self> for HexCoord {
     type Output = Self;
 
     fn sub(self, other: Self) -> Self {
@@ -134,7 +134,7 @@ impl Sub<Self> for Coordinate {
     }
 }
 
-impl Mul<usize> for Coordinate {
+impl Mul<usize> for HexCoord {
     type Output = Self;
 
     fn mul(self, scalar: usize) -> Self {
@@ -142,7 +142,7 @@ impl Mul<usize> for Coordinate {
     }
 }
 
-impl Indexed for Coordinate {
+impl Indexed for HexCoord {
     fn y(&self) -> usize {
         self.y
     }

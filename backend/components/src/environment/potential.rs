@@ -1,4 +1,4 @@
-﻿use crate::environment::subtance_distribution::SubstanceDistribution;
+use crate::environment::subtance_distribution::SubstanceDistribution;
 use crate::game_context::GameContext;
 use crate::shared::property::Property;
 use ndarray::{parallel::prelude::*, Array2};
@@ -18,12 +18,12 @@ impl Potential {
         }
     }
 
-    /// 获取当前的势能分布
+    /// 获取当前的势能场强分布
     pub(crate) fn distribution(&self) -> &Array2<f64> {
         &self.potential_distribution
     }
 
-    /// 更新势能分布
+    /// 更新势能场强分布
     pub(crate) fn update(
         &mut self,
         subtance_distributions: &HashSet<SubstanceDistribution>,
@@ -33,19 +33,19 @@ impl Potential {
             self.calculate_potential_distribution(subtance_distributions, map_size);
     }
 
-    /// 计算势能分布
+    /// 计算势能场强分布
     ///
     /// ### 参数
     /// - `subtance_distributions`: `&HashSet<SubstanceDistribution>`，物质分布的集合。
     ///   - 每个 `SubstanceDistribution` 表示一种物质的分布情况。
     ///   - 集合中的元素无序，但每种物质的类型是唯一的（通过 `HashSet` 确保）。
     /// - `map_size`: `(usize, usize)`，地图的大小。
-    ///   - 用于定义返回势能分布的数组形状。
+    ///   - 用于定义返回势能场强分布的数组形状。
     ///
     /// ### 返回值
-    /// 返回整个地图上的势能分布 `Array2<f64>`。
+    /// 返回整个地图上的势能场强分布 `Array2<f64>`。
     /// - 返回的二维数组形状为 `map_size`。
-    /// - 每个单元格的值表示该位置的势能值。
+    /// - 每个单元格的值表示该位置的势能场强值。
     fn calculate_potential_distribution(
         &self,
         subtance_distributions: &HashSet<SubstanceDistribution>,
@@ -57,14 +57,14 @@ impl Potential {
             .reduce(|| Array2::<f64>::zeros(map_size), |acc, dist| acc + dist)
     }
 
-    /// 计算单个物质分布的势能分布
+    /// 计算单个物质分布的势能场强分布
     ///
     /// ### 参数
     /// - `substance_dist`: `SubstanceDistribution`，物质分布
-    /// - `map_size`: `(usize, usize)`，地图的大小，用于定义势能分布的数组形状
+    /// - `map_size`: `(usize, usize)`，地图的大小，用于定义势能场强分布的数组形状
     ///
     /// ### 返回值
-    /// 返回势能分布 `Array2<f64>`
+    /// 返回势能场强分布 `Array2<f64>`
     fn calculate_single_potential_dist(
         &self,
         substance_dist: &SubstanceDistribution,
@@ -84,15 +84,15 @@ impl Potential {
         // 获取重力常数
         let gravity_const = GameContext::get_gravity_const();
 
-        // 将物质分布的每个网格单元的摩尔量乘以一摩尔物质的体积，得到势能分布
+        // 将物质分布的每个网格单元的摩尔量乘以一摩尔物质的体积，得到势能场强分布
         Array2::from_shape_vec(
             map_size, // 将分布结果按照地图大小转换为二维数组
             substance_dist
                 .distribution()
                 .par_iter() // 并行遍历物质分布中的单元
-                .map(|hex_unit| hex_unit.mole() as f64 * molar_height * gravity_const) // 计算单元势能
+                .map(|hex_unit| hex_unit.mole() as f64 * molar_height * gravity_const) // 计算单元势能场强
                 .collect::<Vec<f64>>(), // 收集结果为向量
         )
-        .expect("未能从向量创建势能分布") // 确保向量长度与地图形状匹配
+        .expect("未能从向量创建势能场强分布") // 确保向量长度与地图形状匹配
     }
 }

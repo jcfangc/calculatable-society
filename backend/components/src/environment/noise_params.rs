@@ -1,4 +1,4 @@
-﻿use rand::Rng;
+use rand::Rng;
 use serde::Serialize;
 use std::fmt;
 use std::hash::{Hash, Hasher};

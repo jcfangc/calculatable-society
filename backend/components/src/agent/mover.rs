@@ -1,4 +1,4 @@
-﻿use crate::agent::location::Location;
+use crate::agent::location::Location;
 use crate::environment::landscape::Landscape;
 use serde::Serialize;
 use std::fmt;

@@ -1,2 +1,2 @@
-﻿pub mod connection;
+pub mod connection;
 pub mod db_contextd;

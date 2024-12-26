@@ -1,4 +1,4 @@
-﻿use utils::enum_map;
+use utils::enum_map;
 enum_map! {
     pub SQLQuery => &'static str {
         // 查询指定代理ID和资源类型的资源信息

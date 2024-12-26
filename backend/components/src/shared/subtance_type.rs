@@ -1,4 +1,4 @@
-﻿use crate::shared::property::Property;
+use crate::shared::property::Property;
 use error_handling::SubtanceTypeError;
 use num::rational::Ratio;
 use serde::Serialize;

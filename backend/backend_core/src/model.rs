@@ -1,4 +1,4 @@
-﻿pub mod components_related {
+pub mod components_related {
     pub mod agent_related {
         pub mod resources_related {
             use sqlx::FromRow;

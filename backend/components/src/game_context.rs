@@ -1,25 +1,42 @@
-﻿use crate::environment::map_size::MapSize;
+use crate::environment::cartesian_vec_2d::CartesianVec2D;
+use crate::environment::map_size::MapSize;
 use once_cell::sync::Lazy;
 use std::sync::{Arc, RwLock};
 use std::sync::{PoisonError, RwLockReadGuard, RwLockWriteGuard};
 use thiserror::Error;
 use uuid::Uuid;
 
+/// 全局游戏上下文实例
+static GAME_CONTEXT: Lazy<Arc<RwLock<GameContext>>> =
+    Lazy::new(|| Arc::new(RwLock::new(GameContext::new())));
+
 /// 游戏上下文
 #[derive(Debug, Default)]
 pub struct GameContext {
-    map_size: Option<MapSize>,     // 地图大小，可选
-    civilization_id: Option<Uuid>, // 文明编号，使用 UUID
-    gravity_const: Option<f64>,    // 重力常数
+    /// 地图大小
+    map_size: Option<MapSize>,
+    /// 文明编号，使用 UUID
+    civilization_id: Option<Uuid>,
+    /// 重力常数
+    gravity_const: Option<f64>,
+    /// 六边形地图基向量 x 在笛卡尔空间投影
+    x_base_vector: CartesianVec2D,
+    /// 六边形地图基向量 y 在笛卡尔空间投影
+    y_base_vector: CartesianVec2D,
 }
 
 impl GameContext {
     /// 创建一个新的上下文
     fn new() -> Self {
+        let x_base_vector = CartesianVec2D::new(0.5, (3.0f64.sqrt()) * 0.5);
+        let y_base_vector = CartesianVec2D::new(1.0, 0.0);
+
         Self {
             map_size: None,
             civilization_id: None,
             gravity_const: None,
+            x_base_vector,
+            y_base_vector,
         }
     }
 }
@@ -74,35 +91,98 @@ impl GameContext {
 // ========================================
 // 获取游戏上下文相关方法
 // ========================================
+/// GameContext 提供了访问全局上下文的方法和工具。
 impl GameContext {
-    fn get_global_field<T, F>(field_accessor: F, field_name: &'static str) -> T
+    /// 访问全局上下文并执行指定操作。
+    ///
+    /// ### 参数
+    /// * `accessor` - 操作上下文的闭包函数。
+    ///
+    /// ### 返回值
+    /// 返回闭包执行结果。
+    fn access_game_context<F, T>(accessor: F) -> T
     where
-        F: FnOnce(&GameContext) -> Option<T>,
+        F: FnOnce(&GameContext) -> T,
     {
         let context = GAME_CONTEXT
             .read()
             .unwrap_or_else(|e| panic!("{}", GameContextError::ReadLockFailed(e)));
 
-        field_accessor(&context)
-            .unwrap_or_else(|| panic!("{}", GameContextError::ContextFieldNotSet(field_name)))
+        accessor(&context)
     }
 
+    /// 获取全局可选字段值，如果字段未设置则触发 panic。
+    ///
+    /// ### 参数
+    /// * `field_accessor` - 获取字段的闭包函数。
+    /// * `field_name` - 字段名称，用于错误提示。
+    ///
+    /// ### 返回值
+    /// 返回字段值。
+    fn get_global_optional_field<T, F>(field_accessor: F, field_name: &'static str) -> T
+    where
+        F: FnOnce(&GameContext) -> Option<T>,
+    {
+        Self::access_game_context(|context| {
+            field_accessor(context)
+                .unwrap_or_else(|| panic!("{}", GameContextError::ContextFieldNotSet(field_name)))
+        })
+    }
+
+    /// 获取全局字段值。
+    ///
+    /// ### 参数
+    /// * `field_accessor` - 获取字段的闭包函数。
+    ///
+    /// ### 返回值
+    /// 返回字段值。
+    fn get_global_field<T, F>(field_accessor: F) -> T
+    where
+        F: FnOnce(&GameContext) -> T,
+    {
+        Self::access_game_context(field_accessor)
+    }
+
+    /// 获取地图大小。
+    ///
+    /// ### 返回值
+    /// 返回地图大小的 `MapSize` 对象。
     pub fn get_map_size() -> MapSize {
-        Self::get_global_field(|ctx| ctx.map_size.clone(), "map_size")
+        Self::get_global_optional_field(|ctx| ctx.map_size.clone(), "map_size")
     }
 
+    /// 获取文明 ID。
+    ///
+    /// ### 返回值
+    /// 返回文明的 `Uuid`。
     pub fn get_civilization_id() -> Uuid {
-        Self::get_global_field(|ctx| ctx.civilization_id, "civilization_id")
+        Self::get_global_optional_field(|ctx| ctx.civilization_id, "civilization_id")
     }
 
+    /// 获取重力常数。
+    ///
+    /// ### 返回值
+    /// 返回重力常数的值。
     pub fn get_gravity_const() -> f64 {
-        Self::get_global_field(|ctx| ctx.gravity_const, "gravity_const")
+        Self::get_global_optional_field(|ctx| ctx.gravity_const, "gravity_const")
+    }
+
+    /// 获取 X 基向量。
+    ///
+    /// ### 返回值
+    /// 返回 X 基向量的 `CartesianCoord` 对象。
+    pub fn get_x_base_vector() -> CartesianVec2D {
+        Self::get_global_field(|ctx| ctx.x_base_vector)
+    }
+
+    /// 获取 Y 基向量。
+    ///
+    /// ### 返回值
+    /// 返回 Y 基向量的 `CartesianCoord` 对象。
+    pub fn get_y_base_vector() -> CartesianVec2D {
+        Self::get_global_field(|ctx| ctx.y_base_vector)
     }
 }
-
-/// 全局游戏上下文实例
-static GAME_CONTEXT: Lazy<Arc<RwLock<GameContext>>> =
-    Lazy::new(|| Arc::new(RwLock::new(GameContext::new())));
 
 #[derive(Debug, Error)]
 pub enum GameContextError {

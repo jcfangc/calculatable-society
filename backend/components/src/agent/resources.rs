@@ -1,4 +1,4 @@
-﻿use crate::_commute::t_from_dto::FromDTO;
+use crate::_commute::t_from_dto::FromDTO;
 use crate::agent::resource_amount::ResourceAmount;
 use crate::shared::property::Property;
 use crate::shared::subtance_type::SubstanceType;
@@ -140,7 +140,9 @@ impl Resources {
     }
 
     /// 计算所有资源的属性值
-    pub(crate) async fn get_all_properties(&self) -> HashMap<SubstanceType, HashMap<Property, f64>> {
+    pub(crate) async fn get_all_properties(
+        &self,
+    ) -> HashMap<SubstanceType, HashMap<Property, f64>> {
         // 仅在 `all_properties` 中使用 `spawn_blocking`，并移除 `properties_sync` 中的 `spawn_blocking`
         let futures: Vec<_> = self
             .resources

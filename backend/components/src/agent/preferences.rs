@@ -1,4 +1,4 @@
-﻿use crate::agent::preference_value::PreferenceValue;
+use crate::agent::preference_value::PreferenceValue;
 use crate::shared::subtance_type::SubstanceType;
 use std::collections::HashMap;
 use std::fmt;

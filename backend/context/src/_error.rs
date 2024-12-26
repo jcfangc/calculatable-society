@@ -1,4 +1,4 @@
-﻿// use sqlx::Error as SqlxError;
+// use sqlx::Error as SqlxError;
 use thiserror::Error;
 
 #[derive(Error, Debug)]

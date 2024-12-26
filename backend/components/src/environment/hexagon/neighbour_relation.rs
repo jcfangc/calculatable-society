@@ -1,4 +1,4 @@
-﻿use crate::environment::coordinate_shift::CoordinateShift;
+use crate::environment::hexagon::hex_displacemant::HexDisplacement;
 use crate::environment::hexagon::t_hexa_relational::HexaRelational;
 use std::collections::HashMap;
 
@@ -13,14 +13,22 @@ pub(crate) enum NeighbourRelation {
 }
 
 impl HexaRelational for NeighbourRelation {
-    fn from_relation_to_coordinate_shift() -> HashMap<Self, CoordinateShift> {
+    fn from_relation_to_coordinate_shift() -> HashMap<Self, HexDisplacement> {
         HashMap::from([
-            (NeighbourRelation::Degree0, CoordinateShift::new(-1, 0)),
-            (NeighbourRelation::Degree60, CoordinateShift::new(-1, 1)),
-            (NeighbourRelation::Degree120, CoordinateShift::new(0, 1)),
-            (NeighbourRelation::Degree180, CoordinateShift::new(1, 0)),
-            (NeighbourRelation::Degree240, CoordinateShift::new(1, -1)),
-            (NeighbourRelation::Degree300, CoordinateShift::new(0, -1)),
+            (NeighbourRelation::Degree0, HexDisplacement::new(-1, 0)),
+            (NeighbourRelation::Degree60, HexDisplacement::new(-1, 1)),
+            (NeighbourRelation::Degree120, HexDisplacement::new(0, 1)),
+            (NeighbourRelation::Degree180, HexDisplacement::new(1, 0)),
+            (NeighbourRelation::Degree240, HexDisplacement::new(1, -1)),
+            (NeighbourRelation::Degree300, HexDisplacement::new(0, -1)),
         ])
+    }
+
+    fn opposite_pairs() -> [(Self, Self); 3] {
+        [
+            (NeighbourRelation::Degree0, NeighbourRelation::Degree180),
+            (NeighbourRelation::Degree60, NeighbourRelation::Degree240),
+            (NeighbourRelation::Degree120, NeighbourRelation::Degree300),
+        ]
     }
 }
