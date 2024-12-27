@@ -1,5 +1,5 @@
 [package]
-name = "components"
+name = "game"
 version = "0.1.0"
 edition = "2021"
 
@@ -11,7 +11,7 @@ utils = { path = "../utils" }
 sqlx = { version = "*", features = ["runtime-tokio-rustls", "macros", "uuid"] }
 rayon = "*"
 tokio = { version = "*", features = ["sync"] }
-context = { path = "../context" }
+back_core = { path = "../back_core" }
 futures = "*"
 noise = "*"
 ndarray = { version = "*", features = ["rayon", "serde"] }
@@ -20,6 +20,5 @@ num-traits = "*"
 serde = { version = "*", features = ["derive"] }
 serde_json = "*"
 once_cell = "*"
-backend_core = { path = "../backend_core" }
 uuid = { version = "*", features = ["v4"] }
 thiserror = "*"

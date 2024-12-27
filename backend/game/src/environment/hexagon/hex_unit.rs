@@ -5,8 +5,6 @@ use crate::environment::hexagon::hex_displacemant::HexDisplacement;
 use crate::environment::hexagon::neighbour_relation::NeighbourRelation;
 use crate::environment::hexagon::t_hexa_relational::HexaRelational;
 use crate::environment::hexagon::unit_change::UnitChange;
-use crate::shared::property::Property;
-use crate::shared::subtance_type::SubstanceType;
 use serde::Serialize;
 use std::collections::HashMap;
 use std::f64::consts::PI;

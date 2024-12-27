@@ -1,0 +1,21 @@
+[package]
+name = "back_core"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+async-trait = "*"
+dotenvy = "*"
+futures = "*"
+once_cell = "*"
+sqlx = { version = "*", features = [
+    "runtime-tokio-rustls",
+    "macros",
+    "uuid",
+    "postgres",
+] }
+tokio = { version = "*", features = ["sync"] }
+tokio-stream = "*"
+tracing = "*"
+utils = { path = "../utils" }
+uuid = "*"

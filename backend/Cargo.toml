@@ -1,5 +1,5 @@
 [workspace]
-members = ["components", "context", "backend_core", "log", "utils"]
+members = ["game", "back_core", "log", "utils"]
 
 [package]
 name = "ess"
@@ -11,7 +11,7 @@ edition = "2021"
 tokio = { version = "*", features = ["full"] }
 axum = { version = "*", features = [] }
 log = { path = "./log" }
-context = { path = "./context" }
+back_core = { path = "./back_core" }
 tracing = "*"
 
 [[bin]]

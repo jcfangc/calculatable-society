@@ -1,4 +1,4 @@
-use context::{AppContext, GLOBAL_APP_CONTEXT};
+use back_core::context::core_context::{AppContext, GLOBAL_APP_CONTEXT};
 use log::init_logging;
 use tracing;
 

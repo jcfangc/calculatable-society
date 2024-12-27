@@ -1,8 +1,5 @@
-mod _error;
-pub mod db;
-
-use db::connection::create_pool;
-use db::db_contextd::DatabaseContexted;
+use crate::context::db::connection::create_pool;
+use crate::context::db::db_contexted::DatabaseContexted;
 use once_cell::sync::Lazy;
 use sqlx::{Pool, Postgres};
 use std::sync::Arc;

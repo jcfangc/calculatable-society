@@ -60,15 +60,15 @@ enum_map! {
     }
 }
 
-pub mod components_related {
+pub mod game_related {
     pub mod agent_related {
         pub mod resources_related {
+            use crate::context::core_context::GLOBAL_APP_CONTEXT;
+            use crate::context::db::db_contexted::DatabaseContexted;
             use crate::dto::dto_resource_amount::DTOResourceAmount;
             use crate::dto::dto_subtance_type::DTOSubtanceType;
             use crate::model::components_related::agent_related::resources_related::ResourcesModel;
             use crate::repository::SQLQuery;
-            use context::db::db_contextd::DatabaseContexted;
-            use context::GLOBAL_APP_CONTEXT;
             use sqlx::Error;
             use uuid::Uuid;
 
@@ -154,12 +154,12 @@ pub mod components_related {
         }
 
         pub mod preferences_related {
+            use crate::context::core_context::GLOBAL_APP_CONTEXT;
+            use crate::context::db::db_contexted::DatabaseContexted;
             use crate::dto::dto_preference_value::DTOPreferenceValue;
             use crate::dto::dto_subtance_type::DTOSubtanceType;
             use crate::model::components_related::agent_related::preferences_related::PreferencesModel;
             use crate::repository::SQLQuery;
-            use context::db::db_contextd::DatabaseContexted;
-            use context::GLOBAL_APP_CONTEXT;
             use sqlx::Error;
             use uuid::Uuid;
 
@@ -230,11 +230,11 @@ pub mod components_related {
 
     pub mod shared_related {
         pub mod property_related {
+            use crate::context::core_context::GLOBAL_APP_CONTEXT;
+            use crate::context::db::db_contexted::DatabaseContexted;
             use crate::dto::dto_property_params::DTOPropertyParams;
             use crate::model::components_related::shared_related::property_related::PropertyModel;
             use crate::repository::SQLQuery;
-            use context::db::db_contextd::DatabaseContexted;
-            use context::GLOBAL_APP_CONTEXT;
             use futures::stream::Stream;
             use sqlx::Error;
             use tokio::sync::mpsc;

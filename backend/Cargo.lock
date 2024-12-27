@@ -141,10 +141,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "backend_core"
+name = "back_core"
 version = "0.1.0"
 dependencies = [
- "context",
+ "async-trait",
+ "dotenvy",
  "futures",
  "once_cell",
  "sqlx",
@@ -248,31 +249,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "components"
-version = "0.1.0"
-dependencies = [
- "backend_core",
- "context",
- "futures",
- "ndarray",
- "noise",
- "num",
- "num-traits",
- "once_cell",
- "rand",
- "rayon",
- "serde",
- "serde_json",
- "sqlx",
- "thiserror",
- "tokio",
- "tracing",
- "utils",
- "uuid",
- "validator",
-]
-
-[[package]]
 name = "concurrent-queue"
 version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -286,19 +262,6 @@ name = "const-oid"
 version = "0.9.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c2459377285ad874054d797f3ccebf984978aa39129f6eafde5cdc8315b612f8"
-
-[[package]]
-name = "context"
-version = "0.1.0"
-dependencies = [
- "async-trait",
- "dotenvy",
- "once_cell",
- "sqlx",
- "thiserror",
- "tokio",
- "tracing",
-]
 
 [[package]]
 name = "core-foundation-sys"
@@ -451,7 +414,7 @@ name = "ess"
 version = "0.1.0"
 dependencies = [
  "axum",
- "context",
+ "back_core",
  "log 0.1.0",
  "tokio",
  "tracing",
@@ -609,6 +572,30 @@ dependencies = [
  "pin-project-lite",
  "pin-utils",
  "slab",
+]
+
+[[package]]
+name = "game"
+version = "0.1.0"
+dependencies = [
+ "back_core",
+ "futures",
+ "ndarray",
+ "noise",
+ "num",
+ "num-traits",
+ "once_cell",
+ "rand",
+ "rayon",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "thiserror",
+ "tokio",
+ "tracing",
+ "utils",
+ "uuid",
+ "validator",
 ]
 
 [[package]]
