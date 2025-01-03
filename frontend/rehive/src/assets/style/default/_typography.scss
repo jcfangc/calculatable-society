@@ -1,0 +1,50 @@
+// _typography.scss
+
+:root {
+
+    // ======================================================
+    // 
+    // 字体大小 (Font Sizes)
+    // 
+    // ======================================================
+
+    --font-size-sm: 0.875rem; // 小字体
+    --font-size-base: 1rem; // 基础字体大小
+    --font-size-lg: 1.25rem; // 大字体
+    --font-size-xl: 1.5rem; // 超大字体
+
+    // ======================================================
+    // 
+    // 行高 (Line Heights)
+    // 
+    // ======================================================
+
+    --line-height-sm: 1.25; // 小行高
+    --line-height-base: 1.5; // 默认行高
+    --line-height-lg: 1.75; // 大行高
+
+    // ======================================================
+    // 
+    // 字重 (Font Weights)
+    // 
+    // ======================================================
+
+    --font-weight-light: 300; // 轻
+    --font-weight-normal: 400; // 正常
+    --font-weight-medium: 500; // 中等
+    --font-weight-bold: 700; // 粗体
+
+    // ======================================================
+    // 
+    // 字体族 (Font Families)
+    // 
+    // ======================================================
+
+    --font-family-sans: 'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    --font-family-mono: 'Noto Sans Mono CJK SC', 'Source Code Pro', 'Courier New', 'Consolas', 'Monaco', monospace;
+
+    --font-family-base: var(--font-family-sans); // 基础文本字体
+    --font-family-heading: var(--font-family-sans); // 标题字体
+    --font-family-code: var(--font-family-mono); // 等宽字体 (代码显示用)
+
+}

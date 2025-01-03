@@ -1,48 +1,33 @@
-﻿version: '3.8'
-
-services:
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    volumes:
-      - ./frontend:/workspace
-    networks:
-      - dev-network
-    ports:
-      - "3000:3000"
-    environment:
-      - NODE_ENV=development
-
+﻿services:
   backend:
+    privileged: true # 启用特权模式
     build:
       context: ./backend
       dockerfile: Dockerfile
     volumes:
-      - ./backend:/workspace
+      - ./backend:/backend_app
     networks:
       - dev-network
-    depends_on:
-      - database
     ports:
       - "8000:8000"
-    environment:
-      - RUST_LOG=info
+    command: [ "tail", "-f", "/dev/null" ] # 保持容器运行
 
-  database:
+  frontend:
+    privileged: true # 启用特权模式
     build:
-      context: ./database
+      context: ./frontend
       dockerfile: Dockerfile
     volumes:
-      - ./database/data:/var/lib/postgresql/data # 持久化数据目录
+      - ./frontend:/frontend_app
+      - /frontend_app/node_modules # 防止 node_modules 被覆盖
     networks:
       - dev-network
     ports:
-      - "5432:5432"
+      - "5173:5173" # 前端 Vite 开发服务器默认端口
+      - "5174:5174" # 避免端口冲突
+    command: [ "tail", "-f", "/dev/null" ] # 保持容器运行
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: mydb
+      - NODE_ENV=development # 设置环境变量
 
 networks:
   dev-network:

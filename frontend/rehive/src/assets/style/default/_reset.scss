@@ -1,0 +1,10 @@
+// _reset.scss
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    height: 100vh; // 改为 100vh，避免多余计算
+    overflow: hidden; // 禁止滚动条
+    background-color: var(--bg-primary); // 使用 CSS 变量
+}

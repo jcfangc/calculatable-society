@@ -1,0 +1,78 @@
+// _colours.scss
+
+:root {
+    // ======================================================
+    // 
+    // 主色调 (Primary Colors) —— 基础颜色
+    // 
+    // ======================================================
+
+    --primary-color: #292929; // 黑色 - 主色调
+    --secondary-color: #efefef; // 白色 - 次色调
+
+    // ======================================================
+    // 
+    // 文本颜色 (Text Colors) —— 控制文字颜色
+    // 
+    // ======================================================
+
+    --text-primary: var(--primary-color); // 默认文字颜色
+    --text-secondary: var(--secondary-color); // 反色文字颜色
+
+    // ======================================================
+    // 
+    // 背景颜色 (Background Colors) —— 控制背景色
+    // 
+    // ======================================================
+
+    --bg-primary: var(--primary-color); // 默认背景色
+    --bg-secondary: var(--secondary-color); // 反色背景色
+
+    // ======================================================
+    // 
+    // 边框颜色 (Border Colors) —— 控制边框颜色
+    // 
+    // ======================================================
+
+    --border-color: var(--secondary-color); // 默认边框颜色
+    --hover-border: var(--primary-color); // 悬停边框颜色
+
+    // ======================================================
+    // 
+    // 状态颜色 (State Colors) —— 动态交互状态颜色
+    // 
+    // ======================================================
+
+    // Hover 状态
+    --hover-bg: var(--secondary-color); // 悬停背景色
+    --hover-text: var(--primary-color); // 悬停文字颜色
+
+    // Focus 状态
+    --focus-shadow-color: var(--secondary-color); // 聚焦状态光晕颜色
+
+    // ======================================================
+    // 
+    // 反馈颜色 (Feedback Colors) —— 成功、警告、错误等状态
+    // 
+    // ======================================================
+
+    // 成功状态 (Success)
+    --success-text: var(--text-secondary);
+    --success-bg: #4caf50; // 绿色背景
+    --success-border: #388e3c; // 深绿色边框
+
+    // 警告状态 (Warning)
+    --warning-text: var(--text-secondary);
+    --warning-bg: #ff9800; // 橙色背景
+    --warning-border: #f57c00; // 深橙色边框
+
+    // 错误状态 (Error)
+    --error-text: var(--text-secondary);
+    --error-bg: #f44336; // 红色背景
+    --error-border: #d32f2f; // 深红色边框
+
+    // 信息状态 (Info)
+    --info-text: var(--text-secondary);
+    --info-bg: #2196f3; // 蓝色背景
+    --info-border: #1976d2; // 深蓝色边框
+}

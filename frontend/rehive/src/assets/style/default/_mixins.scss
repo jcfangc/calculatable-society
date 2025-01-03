@@ -1,0 +1,39 @@
+// _mixins.scss
+
+// 按钮样式混入
+@mixin button-style($padding-y: var(--spacing-sm), // 默认垂直内边距
+    $padding-x: var(--spacing-md), // 默认水平内边距
+    $font-size: var(--font-size-base), // 默认字体大小
+    $font-weight: var(--font-weight-medium), // 默认字体粗细
+    $line-height: var(--line-height-base) // 默认行高
+
+) {
+    padding: $padding-y $padding-x; // 使用 spacing 变量
+    font-size: $font-size; // 使用 font-size 变量
+    font-weight: $font-weight; // 使用 font-weight 变量
+    line-height: $line-height; // 使用 line-height 变量
+    color: var(--text-secondary); // 使用 text-secondary 变量
+    background-color: var(--bg-primary);
+    border: var(--border-size) solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    transition: var(--transition-normal); // 使用 transition 变量
+
+    // 悬停状态
+    &:hover {
+        background-color: var(--hover-bg);
+        color: var(--hover-text);
+        border: var(--border-size) solid var(--hover-border);
+    }
+
+    // 激活状态
+    &:active {
+        transform: var(--transform-scale-sm); // 使用 transform 缩放变量
+    }
+
+    // 聚焦状态
+    &:focus {
+        outline: none;
+        box-shadow: var(--focus-shadow-md); // 使用 focus-shadow 变量
+    }
+}
