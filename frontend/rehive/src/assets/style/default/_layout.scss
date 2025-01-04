@@ -18,7 +18,12 @@
     // 
     // ======================================================
 
-    --border-size: 0.1rem; // 边框大小
+    // 边框尺寸
+    --border-size-sm: 0.1rem; // 小边框
+    --border-size-md: 0.2rem; // 中等边框
+    --border-size-lg: 0.4rem; // 大边框
+
+    // 圆角尺寸
     --border-radius-sm: 0.25rem; // 小圆角
     --border-radius-md: 0.5rem; // 中圆角
     --border-radius-lg: 1rem; // 大圆角

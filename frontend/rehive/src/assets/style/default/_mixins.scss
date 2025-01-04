@@ -1,39 +1,173 @@
 // _mixins.scss
 
-// 按钮样式混入
-@mixin button-style($padding-y: var(--spacing-sm), // 默认垂直内边距
-    $padding-x: var(--spacing-md), // 默认水平内边距
-    $font-size: var(--font-size-base), // 默认字体大小
-    $font-weight: var(--font-weight-medium), // 默认字体粗细
-    $line-height: var(--line-height-base) // 默认行高
+// 颜色配置混入
+@mixin colour-config($text-color: var(--text-secondary), // 默认文本颜色
+    $bg-color: var(--bg-primary), // 默认背景颜色
+    $border-color: var(--border-color), // 默认边框颜色
 
 ) {
-    padding: $padding-y $padding-x; // 使用 spacing 变量
-    font-size: $font-size; // 使用 font-size 变量
-    font-weight: $font-weight; // 使用 font-weight 变量
-    line-height: $line-height; // 使用 line-height 变量
-    color: var(--text-secondary); // 使用 text-secondary 变量
-    background-color: var(--bg-primary);
-    border: var(--border-size) solid var(--border-color);
-    border-radius: var(--border-radius-sm);
-    cursor: pointer;
-    transition: var(--transition-normal); // 使用 transition 变量
+    color: $text-color;
+    background-color: $bg-color;
+    border-color: $border-color;
+}
+
+// 排版配置混入
+@mixin typography-config( // 字体家族
+    $font-family: var(--font-family-base),
+
+    // 基础文字样式
+    $font-size: var(--font-size-base),
+    $font-weight: var(--font-weight-medium),
+    $line-height: var(--line-height-base),
+    $letter-spacing: normal,
+    $font-style: normal, // italic, oblique, normal
+    $text-decoration: none, // underline, line-through, overline, none
+    $text-transform: none, // uppercase, lowercase, capitalize, none
+
+    // 对齐与换行
+    $text-align: left,
+    $white-space: normal, // nowrap, pre, pre-wrap, etc.
+    $word-break: normal // break-word, break-all, keep-all, etc.
+
+) {
+    font-family: $font-family;
+    font-size: $font-size;
+    font-weight: $font-weight;
+    line-height: $line-height;
+    letter-spacing: $letter-spacing;
+    font-style: $font-style;
+    text-decoration: $text-decoration;
+    text-transform: $text-transform;
+    text-align: $text-align;
+    white-space: $white-space;
+    word-break: $word-break;
+}
+
+
+@mixin layout-config( // 基础尺寸
+    $padding-y: var(--spacing-sm),
+    $padding-x: var(--spacing-md),
+    $margin-y: 0,
+    $margin-x: 0,
+
+    // 尺寸与显示
+    $width: auto,
+    $height: auto,
+    $max-width: none,
+    $min-height: 0,
+
+    // 布局模式
+    $display: inline-flex,
+    $flex-direction: row,
+    $flex-wrap: nowrap,
+    $gap: 0, // flex gap
+    $align-items: center,
+    $justify-content: center,
+
+    // 边框与圆角
+    $border-size: var(--border-size-sm),
+    $border-style: solid,
+    $border-color: currentColor, // 或自定义颜色
+    $border-radius: var(--border-radius-sm),
+
+    // 盒模型 & 其他
+    $box-sizing: border-box,
+    $overflow: visible,
+    $position: static,
+    $z-index: auto) {
+    // 基础尺寸
+    padding: $padding-y $padding-x;
+    margin: $margin-y $margin-x;
+
+    // 布局模式
+    display: $display;
+    flex-direction: $flex-direction;
+    flex-wrap: $flex-wrap;
+    gap: $gap;
+    align-items: $align-items;
+    justify-content: $justify-content;
+
+    // 尺寸与显示
+    width: $width;
+    height: $height;
+    max-width: $max-width;
+    min-height: $min-height;
+
+    // 边框
+    border: #{$border-size} $border-style $border-color;
+    border-radius: $border-radius;
+
+    // 盒模型 & 其他
+    box-sizing: $box-sizing;
+    overflow: $overflow;
+    position: $position;
+    z-index: $z-index;
+}
+
+
+@mixin effects-config( // 基础过渡配置
+    $transition: var(--transition-normal),
 
     // 悬停状态
-    &:hover {
-        background-color: var(--hover-bg);
-        color: var(--hover-text);
-        border: var(--border-size) solid var(--hover-border);
-    }
+    $hover-bg-color: var(--hover-bg-color),
+    $hover-text-color: var(--hover-text-color),
+    $hover-border-color: var(--hover-border-color),
+    $hover-box-shadow: var(--box-shadow-sm), // 当需要hover阴影时可传入
 
     // 激活状态
-    &:active {
-        transform: var(--transform-scale-sm); // 使用 transform 缩放变量
-    }
+    $active-transform: var(--transform-scale-sm),
+    $active-box-shadow: var(--box-shadow-lg), // 激活状态的阴影(可选)
 
     // 聚焦状态
-    &:focus {
-        outline: none;
-        box-shadow: var(--focus-shadow-md); // 使用 focus-shadow 变量
+    $focus-shadow: var(--box-shadow-sm),
+    $outline: none, // 有的设计会保留 outline，用于无障碍
+
+    // 禁用颜色样式
+    $disable-bg-color: var(--disabled-bg-color),
+    $disable-text-color: var(--disabled-text-color),
+    $disable-border-color: var(--disabled-border-color),
+    $disabled-cursor: not-allowed // 鼠标悬停样式
+
+) {
+    // 过渡效果
+    transition: $transition;
+
+    // ======================================
+    // 悬停状态
+    // ======================================
+    &:hover {
+        background-color: $hover-bg-color;
+        color: $hover-text-color;
+        border-color: $hover-border-color;
+        box-shadow: $hover-box-shadow;
+    }
+
+    // ======================================
+    // 激活状态
+    // ======================================
+    &:active {
+        // 缩放或位移等变换
+        transform: $active-transform;
+        box-shadow: $active-box-shadow;
+    }
+
+    // ======================================
+    // 聚焦状态
+    // ======================================
+    &:focus,
+    &:focus-visible {
+        outline: $outline;
+        box-shadow: $focus-shadow;
+    }
+
+    &[disabled],
+    &.is-disabled {
+        // 禁用颜色样式
+        background-color: $disable-bg-color;
+        color: $disable-text-color;
+        border-color: $disable-border-color;
+
+        cursor: $disabled-cursor;
+        box-shadow: none; // 移除阴影
     }
 }

@@ -1,59 +1,102 @@
 // _colours.scss
 
+@use "sass:color"; // 引入 color 模块
+
+// 主色调
+$primary-color: #00062a;
+
+$primary-stronger: color.scale($primary-color, $lightness: -10%);
+$primary-strongest: color.scale($primary-color, $lightness: -30%);
+
+// 将 weak 颜色变浅，并增加透明度
+$primary-weaker: color.change(color.scale($primary-color, $lightness: 10%), $alpha: 0.9);
+$primary-weakest: color.change(color.scale($primary-color, $lightness: 30%), $alpha: 0.7);
+
+// 辅助色调
+$secondary-color: #e57fff;
+
+// 较暗的弱色调
+$secondary-weaker: color.change(color.scale($secondary-color, $lightness: -10%), $alpha: 0.9);
+$secondary-weakeest: color.change(color.scale($secondary-color, $lightness: -30%), $alpha: 0.7);
+
+// 较亮的强色调
+$secondary-stronger: color.scale($secondary-color, $lightness: 10%);
+$secondary-strongest: color.scale($secondary-color, $lightness: 30%);
+
 :root {
     // ======================================================
-    // 
+    //
     // 主色调 (Primary Colors) —— 基础颜色
-    // 
+    //
     // ======================================================
 
-    --primary-color: #292929; // 黑色 - 主色调
-    --secondary-color: #efefef; // 白色 - 次色调
+    // 主色调
+    --primary-color: #{$primary-color};
+
+    --primary-color-stronger: #{$primary-stronger};
+    --primary-color-strongest: #{$primary-strongest};
+
+    --primary-color-weaker: #{$primary-weaker};
+    --primary-color-weakest: #{$primary-weakest};
+
+    // 辅助色调
+    --secondary-color: #{$secondary-color};
+
+    --secondary-color-stronger: #{$secondary-stronger};
+    --secondary-color-strongest: #{$secondary-strongest};
+
+    --secondary-color-weaker: #{$secondary-weaker};
+    --secondary-color-weakest: #{$secondary-weakeest};
 
     // ======================================================
-    // 
+    //
     // 文本颜色 (Text Colors) —— 控制文字颜色
-    // 
+    //
     // ======================================================
 
     --text-primary: var(--primary-color); // 默认文字颜色
     --text-secondary: var(--secondary-color); // 反色文字颜色
 
     // ======================================================
-    // 
+    //
     // 背景颜色 (Background Colors) —— 控制背景色
-    // 
+    //
     // ======================================================
 
     --bg-primary: var(--primary-color); // 默认背景色
     --bg-secondary: var(--secondary-color); // 反色背景色
 
     // ======================================================
-    // 
+    //
     // 边框颜色 (Border Colors) —— 控制边框颜色
-    // 
+    //
     // ======================================================
 
     --border-color: var(--secondary-color); // 默认边框颜色
-    --hover-border: var(--primary-color); // 悬停边框颜色
 
     // ======================================================
-    // 
+    //
     // 状态颜色 (State Colors) —— 动态交互状态颜色
-    // 
+    //
     // ======================================================
 
     // Hover 状态
-    --hover-bg: var(--secondary-color); // 悬停背景色
-    --hover-text: var(--primary-color); // 悬停文字颜色
+    --hover-bg-color: var(--secondary-color-stronger); // 悬停背景色
+    --hover-text-color: var(--primary-color-stronger); // 悬停文字颜色
+    --hover-border-color: var(--primary-color-stronger); // 悬停边框颜色
 
     // Focus 状态
-    --focus-shadow-color: var(--secondary-color); // 聚焦状态光晕颜色
+    --focus-shadow-color: var(--secondary-color-stronger); // 聚焦状态光晕颜色
+
+    // Disabled 状态
+    --disabled-bg-color: var(--primary-color-weakest);
+    --disabled-text-color: var(--secondary-color-weakest);
+    --disabled-border-color: var(--secondary-color-weakest);
 
     // ======================================================
-    // 
+    //
     // 反馈颜色 (Feedback Colors) —— 成功、警告、错误等状态
-    // 
+    //
     // ======================================================
 
     // 成功状态 (Success)

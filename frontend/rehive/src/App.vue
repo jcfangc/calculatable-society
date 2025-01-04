@@ -1,12 +1,12 @@
 <template>
   <div class="app-container">
     <!-- 使用按钮组件 -->
-    <Button>提交</Button>
+    <Button></Button>
   </div>
 </template>
 
 <script setup lang="ts">
-import Button from './components/Button.vue';
+import Button from "./components/Button.vue";
 </script>
 
 <style lang="scss">
