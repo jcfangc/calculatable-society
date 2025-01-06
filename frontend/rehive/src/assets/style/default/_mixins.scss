@@ -53,7 +53,9 @@
     // 尺寸与显示
     $width: auto,
     $height: auto,
-    $max-width: none,
+    $max-width: var(--container-max-width),
+    $min-width: 0,
+    $max-height: var(--container-max-height),
     $min-height: 0,
 
     // 布局模式
@@ -91,6 +93,8 @@
     width: $width;
     height: $height;
     max-width: $max-width;
+    min-width: $min-width;
+    max-height: $max-height;
     min-height: $min-height;
 
     // 边框

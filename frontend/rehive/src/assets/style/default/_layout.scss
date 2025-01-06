@@ -24,9 +24,9 @@
     --border-size-lg: 0.4rem; // 大边框
 
     // 圆角尺寸
-    --border-radius-sm: 0.25rem; // 小圆角
-    --border-radius-md: 0.5rem; // 中圆角
-    --border-radius-lg: 1rem; // 大圆角
+    --border-radius-sm: 0.5rem; // 小圆角
+    --border-radius-md: 0.75rem; // 中圆角
+    --border-radius-lg: 1.25rem; // 大圆角
 
     // ======================================================
     // 
@@ -34,7 +34,8 @@
     // 
     // ======================================================
 
-    --container-max-width: 1200px; // 最大容器宽度
+    --container-max-width: 80vw; // 最大容器宽度
+    --container-max-height: 100vh; // 最大容器高度
     --container-padding: 1rem; // 容器内边距
 
     // ======================================================

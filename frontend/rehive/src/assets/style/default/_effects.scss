@@ -21,9 +21,9 @@
     --focus-shadow-md: 0 0 0.25rem var(--focus-shadow-color); // 中光晕
     --focus-shadow-lg: 0 0 0.5rem var(--focus-shadow-color); // 大光晕
 
-    --box-shadow-sm: 0 1px 3px var(--secondary-color); // 小阴影
-    --box-shadow-md: 0 4px 6px var(--secondary-color-stronger); // 中阴影
-    --box-shadow-lg: 0 10px 15px var(--secondary-color-strongest); // 大阴影
+    --box-shadow-sm: 0 0.1rem 1rem var(--secondary-color); // 小阴影
+    --box-shadow-md: 0 0.2rem 2rem var(--secondary-color-stronger); // 中阴影
+    --box-shadow-lg: 0 0.3rem 3rem var(--secondary-color-strongest); // 大阴影
 
     // ======================================================
     // 
