@@ -2,7 +2,7 @@
 	<!-- 使用按钮组件 -->
 	<div>
 		<ReButton
-			v-on:click-callback="clickCallback"
+			:onClickCallback="clickCallback"
 			name="测试按钮"
 			>test</ReButton
 		>
@@ -10,7 +10,7 @@
 	<div>
 		<ReInputBox
 			v-model:input-value="inputValue"
-			:inputCallback="inputCallback"
+			:onInputCallback="inputCallback"
 			placeholder="请输入内容"
 		></ReInputBox>
 	</div>
@@ -20,7 +20,7 @@
 		<ReListbox
 			:options="options"
 			v-model:selected-option="selectedOption"
-			:selectCallback="selectCallback"
+			:onSelectCallback="selectCallback"
 		></ReListbox>
 	</div>
 	<div class="aaa">{{ selectedOption }}</div>

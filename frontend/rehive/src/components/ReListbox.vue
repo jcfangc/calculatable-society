@@ -11,7 +11,7 @@
 				v-for="option in options"
 				:key="options.indexOf(option)"
 				class="option"
-				@click="updateSelectValue(option)"
+				@click.stop="updateSelectValue(option)"
 			>
 				{{ option }}
 			</ListboxOption>
@@ -26,8 +26,8 @@
 		ListboxOptions,
 		ListboxOption,
 	} from "@headlessui/vue";
-	import { ref, watch } from "vue";
-	import { useDebounce } from "@/hooks/useDebounce.hook";
+	import { useCancelableDebounce } from "@/hooks/useCancelableDebounce.hook";
+	import type { UseCancelableDebounceOptions } from "@/hooks/useCancelableDebounce.hook";
 
 	// 接收父组件传递的属性
 	const props = defineProps({
@@ -40,7 +40,7 @@
 			default: "请选择选项",
 		},
 		// 回调函数：选项变更时触发
-		selectCallback: {
+		onSelectCallback: {
 			type: Function as unknown as () => (
 				value: string | number,
 				abort?: AbortSignal
@@ -49,63 +49,23 @@
 		},
 	});
 
-	const updateSelectValue = (value: string | number) => {
-		// 更新选中的值
-		emit("update:selectedOption", value);
-	};
-
-	let abortController = new AbortController(); // 使用 AbortController 取消请求
-	let selectLoading = false;
-	const debouncedValue = ref(props.selectedOption); // 防抖用的值
-	const { debounce } = useDebounce(); // 使用自定义防抖 hook
-
-	const cancelCurrentRequest = () => {
-		// 如果正在加载，则立即中止当前请求
-		if (selectLoading) {
-			abortController.abort(); // 取消当前回调
-			abortController = new AbortController(); // 重置取消控制器
-			selectLoading = false; // 重置加载状态
-		}
-	};
-
-	watch(
-		() => props.selectedOption,
-		(newValue) => {
-			// 取消当前请求
-			cancelCurrentRequest();
-			// 防抖处理并启动加载逻辑
-			debounce(() => {
-				if (newValue) {
-					debouncedValue.value = newValue; // 更新防抖后的值
-					startLoading(newValue); // 启动加载逻辑
-				}
-			}, 1000); // 防抖时间为 1 秒
-		}
+	const { watchValue } = useCancelableDebounce<string | number>(
+		props.onSelectCallback,
+		{
+			initialValue: props.selectedOption,
+			debounceDelay: 1000,
+		} as UseCancelableDebounceOptions<string | number>
 	);
 
 	// 定义事件，用于更新 v-model
 	const emit = defineEmits(["update:selectedOption"]);
 
-	// 监听用户选择更新 v-model
-	// 用户选择后触发的逻辑
-	const startLoading = async (value: string | number) => {
-		selectLoading = true; // 设置加载状态
-
-		// 如果存在回调函数，则执行回调
-		try {
-			await props.selectCallback(value, abortController.signal); // 调用父组件传入的回调
-		} catch (error) {
-			// 错误处理
-			if (error instanceof DOMException && error.name === "AbortError") {
-			} else if (error instanceof Error) {
-				console.error("回调执行失败:", error.message);
-			} else {
-				console.error("未知错误:", error);
-			}
-		} finally {
-			selectLoading = false; // 重置加载状态
-		}
+	const updateSelectValue = (value: string | number) => {
+		// 更新选中的值
+		emit("update:selectedOption", value);
 	};
+
+	watchValue(() => props.selectedOption);
 </script>
 
 <style scoped lang="scss">

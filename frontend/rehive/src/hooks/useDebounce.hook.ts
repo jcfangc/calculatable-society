@@ -1,6 +1,12 @@
 // hooks/useDebounce.ts
 import { ref } from "vue";
 
+/**
+ * 专门用于防抖的 Hook
+ * @returns 返回一个对象，包含以下属性和方法：
+ * - debounce(callback: () => void, delay?: number): void
+ * 防抖函数，用于处理频繁触发的事件，只有在事件停止一段时间后才会执行回调。
+ */
 export function useDebounce() {
 	const debounceTimer = ref<ReturnType<typeof setTimeout> | null>(null);
 

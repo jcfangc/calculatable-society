@@ -11,14 +11,15 @@
 		:aria-required="required"
 		:required="required"
 		:aria-label="ariaLabel || placeholder"
-		@input="updateInputValue"
+		@input.stop="updateInputValue"
 	/>
 </template>
 
 <script lang="ts" setup>
 	// 导入必要依赖和类型
-	import { ref, watch } from "vue";
-	import { useDebounce } from "@/hooks/useDebounce.hook";
+	import { ref } from "vue";
+	import { useCancelableDebounce } from "@/hooks/useCancelableDebounce.hook";
+	import type { UseCancelableDebounceOptions } from "@/hooks/useCancelableDebounce.hook";
 
 	// 定义 Props
 	const props = defineProps({
@@ -33,7 +34,7 @@
 			default: false,
 		},
 		// 输入事件回调函数，允许默认参数为字符串内容
-		inputCallback: {
+		onInputCallback: {
 			type: Function as unknown as () => (
 				value: string,
 				abortSignal?: AbortSignal
@@ -76,6 +77,7 @@
 		}
 	};
 
+	// 更新输入框的值
 	const updateInputValue = (event: Event) => {
 		const inputElement = event.target as HTMLInputElement;
 		const newValue = inputElement.value;
@@ -85,58 +87,16 @@
 		emit("update:inputValue", newValue); // 更新值
 	};
 
-	let inputLoading = false;
-	const debouncedValue = ref(props.inputValue); // 防抖用的值
-	let abortController = new AbortController(); // 使用 AbortController 取消请求
-	const { debounce } = useDebounce(); // 使用自定义防抖 hook
-
-	const cancelCurrentRequest = () => {
-		// 如果正在加载，则立即中止当前请求
-		if (inputLoading) {
-			abortController.abort(); // 取消当前回调
-			abortController = new AbortController(); // 重置取消控制器
-			inputLoading = false; // 重置加载状态
-		}
-	};
-
-	watch(
-		() => props.inputValue,
-		(newValue) => {
-			// 取消当前请求
-			cancelCurrentRequest();
-			// 防抖处理并启动加载逻辑
-			debounce(() => {
-				if (newValue) {
-					debouncedValue.value = newValue; // 更新防抖后的值
-					startLoading(newValue); // 启动加载逻辑
-				}
-			}, 1000); // 防抖时间为 1 秒
-		}
+	// 使用自定义钩子函数
+	const { watchValue } = useCancelableDebounce<string>(
+		props.onInputCallback,
+		{
+			initialValue: props.inputValue,
+			debounceDelay: 1000,
+		} as UseCancelableDebounceOptions<string>
 	);
 
-	// 加载回调函数
-	const startLoading = async (value: string) => {
-		if (!value) return; // 如果输入值为空，则直接返回
-
-		// 标记加载状态
-		inputLoading = true;
-
-		try {
-			// 调用异步回调函数，并传递 abortSignal
-			await props.inputCallback(value, abortController.signal);
-		} catch (error) {
-			// 错误处理
-			if (error instanceof DOMException && error.name === "AbortError") {
-			} else if (error instanceof Error) {
-				console.error("回调执行失败:", error.message);
-			} else {
-				console.error("未知错误:", error);
-			}
-		} finally {
-			// 恢复状态
-			inputLoading = false;
-		}
-	};
+	watchValue(() => props.inputValue);
 </script>
 
 <style scoped lang="scss">
