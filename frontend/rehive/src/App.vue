@@ -34,11 +34,31 @@
 	import ReListbox from "./components/ReListbox.vue";
 
 	// 按钮回调
-	const clickCallback = async () => {
-		await new Promise((resolve) => {
-			setTimeout(() => {
-				console.log("点击回调");
-				resolve(true);
+	const clickCallback = async (
+		value: MouseEvent,
+		abortSignal?: AbortSignal
+	) => {
+		await new Promise<void>((resolve, reject) => {
+			console.log("点击回调", value);
+
+			// 设定倒计时（3秒）
+			let countdown = 3;
+
+			const intervalId = setInterval(() => {
+				if (abortSignal?.aborted) {
+					clearInterval(intervalId); // 如果中止信号触发，停止倒计时
+					reject(new DOMException("操作已被中止", "AbortError")); // 抛出AbortError
+					return;
+				}
+
+				console.log(`${countdown}秒`);
+				countdown--;
+
+				// 当倒计时结束时清除定时器
+				if (countdown < 0) {
+					clearInterval(intervalId);
+					resolve(); // 倒计时完成，调用resolve
+				}
 			}, 1000);
 		});
 	};

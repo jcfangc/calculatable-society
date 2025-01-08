@@ -18,7 +18,7 @@
 </template>
 
 <script lang="ts" setup>
-	import { defineProps, defineEmits, ref } from "vue";
+	import { ref } from "vue";
 	import { ButtonType, ButtonEvent } from "@/enums/button.enum";
 	import { useDebounce } from "@/hooks/useDebounce.hook";
 	import { useCancel } from "@/hooks/useCancel.hook";
@@ -40,7 +40,8 @@
 		// 点击回调函数，返回 Promise<void> 的异步函数
 		onClickCallback: {
 			type: Function as unknown as () => (
-				event: MouseEvent
+				event: MouseEvent,
+				abort?: AbortSignal
 			) => Promise<void>,
 			required: true,
 		},
@@ -48,9 +49,14 @@
 
 	// 触发的自定义事件
 	const emit = defineEmits([ButtonEvent.Click]);
-	const buttonLoading = ref(false);
+
 	const { debounce } = useDebounce();
-	const { cancelCurrentRequest } = useCancel();
+	const {
+		cancelCurrentRequest,
+		getSignal,
+		loading: buttonLoading,
+		startRequest,
+	} = useCancel();
 
 	async function handleClick(event: MouseEvent) {
 		// 如果按钮已禁用或正在 loading，就不处理后续点击
@@ -59,15 +65,7 @@
 		cancelCurrentRequest();
 		// 再通过 debounce 延迟执行
 		debounce(() => {
-			buttonLoading.value = true;
-			props
-				.onClickCallback(event)
-				.then(() => {
-					emit(ButtonEvent.Click, event);
-				})
-				.finally(() => {
-					buttonLoading.value = false;
-				});
+			startRequest(() => props.onClickCallback(event, getSignal()));
 		}, 500);
 	}
 </script>

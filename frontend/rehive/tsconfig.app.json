@@ -1,3 +1,4 @@
+// tsconfig.app.json
 {
   "extends": "@vue/tsconfig/tsconfig.dom.json",
   "include": [
@@ -10,10 +11,11 @@
     "src/**/__tests__/*"
   ],
   "compilerOptions": {
-    "composite": true,
-    "declaration": true, // 生成类型声明文件
-    // 按需开启增量编译
-    "incremental": true,
+    "composite": true, // 确保开启复合编译
+    "declaration": true, // 确保生成类型声明文件
+    "emitDeclarationOnly": false, // 允许生成完整输出文件
+    "incremental": true, // 支持增量编译
+    "outDir": "./dist", // 添加输出目录
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
     // 原先的路径别名
     "baseUrl": "./src",
@@ -31,34 +33,5 @@
         "store/*"
       ]
     },
-    // 一些常用的编译选项
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleResolution": "node",
-    "useDefineForClassFields": true,
-    "importHelpers": true,
-    "stripInternal": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    // 严格模式相关
-    "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "strictBindCallApply": true,
-    "strictPropertyInitialization": true,
-    "noImplicitThis": true,
-    "useUnknownInCatchVariables": true,
-    "alwaysStrict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "exactOptionalPropertyTypes": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUncheckedIndexedAccess": true,
-    "noImplicitOverride": true,
-    "noPropertyAccessFromIndexSignature": true,
-    // 一般可保留跳过声明文件检查
-    "skipLibCheck": true
   }
 }

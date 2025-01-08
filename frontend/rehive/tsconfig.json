@@ -1,11 +1,9 @@
+// tsconfig.json
 {
   "files": [
     "./src/types/route.d.ts"
   ],
   "references": [
-    {
-      "path": "./tsconfig.node.json"
-    },
     {
       "path": "./tsconfig.app.json"
     }
