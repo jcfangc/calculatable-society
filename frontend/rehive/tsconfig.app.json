@@ -10,6 +10,8 @@
     "src/**/__tests__/*"
   ],
   "compilerOptions": {
+    "composite": true,
+    "declaration": true, // 生成类型声明文件
     // 按需开启增量编译
     "incremental": true,
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
@@ -36,7 +38,6 @@
     "useDefineForClassFields": true,
     "importHelpers": true,
     "stripInternal": true,
-    "noEmitOnError": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     // 严格模式相关

@@ -1,5 +1,5 @@
 [workspace]
-members = ["game", "back_core", "log", "utils"]
+members = ["game", "back_core", "log", "utils", "auth"]
 
 [package]
 name = "ess"

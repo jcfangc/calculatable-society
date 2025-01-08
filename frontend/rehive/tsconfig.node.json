@@ -8,8 +8,11 @@
     "playwright.config.*"
   ],
   "compilerOptions": {
+    "composite": true,
     // 不输出编译文件
-    "noEmit": true,
+    "emitDeclarationOnly": true,
+    "declaration": true, // 生成类型声明文件
+    "esModuleInterop": true,
     // 开启增量编译，适合大型项目
     "incremental": true,
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",

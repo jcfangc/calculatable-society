@@ -1,0 +1,39 @@
+@mixin scrollbar-config(
+	$scrollbar-width: 0.8rem,
+	$scrollbar-height: 1rem,
+	$track-bg: var(--bg-primary),
+	$thumb-bg: var(--primary-color),
+	$thumb-hover-bg: var(--hover-bg-color),
+	$thumb-border-radius: var(--border-radius-sm),
+	$thumb-border: 1px dashed var(--bg-secondary),
+	$thumb-hover-border: 1px solid var(--bg-primary)
+) {
+	/* 滚动条整体尺寸 */
+	&::-webkit-scrollbar {
+		width: $scrollbar-width; // 滚动条宽度
+		height: $scrollbar-height; // 滚动条高度（横向滚动）
+	}
+
+	/* 滚动条轨道 */
+	&::-webkit-scrollbar-track {
+		background: $track-bg; // 滚动条轨道背景色
+		border-radius: $thumb-border-radius; // 轨道圆角
+	}
+
+	/* 滚动条滑块 */
+	&::-webkit-scrollbar-thumb {
+		background-color: $thumb-bg; // 滑块颜色
+		border-radius: $thumb-border-radius; // 滑块圆角
+		border: $thumb-border; // 滑块边框样式
+	}
+
+	/* 滚动条滑块悬停样式 */
+	&::-webkit-scrollbar-thumb:hover {
+		background-color: $thumb-hover-bg; // 悬停颜色
+		border: $thumb-hover-border; // 悬停边框样式
+	}
+
+	/* Firefox 支持 */
+	scrollbar-width: thin; // 滚动条宽度 (auto, thin, none)
+	scrollbar-color: $thumb-bg $track-bg; // 滑块和轨道颜色
+}
