@@ -1,7 +1,9 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
-import { languages, LanguageEnum } from "@/locales/index.locale";
-import { TextKeys } from "@/locales/keys.locale";
+import { languages, LanguageEnum } from "@/utils/locales/index.util";
+import { TextKeys } from "@/utils/locales/keys.util";
+import { LocalStorageKeys } from "@/utils/browser/local-storage/localStorageKeys.util";
+import { LocalStorageUtil } from "@/utils/browser/local-storage/localStorage.util";
 
 // 插值工具函数
 const formatString = (
@@ -18,7 +20,8 @@ const formatString = (
 export const useLanguageStore = defineStore("language", () => {
 	// 当前语言状态
 	const currentLanguage = ref<LanguageEnum>(
-		(localStorage.getItem("lang") as LanguageEnum) || LanguageEnum.ZH
+		LocalStorageUtil.get<LanguageEnum>(LocalStorageKeys.LANGUAGE) ||
+			LanguageEnum.ZH
 	);
 
 	// 获取当前语言包
@@ -37,7 +40,7 @@ export const useLanguageStore = defineStore("language", () => {
 	const setLanguage = (lang: LanguageEnum): void => {
 		if (languages[lang]) {
 			currentLanguage.value = lang; // 更新语言
-			localStorage.setItem("lang", lang); // 持久化语言
+			LocalStorageUtil.set(LocalStorageKeys.LANGUAGE, lang); // 保存到本地
 		} else {
 			console.warn(`Unsupported language: ${lang}`);
 		}
@@ -46,7 +49,7 @@ export const useLanguageStore = defineStore("language", () => {
 	// 返回可用的方法和状态
 	return {
 		currentLanguage,
-		messages: langPack,
+		langPack,
 		t,
 		setLanguage,
 	};
