@@ -1,9 +1,39 @@
 <template>
-	<Sidebar />
+	<!-- <Sidebar /> -->
+	<WorldWindow
+		:width="windowWidth"
+		:height="windowHeight"
+		:civilization_id="civilizationId"
+	/>
 </template>
 
 <script setup lang="ts">
-	import Sidebar from "@/components/Sidebar.vue";
+	// import Sidebar from "@/components/Sidebar.vue";
+	import WorldWindow from "@/views/WorldWindow.vue";
+	import { ref, onMounted, onUnmounted } from "vue";
+
+	// 窗口宽高
+	const windowWidth = ref(window.innerWidth);
+	const windowHeight = ref(window.innerHeight);
+
+	// 生成一个临时 UUID
+	const civilizationId = ref(crypto.randomUUID());
+
+	// 更新窗口大小
+	const updateWindowSize = () => {
+		windowWidth.value = window.innerWidth;
+		windowHeight.value = window.innerHeight;
+	};
+
+	// 监听窗口大小变化
+	onMounted(() => {
+		window.addEventListener("resize", updateWindowSize);
+	});
+
+	// 移除监听器以避免内存泄漏
+	onUnmounted(() => {
+		window.removeEventListener("resize", updateWindowSize);
+	});
 </script>
 
 <style lang="scss">

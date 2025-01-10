@@ -1,11 +1,21 @@
-// tsconfig.json
 {
-  "files": [
-    "./src/types/route.d.ts"
-  ],
-  "references": [
-    {
-      "path": "./tsconfig.app.json"
-    }
-  ]
+	"include": ["env.d.ts", "src/**/*", "src/**/*.vue"],
+	"exclude": ["node_modules", "src/**/__tests__/*"],
+	"compilerOptions": {
+		"module": "esnext",
+		"moduleResolution": "node",
+		"target": "esnext",
+		"lib": ["dom", "dom.iterable", "esnext"], // 确保包含全局类型定义库
+		"jsx": "preserve",
+		"strict": true,
+		"skipLibCheck": true,
+		"esModuleInterop": true,
+		"baseUrl": "./src",
+		"paths": {
+			"@/*": ["./*"],
+			"@components/*": ["components/*"],
+			"@assets/*": ["assets/*"],
+			"@store/*": ["store/*"]
+		}
+	}
 }

@@ -1,8 +1,16 @@
 <template>
 	<Combobox v-model="selectedPerson">
-		<ComboboxInput @change="query = $event.target.value" />
-		<ComboboxOptions>
+		<ComboboxInput
+			@change="query = $event.target.value"
+			class="combobox-input"
+		/>
+
+		<ComboboxOptions
+			class="combobox-options"
+			v-if="filteredPeople.length !== 0"
+		>
 			<ComboboxOption
+				class="combobox-option"
 				v-for="person in filteredPeople"
 				:key="person"
 				:value="person"
@@ -13,7 +21,7 @@
 	</Combobox>
 </template>
 
-<script setup>
+<script setup lang="ts">
 	import { ref, computed } from "vue";
 	import {
 		Combobox,
@@ -23,11 +31,17 @@
 	} from "@headlessui/vue";
 
 	const people = [
-		"Durward Reynolds",
-		"Kenton Towne",
-		"Therese Wunsch",
-		"Benedict Kessler",
-		"Katelyn Rohan",
+		"门前大桥下",
+		"游过一群鸭",
+		"快来快来数一数",
+		"二四六七八",
+		"嘎嘎嘎嘎",
+		"真呀真多呀",
+		"数不清",
+		"数不清",
+		"真呀真多呀",
+		"数不清",
+		"到底有多少鸭",
 	];
 	const selectedPerson = ref(people[0]);
 	const query = ref("");
@@ -42,3 +56,36 @@
 			  })
 	);
 </script>
+
+<style lang="scss">
+	@use "@/assets/style/default/index.scss" as *;
+
+	.combobox-input {
+		@include default-config;
+		cursor: pointer;
+	}
+
+	.combobox-options {
+		@include default-config($layout-config: false, $effects-config: false);
+		@include effects-config(
+			$active-transform: none,
+			$hover-border-color: transparent
+		);
+		@include layout-config(
+			$flex-direction: column,
+			$align-items: start,
+			$justify-content: start,
+			$gap: var(--spacing-sm),
+			$overflow: auto
+		);
+
+		@include scrollbar-config;
+
+		max-height: calc(var(--container-max-height) * 0.5);
+	}
+
+	.combobox-option {
+		@include default-config;
+		cursor: pointer;
+	}
+</style>

@@ -3,7 +3,7 @@
 @use "sass:color"; // 引入 color 模块
 
 // 主色调
-$primary-color: rgb(0, 3, 53);
+$primary-color: rgb(22, 0, 95);
 
 $primary-stronger: color.scale($primary-color, $lightness: -10%);
 $primary-strongest: color.scale($primary-color, $lightness: -30%);
@@ -19,7 +19,7 @@ $primary-weakest: color.change(
 );
 
 // 辅助色调
-$secondary-color: rgb(227, 155, 255);
+$secondary-color: rgb(253, 48, 229);
 
 // 较暗的弱色调
 $secondary-weaker: color.change(
