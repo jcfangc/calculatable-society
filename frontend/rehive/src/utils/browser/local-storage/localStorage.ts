@@ -1,4 +1,4 @@
-import { LocalStorageKeys } from "@/utils/browser/local-storage/localStorageKeys.util";
+import { LocalStorageKeys } from "@/utils/browser/local-storage/localStorageKeys";
 
 export const LocalStorageUtil = {
 	set<T>(key: LocalStorageKeys, value: T): void {

@@ -1,4 +1,4 @@
-import { TextKeys } from "../keys.util";
+import { TextKeys } from "../keys";
 
 export const zh = {
 	[TextKeys.Login]: "登录",

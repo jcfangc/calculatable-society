@@ -1,5 +1,5 @@
-import { en } from "./langs/en.util";
-import { zh } from "./langs/zh.util";
+import { en } from "./langs/en";
+import { zh } from "./langs/zh";
 
 export const enum LanguageEnum {
 	EN = "EN",

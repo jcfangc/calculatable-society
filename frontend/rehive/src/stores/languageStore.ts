@@ -1,9 +1,9 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
-import { languages, LanguageEnum } from "@/utils/locales/index.util";
-import { TextKeys } from "@/utils/locales/keys.util";
-import { LocalStorageKeys } from "@/utils/browser/local-storage/localStorageKeys.util";
-import { LocalStorageUtil } from "@/utils/browser/local-storage/localStorage.util";
+import { languages, LanguageEnum } from "@/utils/locales/index";
+import { TextKeys } from "@/utils/locales/keys";
+import { LocalStorageKeys } from "@/utils/browser/local-storage/localStorageKeys";
+import { LocalStorageUtil } from "@/utils/browser/local-storage/localStorage";
 
 // 插值工具函数
 const formatString = (
