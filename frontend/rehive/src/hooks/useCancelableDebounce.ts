@@ -1,7 +1,7 @@
 import { ref, watch } from "vue";
 import type { Ref } from "vue";
-import { useDebounce } from "@/hooks/useDebounce.hook";
-import { useCancel } from "@/hooks/useCancel.hook";
+import { useDebounce } from "@/hooks/useDebounce";
+import { useCancel } from "@/hooks/useCancel";
 
 /**
  * useCancelableDebounce 的配置项

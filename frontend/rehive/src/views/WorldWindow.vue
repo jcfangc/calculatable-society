@@ -1,220 +1,107 @@
 <template>
-	<div ref="threeCanvas"></div>
+	<div
+		id="threeCanvas"
+		ref="threeCanvas"
+		@click="handleFocus"
+		@focus="handleFocus"
+		@blur="handleBlur"
+	></div>
 </template>
 
-<script lang="ts">
-	import {
-		defineComponent,
-		onMounted,
-		onBeforeUnmount,
-		ref,
-		watch,
-	} from "vue";
-	import * as THREE from "three";
-	import { FlyControls } from "three/examples/jsm/controls/FlyControls";
-	import { useWebSocket, WebSocketConfig } from "@/hooks/useWebSocket.hook";
-	import { createThreeScene, makeThreeRefs } from "@/utils/threejs";
-	import hotkeys from "hotkeys-js";
-	import { createCameraController } from "@/utils/threejs/createShortcuts";
+<script setup lang="ts">
+	import { onMounted, onBeforeUnmount, ref, Ref } from "vue";
+	import { ThreeManager } from "@/utils/threejs/threeManager";
+	import { ThreeCoreOptions } from "@/utils/threejs/threeCoreFactory";
+	import { HexagonGridConfig } from "@/utils/threejs/hexagonGridManager";
+	import { useWebSocket, makeWebSocketConfig } from "@/hooks/useWebSocket";
 
-	/**
-	 * WorldWindow 组件
-	 */
-	export default defineComponent({
-		name: "WorldWindow",
-
-		//--------------------------------------------------
-		// 1. Props
-		//--------------------------------------------------
-		props: {
-			width: {
-				type: Number,
-				required: true,
-			},
-			height: {
-				type: Number,
-				required: true,
-			},
-			civilization_id: {
-				type: String,
-				required: true,
-				validator: (value: string) => /^[0-9a-fA-F-]{36}$/.test(value), // 验证是否为有效的 UUID
-			},
+	const props = defineProps({
+		width: {
+			type: Number,
+			required: true,
 		},
-
-		setup(props) {
-			//--------------------------------------------------
-			// 2. refs, 变量声明
-			//--------------------------------------------------
-			const threeCanvas = ref<HTMLDivElement | null>(null); // 容器 DOM
-			let renderer: THREE.WebGLRenderer | null = null;
-			let camera: THREE.PerspectiveCamera | null = null;
-			let scene: THREE.Scene | null = null;
-			let controls: FlyControls | null = null;
-
-			const dependencies = makeThreeRefs(
-				scene,
-				camera,
-				renderer,
-				controls
-			);
-
-			const { initializeScene, updateRendererSize, updateSceneWithData } =
-				createThreeScene(
-					threeCanvas,
-					props.width,
-					props.height,
-					dependencies
-				);
-
-			// WebSocket 配置
-			const wsConfig: WebSocketConfig = {
-				url: "wss://your-backend-endpoint.com",
-				autoReconnect: true,
-				reconnectInterval: 2000,
-				maxReconnectAttempts: 3,
-				onOpen: (socket) => {
-					socket.send(
-						JSON.stringify({
-							type: "fetch",
-							id: props.civilization_id,
-						})
-					);
-				},
-				onMessage: (event) => {
-					const data = JSON.parse(event.data);
-					console.log("Received data:", data);
-					updateSceneWithData(data);
-				},
-				onError: (error) => {
-					console.error("WebSocket error:", error);
-				},
-				onClose: (event) => {
-					console.log("WebSocket closed:", event);
-				},
-			};
-
-			// 使用 WebSocket Hook
-			const { connect, disconnect } = useWebSocket(wsConfig);
-
-			//--------------------------------------------------
-			// 3. 生命周期钩子
-			//--------------------------------------------------
-			onMounted(() => {
-				// 初始化场景、渲染器以及 Controls
-				const initThreeRefs = initializeScene();
-
-				// 模拟获取数据后更新场景并获取相机默认信息
-				const sceneInfo = mockFetchData();
-
-				// 检查是否成功获取场景信息
-				if (!sceneInfo || !initThreeRefs?.camera) {
-					console.error("Failed to initialize scene data.");
-					return;
-				} else {
-					// 解构场景信息
-					const { defaultPosition, defaultLookAt } = sceneInfo;
-
-					// 创建相机控制器
-					const {
-						resetCameraPosition,
-						reverseCamera,
-						updateCameraZ,
-					} = createCameraController(
-						initThreeRefs.camera, // 包含 scene, camera, renderer, controls
-						defaultPosition,
-						defaultLookAt
-					);
-
-					// Alt + G：重置相机位置
-					hotkeys("alt+g", resetCameraPosition);
-
-					// Alt + R：摄像头反转 180 度
-					hotkeys("alt+r", reverseCamera);
-
-					// Z + 数字 + Enter：更新相机 Z 坐标
-					let zValueInput = "";
-					hotkeys("z+*", (event) => {
-						// 将 event.key 转为数字后使用 isNaN 检查
-						if (!isNaN(Number(event.key))) {
-							zValueInput += event.key; // 拼接数字
-						}
-					});
-
-					hotkeys("enter", () => {
-						if (zValueInput) {
-							const zValue = parseFloat(zValueInput);
-							updateCameraZ(zValue);
-							zValueInput = ""; // 重置输入
-						}
-					});
-				}
-			});
-
-			onBeforeUnmount(() => {
-				// 清理 WebSocket 连接
-				disconnect();
-				// 清理 Controls
-				if (dependencies.controls) {
-					dependencies.controls.dispose();
-				}
-				hotkeys.unbind("alt+g");
-				hotkeys.unbind("alt+r");
-				hotkeys.unbind("z+*");
-				hotkeys.unbind("enter");
-			});
-
-			//--------------------------------------------------
-			// 4. Watchers
-			//--------------------------------------------------
-			watch(
-				() => [props.width, props.height],
-				() => {
-					updateRendererSize();
-				}
-			);
-
-			//--------------------------------------------------
-			// 5. 主要逻辑方法
-			//--------------------------------------------------
-
-			/**
-			 * 模拟获取数据后更新场景
-			 * @returns 更新场景后的信息（defaultPosition 和 defaultLookAt）
-			 */
-			const mockFetchData = () => {
-				// 模拟获取数据并更新场景
-				const sceneUpdateResult = updateSceneWithData({
-					rowNum: 256,
-					columnNum: 256,
-				});
-
-				// 检查返回值是否存在
-				if (sceneUpdateResult) {
-					const { defaultPosition, defaultLookAt } =
-						sceneUpdateResult;
-
-					console.log("Default Position:", defaultPosition);
-					console.log("Default LookAt:", defaultLookAt);
-
-					// 返回更新后的信息
-					return { defaultPosition, defaultLookAt };
-				} else {
-					console.error("Failed to update scene with data.");
-					return null; // 返回 null 表示更新失败
-				}
-			};
-
-			//--------------------------------------------------
-			// 7. 返回给模板使用的变量/方法
-			//--------------------------------------------------
-			return {
-				threeCanvas,
-			};
+		height: {
+			type: Number,
+			required: true,
 		},
+		civilization_id: {
+			type: String,
+			required: true,
+			validator: (value: string) => /^[0-9a-fA-F-]{36}$/.test(value), // 验证是否为有效的 UUID
+		},
+	});
+
+	const isActive = ref(false); // 是否激活当前组件
+	const threeCanvas = ref<HTMLDivElement | null>(null); // 容器 DOM
+	let jsonData: { rowNum: number; columnNum: number } = {
+		rowNum: 16,
+		columnNum: 16,
+	}; // 初始网格数据
+
+	function handleFocus() {
+		isActive.value = true; // 设置激活状态
+	}
+
+	function handleBlur() {
+		isActive.value = false; // 设置非激活状态
+	}
+
+	// WebSocket 配置
+	const wsConfig = makeWebSocketConfig(
+		"ws://this.is.a.websocket.url",
+		() => {
+			console.log("WebSocket 连接已建立");
+		},
+		(event) => {
+			console.log("收到消息", event.data);
+			// 解析并更新网格数据
+			jsonData = JSON.parse(event.data);
+		}
+	);
+
+	// const { socket, connect, disconnect } = useWebSocket(wsConfig); // WebSocket 实例
+
+	// 实例化 ThreeManager
+	let manager: ThreeManager | null = null;
+
+	function initThreeManager() {
+		if (!threeCanvas.value) return;
+
+		// 配置 Three.js 核心选项
+		const coreOptions: ThreeCoreOptions = {
+			container: <Ref<HTMLDivElement>>threeCanvas, //
+			width: props.width, // 视口宽度
+			height: props.height, // 视口高度
+			aspect: props.width / props.height, // 视角宽高比
+			rendererOptions: {
+				alpha: true, // 背景透明
+				antialias: true, // 抗锯齿
+			},
+			mapDimensions: {
+				rowNum: jsonData.rowNum, // 地图宽度
+				columnNum: jsonData.columnNum, // 地图高度
+			},
+		};
+
+		// 配置网格选项
+		const gridConfig: Omit<HexagonGridConfig, "scene" | "camera"> = {
+			rowNum: jsonData.rowNum, // 动态行数
+			columnNum: jsonData.columnNum, // 动态列数
+		};
+
+		// 实例化 ThreeManager
+		manager = new ThreeManager(coreOptions, isActive, gridConfig);
+	}
+
+	onMounted(() => {
+		// connect(); // 建立 WebSocket 连接
+		initThreeManager(); // 初始化 ThreeManager
+	});
+
+	onBeforeUnmount(() => {
+		// disconnect(); // 断开 WebSocket 连接
+		manager?.dispose(); // 清理 ThreeManager 实例
 	});
 </script>
 
-<style lang="scss">
-	/* 根据需要编写样式 */
-</style>
+<style lang="scss"></style>
