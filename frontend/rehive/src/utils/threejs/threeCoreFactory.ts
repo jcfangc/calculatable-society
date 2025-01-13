@@ -31,6 +31,9 @@ export interface ThreeCore {
 
 export class ThreeCoreFactory {
 	private static renderLoopActive = false;
+	private static sqrt3 = Math.sqrt(3);
+	private static halfSqrt3 = this.sqrt3 / 2;
+	private static epsilon = 0.1;
 
 	/**
 	 * 创建所有核心元素并集成 Vue 3 生命周期管理
@@ -165,49 +168,61 @@ export class ThreeCoreFactory {
 	}
 
 	/**
-	 * 边界判断逻辑
+	 * 检查点是否在地图范围内
 	 */
 	private static isInsideMap(
-		x: number,
-		y: number,
-		rowNum: number,
-		columnNum: number
+		camera: THREE.PerspectiveCamera,
+		config: {
+			rowNum: number;
+			columnNum: number;
+			exceeding: number;
+		}
 	): boolean {
-		const sqrt3 = Math.sqrt(3);
-		const halfSqrt3 = sqrt3 / 2;
 		return (
-			x >= 0 &&
-			x <= halfSqrt3 * columnNum &&
-			y >= x / sqrt3 &&
-			y <= rowNum + x / sqrt3
+			camera.position.x >= 0 &&
+			camera.position.x <= this.halfSqrt3 * config.columnNum &&
+			camera.position.y >= camera.position.x / this.sqrt3 &&
+			camera.position.y <=
+				config.rowNum + camera.position.x / this.sqrt3 &&
+			camera.position.z >= config.exceeding
 		);
 	}
 
 	/**
-	 * 环绕处理逻辑
+	 * 处理相机的边界逻辑
 	 */
 	private static wrapCameraPosition(
-		x: number,
-		y: number,
-		rowNum: number,
-		columnNum: number
-	): { x: number; y: number } {
-		const sqrt3 = Math.sqrt(3);
-		const halfSqrt3 = sqrt3 / 2;
+		camera: THREE.PerspectiveCamera,
+		config: {
+			rowNum: number;
+			columnNum: number;
+			exceeding: number;
+		}
+	): void {
+		const makeUp = config.exceeding * this.epsilon;
+
+		// 避免 z 轴超出
+		if (camera.position.z < config.exceeding) {
+			camera.position.z = config.exceeding;
+		}
 
 		// 环绕处理
+		if (camera.position.x > this.halfSqrt3 * config.columnNum) {
+			camera.position.x -= this.halfSqrt3 * config.columnNum - makeUp;
+			camera.position.y -= 0.5 * config.columnNum - makeUp;
+		} else if (camera.position.x < 0) {
+			camera.position.x += this.halfSqrt3 * config.columnNum - makeUp;
+			camera.position.y += 0.5 * config.columnNum - makeUp;
+		}
 
-		// 右边界超出
-		if (x > halfSqrt3 * columnNum) x -= halfSqrt3 * columnNum;
-		// 左边界超出
-		else if (x < 0) x += halfSqrt3 * columnNum;
-
-		// 上边界超出
-		if (y > rowNum + x / sqrt3) y -= rowNum + x / sqrt3;
-		// 下边界超出
-		else if (y < x / sqrt3) y += rowNum + x / sqrt3;
-
-		return { x, y };
+		if (
+			camera.position.y >
+			config.rowNum + camera.position.x / this.sqrt3
+		) {
+			camera.position.y -= config.rowNum - makeUp;
+		} else if (camera.position.y < camera.position.x / this.sqrt3) {
+			camera.position.y += config.rowNum - makeUp;
+		}
 	}
 
 	/**
@@ -219,10 +234,19 @@ export class ThreeCoreFactory {
 		renderer: THREE.WebGLRenderer,
 		controls: FlyControls,
 		mapDimensions: { rowNum: number; columnNum: number },
-		checkInterval: number
-	) {
+		checkInterval: number,
+		frameTime: number = 0.02
+	): void {
 		this.renderLoopActive = true;
 		let frameCount = 0;
+
+		const exceeding = controls.movementSpeed * checkInterval * frameTime;
+
+		const config = {
+			rowNum: mapDimensions.rowNum,
+			columnNum: mapDimensions.columnNum,
+			exceeding: exceeding,
+		};
 
 		const loop = () => {
 			if (!this.renderLoopActive) return;
@@ -234,27 +258,13 @@ export class ThreeCoreFactory {
 			if (frameCount % checkInterval === 0) {
 				frameCount = 0;
 
-				if (
-					!this.isInsideMap(
-						camera.position.x,
-						camera.position.y,
-						mapDimensions.rowNum,
-						mapDimensions.columnNum
-					)
-				) {
-					const newPosition = this.wrapCameraPosition(
-						camera.position.x,
-						camera.position.y,
-						mapDimensions.rowNum,
-						mapDimensions.columnNum
-					);
-					camera.position.x = newPosition.x;
-					camera.position.y = newPosition.y;
+				if (!this.isInsideMap(camera, config)) {
+					this.wrapCameraPosition(camera, config);
 				}
 			}
 
 			// 更新控制器并渲染场景
-			controls.update(0.02);
+			controls.update(frameTime);
 			renderer.render(scene, camera);
 		};
 		loop();

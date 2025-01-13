@@ -61,6 +61,21 @@ export class HotkeysManager {
 			}
 		});
 
+		// Backspace: 删除最后输入的字符
+		hotkeys("backspace", (event) => {
+			if (!this.isActive.value) return;
+
+			// 阻止浏览器默认的后退操作
+			event.preventDefault();
+
+			// 如果你希望始终先尝试删除 Z 坐标的输入
+			if (this.zValueInput.length > 0) {
+				this.zValueInput = this.zValueInput.slice(0, -1);
+			} else if (this.coordinateInput.length > 0) {
+				this.coordinateInput = this.coordinateInput.slice(0, -1);
+			}
+		});
+
 		// Enter: 处理输入内容
 		hotkeys("enter", () => {
 			if (this.isActive.value) {

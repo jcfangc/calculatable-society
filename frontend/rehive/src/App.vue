@@ -1,16 +1,23 @@
 <template>
 	<!-- <Sidebar /> -->
-	<WorldWindow
+	<!-- <WorldWindow
 		:width="windowWidth"
 		:height="windowHeight"
 		:civilization_id="civilizationId"
-	/>
+	/> -->
 </template>
 
 <script setup lang="ts">
 	// import Sidebar from "@/components/Sidebar.vue";
-	import WorldWindow from "@/views/WorldWindow.vue";
+	// import WorldWindow from "@/views/WorldWindow.vue";
+	import { emitter } from "./utils/mitt/emitter";
+	import { TipEvent, TipLevel } from "./utils/mitt/events/tipEvent";
 	import { ref, onMounted, onUnmounted } from "vue";
+
+	emitter.emit(TipEvent.Show, {
+		level: TipLevel.Info,
+		message: "Hello, World!",
+	});
 
 	// 窗口宽高
 	const windowWidth = ref(window.innerWidth);
@@ -43,6 +50,7 @@
 	// 应用容器样式
 	#app {
 		display: flex;
+		flex-direction: column;
 		justify-content: center;
 		align-items: center;
 		min-height: 100vh; // 使用视口高度填充全屏

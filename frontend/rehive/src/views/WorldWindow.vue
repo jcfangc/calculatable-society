@@ -6,6 +6,10 @@
 		@focus="handleFocus"
 		@blur="handleBlur"
 	></div>
+	<div id="crosshair">
+		<div class="horizontal"></div>
+		<div class="vertical"></div>
+	</div>
 </template>
 
 <script setup lang="ts">
@@ -34,8 +38,8 @@
 	const isActive = ref(false); // 是否激活当前组件
 	const threeCanvas = ref<HTMLDivElement | null>(null); // 容器 DOM
 	let jsonData: { rowNum: number; columnNum: number } = {
-		rowNum: 16,
-		columnNum: 16,
+		rowNum: 128,
+		columnNum: 128,
 	}; // 初始网格数据
 
 	function handleFocus() {
@@ -104,4 +108,39 @@
 	});
 </script>
 
-<style lang="scss"></style>
+<style lang="scss">
+	#crosshair {
+		position: fixed;
+		top: 50%;
+		left: 50%;
+		width: 20px; // 准星的总宽度
+		height: 20px; // 准星的总高度
+		transform: translate(-50%, -50%);
+		pointer-events: none; // 防止准星干扰鼠标事件
+
+		// 水平线
+		.horizontal,
+		.vertical {
+			position: absolute;
+			background: white; // 准星的颜色
+		}
+
+		// 水平线样式
+		.horizontal {
+			top: 50%;
+			left: 0;
+			width: 100%;
+			height: 2px; // 线条厚度
+			transform: translateY(-50%);
+		}
+
+		// 垂直线样式
+		.vertical {
+			top: 0;
+			left: 50%;
+			width: 2px; // 线条厚度
+			height: 100%;
+			transform: translateX(-50%);
+		}
+	}
+</style>
