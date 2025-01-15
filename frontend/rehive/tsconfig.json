@@ -6,7 +6,6 @@
 		"moduleResolution": "node",
 		"target": "esnext",
 		"lib": ["dom", "dom.iterable", "esnext"], // 确保包含全局类型定义库
-		"jsx": "preserve",
 		"strict": true,
 		"skipLibCheck": true,
 		"esModuleInterop": true,

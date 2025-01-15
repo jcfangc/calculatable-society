@@ -1,23 +1,16 @@
 <template>
 	<!-- <Sidebar /> -->
-	<!-- <WorldWindow
+	<WorldWindow
 		:width="windowWidth"
 		:height="windowHeight"
 		:civilization_id="civilizationId"
-	/> -->
+	/>
 </template>
 
 <script setup lang="ts">
 	// import Sidebar from "@/components/Sidebar.vue";
-	// import WorldWindow from "@/views/WorldWindow.vue";
-	import { emitter } from "./utils/mitt/emitter";
-	import { TipEvent, TipLevel } from "./utils/mitt/events/tipEvent";
+	import WorldWindow from "@/views/WorldWindow.vue";
 	import { ref, onMounted, onUnmounted } from "vue";
-
-	emitter.emit(TipEvent.Show, {
-		level: TipLevel.Info,
-		message: "Hello, World!",
-	});
 
 	// 窗口宽高
 	const windowWidth = ref(window.innerWidth);

@@ -2,6 +2,8 @@ import * as THREE from "three";
 import hotkeys from "hotkeys-js";
 import { Ref } from "vue";
 import { useHexagonStore } from "@/stores/hexagonStore";
+import { useTip } from "@/hooks/useTip";
+import { TipLevel } from "@/components/Tip.vue";
 
 /**
  * 管理快捷键相关的类
@@ -32,18 +34,40 @@ export class HotkeysManager {
 	private initHotkeys() {
 		// Alt + G: 重置相机位置
 		hotkeys("alt+g", () => {
-			if (this.isActive.value) this.resetCameraPosition();
+			if (this.isActive.value) {
+				this.resetCameraPosition();
+				useTip(
+					TipLevel.Success,
+					`Reset camera to default position: [${this.defaultPosition
+						.toArray()
+						.map((val) => val.toFixed(3))
+						.join(", ")}]`
+				);
+			}
 		});
 
 		// Alt + R: 摄像头反转 180 度
 		hotkeys("alt+r", () => {
-			if (this.isActive.value) this.reverseCamera();
+			if (this.isActive.value) {
+				this.reverseCamera();
+				useTip(
+					TipLevel.Success,
+					`Reversed camera by 180 degrees. Now: x=${THREE.MathUtils.radToDeg(
+						this.camera.rotation.x
+					).toFixed(3)}°, y=${THREE.MathUtils.radToDeg(
+						this.camera.rotation.y
+					).toFixed(3)}°, z=${THREE.MathUtils.radToDeg(
+						this.camera.rotation.z
+					).toFixed(3)}°`
+				);
+			}
 		});
 
 		// Z + 数字 + Enter: 更新相机 Z 坐标
 		hotkeys("z+*", (event) => {
 			if (this.isActive.value && !isNaN(Number(event.key))) {
 				this.zValueInput += event.key;
+				useTip(TipLevel.Info, `Input Z: ${this.zValueInput}`);
 			}
 		});
 
@@ -57,6 +81,10 @@ export class HotkeysManager {
 					event.key === "，"
 				) {
 					this.coordinateInput += event.key;
+					useTip(
+						TipLevel.Info,
+						`Input Coordinate: ${this.coordinateInput}`
+					);
 				}
 			}
 		});
@@ -71,8 +99,13 @@ export class HotkeysManager {
 			// 如果你希望始终先尝试删除 Z 坐标的输入
 			if (this.zValueInput.length > 0) {
 				this.zValueInput = this.zValueInput.slice(0, -1);
+				useTip(TipLevel.Info, `Input Z: ${this.zValueInput}`);
 			} else if (this.coordinateInput.length > 0) {
 				this.coordinateInput = this.coordinateInput.slice(0, -1);
+				useTip(
+					TipLevel.Info,
+					`Input Coordinate: ${this.coordinateInput}`
+				);
 			}
 		});
 
@@ -82,10 +115,15 @@ export class HotkeysManager {
 				if (this.zValueInput) {
 					const zValue = parseFloat(this.zValueInput);
 					this.updateCameraZ(zValue);
+					useTip(TipLevel.Success, `Camera Z Updated: ${zValue}`);
 					this.zValueInput = "";
 				}
 				if (this.coordinateInput) {
 					this.updateCameraPositionFromInput(this.coordinateInput);
+					useTip(
+						TipLevel.Success,
+						`Camera Moved to: ${this.coordinateInput}`
+					);
 					this.coordinateInput = "";
 				}
 			}

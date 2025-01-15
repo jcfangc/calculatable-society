@@ -1,79 +1,48 @@
 <template>
-	<div
-		v-if="visible"
-		:class="`tip tip--${tip.level}`"
-	>
+	<div :class="`tip tip--${level}`">
 		<span class="tip__icon">{{ icon }}</span>
-		{{ tip.message }}
+		{{ message }}
 	</div>
 </template>
-
 <script lang="ts">
-	import {
-		defineComponent,
-		reactive,
-		onMounted,
-		onUnmounted,
-		computed,
-		ref,
-	} from "vue";
-	import { emitter } from "@/utils/mitt/emitter";
-	import {
-		TipEvent,
-		TipLevel,
-		TipMessage,
-	} from "@/utils/mitt/events/tipEvent";
+	import { defineComponent, computed, ref } from "vue";
+
+	export const enum TipLevel {
+		Success = "success",
+		Warning = "warning",
+		Error = "error",
+		Info = "info",
+	}
 
 	export default defineComponent({
 		name: "Tip",
-		setup() {
-			// 响应式数据
-			const tip = reactive<TipMessage>({
-				level: TipLevel.Info,
-				message: "",
-			});
-
-			const visible = ref(false);
-
-			// 动态计算前缀符号
+		props: {
+			level: {
+				type: String as () => TipLevel,
+				required: true,
+			},
+			message: {
+				type: String,
+				required: true,
+			},
+		},
+		setup(props) {
 			const icon = computed(() => {
-				switch (tip.level) {
+				switch (props.level) {
 					case TipLevel.Success:
-						return "✅"; // 成功
+						return "✅";
 					case TipLevel.Warning:
-						return "☢️"; // 警告
+						return "☢️";
 					case TipLevel.Error:
-						return "🚫"; // 错误
+						return "🚫";
 					case TipLevel.Info:
 					default:
-						return "ℹ️"; // 信息
+						return "ℹ️";
 				}
 			});
 
-			// 监听 Tip 事件
-			const onShowTip = (message: TipMessage) => {
-				tip.level = message.level;
-				tip.message = message.message;
-				visible.value = true;
-
-				// 自动隐藏提示
-				setTimeout(() => {
-					visible.value = false;
-				}, 3000);
-			};
-
-			onMounted(() => {
-				emitter.on(TipEvent.Show, onShowTip);
-			});
-
-			onUnmounted(() => {
-				emitter.off(TipEvent.Show, onShowTip);
-			});
-
 			return {
-				tip,
 				icon,
-				visible,
 			};
 		},
 	});
@@ -88,14 +57,19 @@
 		@include colour-config(
 			$text-color: white,
 			$bg-color: var(--info-bg),
-			$border-color: var(--info-border)
+			$border-color: none
 		);
 		@include layout-config(
-			$padding-y: var(--spacing-md),
-			$padding-x: var(--spacing-lg),
+			$padding-y: var(--spacing-sm),
+			$padding-x: var(--spacing-md),
 			$gap: var(--spacing-sm),
-			$max-width: 50vw
+			$max-width: 50vw,
+			$position: fixed
 		);
+		z-index: 9999;
+		top: 10%;
+		left: 50%;
+		transform: translate(-50%, -50%);
 	}
 
 	.tip__icon {
@@ -121,31 +95,35 @@
 		@include colour-config(
 			$text-color: white,
 			$bg-color: var(--success-bg),
-			$border-color: var(--success-border)
+			$border-color: transparent
 		);
+		box-shadow: 0 0 1rem var(--success-border);
 	}
 
 	.tip--warning {
 		@include colour-config(
 			$text-color: white,
 			$bg-color: var(--warning-bg),
-			$border-color: var(--warning-border)
+			$border-color: transparent
 		);
+		box-shadow: 0 0 1rem var(--warning-border);
 	}
 
 	.tip--error {
 		@include colour-config(
 			$text-color: white,
 			$bg-color: var(--error-bg),
-			$border-color: var(--error-border)
+			$border-color: transparent
 		);
+		box-shadow: 0 0 1rem var(--error-border);
 	}
 
 	.tip--info {
 		@include colour-config(
 			$text-color: white,
 			$bg-color: var(--info-bg),
-			$border-color: var(--info-border)
+			$border-color: transparent
 		);
+		box-shadow: 0 0 1rem var(--info-border);
 	}
 </style>
