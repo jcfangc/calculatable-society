@@ -1,144 +1,58 @@
-import * as THREE from "three";
-import hotkeys from "hotkeys-js";
 import { Ref } from "vue";
-import { useHexagonStore } from "@/stores/hexagonStore";
-import { useTip } from "@/hooks/useTip";
-import { TipLevel } from "@/components/Tip.vue";
+import * as THREE from "three";
+import { FlyControls } from "three/examples/jsm/controls/FlyControls";
+import {
+	registerResetCameraHotkey,
+	registerReverseCameraHotkey,
+	registerUpdateCameraZHotkey,
+	registerMoveCameraHotkey,
+} from "@/utils/threejs/hotkeys";
+import hotkeys from "hotkeys-js";
 
-/**
- * 管理快捷键相关的类
- */
 export class HotkeysManager {
 	private camera: THREE.PerspectiveCamera;
-
-	// 默认位置和朝向
-	private defaultPosition: THREE.Vector3 = new THREE.Vector3(0, 0, 5);
-	private defaultTarget: THREE.Vector3 = new THREE.Vector3(0, 0, 0);
-
-	private zValueInput: string = "";
-	private coordinateInput: string = "";
-
-	// 控制快捷键是否启用
 	private isActive: Ref<boolean>;
+	private controls: FlyControls;
+	private defaultPosition: THREE.Vector3;
+	private defaultTarget: THREE.Vector3;
 
-	constructor(camera: THREE.PerspectiveCamera, isActive: Ref<boolean>) {
+	constructor(
+		camera: THREE.PerspectiveCamera,
+		isActive: Ref<boolean>,
+		controls: FlyControls
+	) {
 		this.camera = camera;
 		this.isActive = isActive;
+		this.controls = controls;
+		this.defaultPosition = new THREE.Vector3(0, 0, 5);
+		this.defaultTarget = new THREE.Vector3(0, 0, 0);
 
 		this.initHotkeys();
 	}
 
-	/**
-	 * 初始化快捷键
-	 */
 	private initHotkeys() {
-		// Alt + G: 重置相机位置
-		hotkeys("alt+g", () => {
-			if (this.isActive.value) {
-				this.resetCameraPosition();
-				useTip(
-					TipLevel.Success,
-					`Reset camera to default position: [${this.defaultPosition
-						.toArray()
-						.map((val) => val.toFixed(3))
-						.join(", ")}]`
-				);
-			}
-		});
-
-		// Alt + R: 摄像头反转 180 度
-		hotkeys("alt+r", () => {
-			if (this.isActive.value) {
-				this.reverseCamera();
-				useTip(
-					TipLevel.Success,
-					`Reversed camera by 180 degrees. Now: x=${THREE.MathUtils.radToDeg(
-						this.camera.rotation.x
-					).toFixed(3)}°, y=${THREE.MathUtils.radToDeg(
-						this.camera.rotation.y
-					).toFixed(3)}°, z=${THREE.MathUtils.radToDeg(
-						this.camera.rotation.z
-					).toFixed(3)}°`
-				);
-			}
-		});
-
-		// Z + 数字 + Enter: 更新相机 Z 坐标
-		hotkeys("z+*", (event) => {
-			if (this.isActive.value && !isNaN(Number(event.key))) {
-				this.zValueInput += event.key;
-				useTip(TipLevel.Info, `Input Z: ${this.zValueInput}`);
-			}
-		});
-
-		// G + 数字 + 中英文逗号 + 数字 + Enter: 移动到指定坐标
-		hotkeys("g+*", (event) => {
-			if (this.isActive.value) {
-				// 允许数字和逗号输入
-				if (
-					!isNaN(Number(event.key)) ||
-					event.key === "," ||
-					event.key === "，"
-				) {
-					this.coordinateInput += event.key;
-					useTip(
-						TipLevel.Info,
-						`Input Coordinate: ${this.coordinateInput}`
-					);
-				}
-			}
-		});
-
-		// Backspace: 删除最后输入的字符
-		hotkeys("backspace", (event) => {
-			if (!this.isActive.value) return;
-
-			// 阻止浏览器默认的后退操作
-			event.preventDefault();
-
-			// 如果你希望始终先尝试删除 Z 坐标的输入
-			if (this.zValueInput.length > 0) {
-				this.zValueInput = this.zValueInput.slice(0, -1);
-				useTip(TipLevel.Info, `Input Z: ${this.zValueInput}`);
-			} else if (this.coordinateInput.length > 0) {
-				this.coordinateInput = this.coordinateInput.slice(0, -1);
-				useTip(
-					TipLevel.Info,
-					`Input Coordinate: ${this.coordinateInput}`
-				);
-			}
-		});
-
-		// Enter: 处理输入内容
-		hotkeys("enter", () => {
-			if (this.isActive.value) {
-				if (this.zValueInput) {
-					const zValue = parseFloat(this.zValueInput);
-					this.updateCameraZ(zValue);
-					useTip(TipLevel.Success, `Camera Z Updated: ${zValue}`);
-					this.zValueInput = "";
-				}
-				if (this.coordinateInput) {
-					this.updateCameraPositionFromInput(this.coordinateInput);
-					useTip(
-						TipLevel.Success,
-						`Camera Moved to: ${this.coordinateInput}`
-					);
-					this.coordinateInput = "";
-				}
-			}
-		});
+		registerResetCameraHotkey(
+			this.camera,
+			this.isActive,
+			this.defaultPosition,
+			this.defaultTarget
+		);
+		registerReverseCameraHotkey(this.camera, this.isActive);
+		registerUpdateCameraZHotkey(
+			this.camera,
+			this.isActive,
+			this.enableControls.bind(this)
+		);
+		registerMoveCameraHotkey(
+			this.camera,
+			this.isActive,
+			this.enableControls.bind(this)
+		);
 	}
 
-	/**
-	 * 重置相机到默认位置
-	 */
-	private resetCameraPosition() {
-		this.camera.position.copy(this.defaultPosition);
-		this.camera.lookAt(this.defaultTarget);
-		console.log(
-			`Camera reset to default position: ${this.defaultPosition.toArray()}, target: ${this.defaultTarget.toArray()}`
-		);
+	private enableControls(enable: boolean) {
+		this.isActive.value = enable;
+		this.controls.enabled = enable;
 	}
 
 	/**
@@ -157,60 +71,11 @@ export class HotkeysManager {
 		);
 	}
 
-	/**
-	 * 摄像头反转 180 度
-	 */
-	private reverseCamera() {
-		this.camera.rotation.y += Math.PI;
-		console.log("Camera reversed 180 degrees.");
-	}
-
-	/**
-	 * 更新摄像机的 Z 坐标
-	 * @param zValue 用户输入的 Z 坐标值
-	 */
-	private updateCameraZ(zValue: number) {
-		this.camera.position.z = zValue;
-		console.log(`Camera Z position updated to: ${zValue}`);
-	}
-
-	/**
-	 * 根据用户输入更新相机位置
-	 * @param input 用户输入的坐标字符串
-	 */
-	private updateCameraPositionFromInput(input: string) {
-		// 替换中英文逗号
-		const sanitizedInput = input.replace(/，/g, ",");
-		const [xStr, yStr] = sanitizedInput.split(",");
-
-		if (xStr && yStr) {
-			const x = parseFloat(xStr);
-			const y = parseFloat(yStr);
-
-			const { calculateHexagonCenter } = useHexagonStore();
-			const { x: newX, y: newY } = calculateHexagonCenter(y, x);
-
-			this.camera.position.set(newX, newY, 10);
-
-			const toLookAt = new THREE.Vector3(newX, newY, 0);
-			this.camera.lookAt(toLookAt);
-			console.log(`Camera moved to position: [${newX}, ${newY}, 10]`);
-		} else {
-			console.error(
-				"Invalid coordinate input. Expected format: 'number,number'."
-			);
-		}
-	}
-
-	/**
-	 * 取消所有热键绑定
-	 */
 	public dispose() {
 		hotkeys.unbind("alt+g");
 		hotkeys.unbind("alt+r");
-		hotkeys.unbind("z+*");
-		hotkeys.unbind("g+*");
-		hotkeys.unbind("enter");
+		hotkeys.unbind("alt+z");
+		hotkeys.unbind("alt+m");
 		console.log("Hotkeys unbound.");
 	}
 }

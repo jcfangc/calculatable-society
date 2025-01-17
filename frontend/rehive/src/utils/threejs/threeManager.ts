@@ -51,7 +51,11 @@ export class ThreeManager {
 			);
 
 		// 初始化热键管理器并绑定默认相机位置
-		this.hotkeysManager = new HotkeysManager(this.core.camera, isActive);
+		this.hotkeysManager = new HotkeysManager(
+			this.core.camera,
+			isActive,
+			this.core.controls
+		);
 		this.hotkeysManager.setDefaultCameraPosition(
 			defaultPosition,
 			defaultLookAt

@@ -1,4 +1,6 @@
 @mixin scrollbar-config(
+	$corner-color: var(--bg-primary),
+	$corner-radius: var(--border-radius-lg),
 	$scrollbar-width: 0.8rem,
 	$scrollbar-height: 1rem,
 	$track-bg: var(--bg-primary),
@@ -8,6 +10,12 @@
 	$thumb-border: 1px dashed var(--bg-secondary),
 	$thumb-hover-border: 1px solid var(--bg-primary)
 ) {
+	/* 设置右下角小方块的样式 */
+	&::-webkit-scrollbar-corner {
+		background-color: $corner-color; // 设置背景颜色
+		border-radius: $corner-radius; // 可选: 设置圆角
+	}
+
 	/* 滚动条整体尺寸 */
 	&::-webkit-scrollbar {
 		width: $scrollbar-width; // 滚动条宽度
@@ -36,4 +44,13 @@
 	/* Firefox 支持 */
 	scrollbar-width: thin; // 滚动条宽度 (auto, thin, none)
 	scrollbar-color: $thumb-bg $track-bg; // 滑块和轨道颜色
+}
+
+@mixin spin-button-config() {
+	/* Webkit 内核的数字输入框按钮 */
+	&::-webkit-inner-spin-button,
+	&::-webkit-outer-spin-button {
+		-webkit-appearance: none;
+		appearance: none;
+	}
 }
