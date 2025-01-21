@@ -17,6 +17,7 @@ pub(crate) struct HexUnit {
     movement: CartesianVec2D,
 }
 
+/// 关于字段的基本操作
 impl HexUnit {
     pub(crate) fn new(mole: usize, movement: CartesianVec2D) -> Self {
         Self { mole, movement }
@@ -50,7 +51,10 @@ impl HexUnit {
         self.mole = (self.mole as isize + unit_change.mole_change() as isize) as usize;
         self.movement = self.movement + unit_change.movement_change();
     }
+}
 
+/// 关于扩散逻辑的集合
+impl HexUnit {
     pub(crate) fn diffuse(
         &self,
         fluidity: f64,

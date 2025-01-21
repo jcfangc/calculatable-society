@@ -1,5 +1,6 @@
 use crate::environment::cartesian_vec_2d::CartesianVec2D;
 use crate::environment::map_size::MapSize;
+use my_proc_macro::Literal;
 use once_cell::sync::Lazy;
 use std::sync::{Arc, RwLock};
 use std::sync::{PoisonError, RwLockReadGuard, RwLockWriteGuard};
@@ -11,7 +12,7 @@ static GAME_CONTEXT: Lazy<Arc<RwLock<GameContext>>> =
     Lazy::new(|| Arc::new(RwLock::new(GameContext::new())));
 
 /// 游戏上下文
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Literal)]
 pub struct GameContext {
     /// 地图大小
     map_size: Option<MapSize>,
@@ -20,8 +21,10 @@ pub struct GameContext {
     /// 重力常数
     gravity_const: Option<f64>,
     /// 六边形地图基向量 x 在笛卡尔空间投影
+    #[notLiteral]
     x_base_vector: CartesianVec2D,
     /// 六边形地图基向量 y 在笛卡尔空间投影
+    #[notLiteral]
     y_base_vector: CartesianVec2D,
 }
 
@@ -148,7 +151,7 @@ impl GameContext {
     /// ### 返回值
     /// 返回地图大小的 `MapSize` 对象。
     pub fn get_map_size() -> MapSize {
-        Self::get_global_optional_field(|ctx| ctx.map_size.clone(), "map_size")
+        Self::get_global_optional_field(|ctx| ctx.map_size.clone(), GameContext::MAP_SIZE)
     }
 
     /// 获取文明 ID。
@@ -156,7 +159,7 @@ impl GameContext {
     /// ### 返回值
     /// 返回文明的 `Uuid`。
     pub fn get_civilization_id() -> Uuid {
-        Self::get_global_optional_field(|ctx| ctx.civilization_id, "civilization_id")
+        Self::get_global_optional_field(|ctx| ctx.civilization_id, GameContext::CIVILIZATION_ID)
     }
 
     /// 获取重力常数。
@@ -164,7 +167,7 @@ impl GameContext {
     /// ### 返回值
     /// 返回重力常数的值。
     pub fn get_gravity_const() -> f64 {
-        Self::get_global_optional_field(|ctx| ctx.gravity_const, "gravity_const")
+        Self::get_global_optional_field(|ctx| ctx.gravity_const, GameContext::GRAVITY_CONST)
     }
 
     /// 获取 X 基向量。

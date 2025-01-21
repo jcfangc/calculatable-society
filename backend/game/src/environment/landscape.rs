@@ -68,7 +68,10 @@ impl Landscape {
         self.potential
             .update(&self.subtance_distributions, self.map_size.as_tuple());
     }
+}
 
+/// 关于扩散逻辑的集合
+impl Landscape {
     pub(crate) fn diffuse(&mut self) {
         // 更新当前状态
         self.update_distributions(None);

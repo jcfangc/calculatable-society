@@ -33,3 +33,9 @@ coverage
 
 # Ignore pnpm store files
 frontend/.pnpm-store/
+
+# Ignore all local env files
+**/.env
+
+# Ignore all database files
+database/*

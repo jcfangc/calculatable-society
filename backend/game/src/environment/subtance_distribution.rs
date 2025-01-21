@@ -22,7 +22,6 @@ use std::{
     collections::HashMap,
     hash::{Hash, Hasher},
 };
-use tracing::instrument;
 
 const ENLARGE_FACTOR: usize = 255;
 
@@ -33,8 +32,8 @@ pub(crate) struct SubstanceDistribution {
     noise_params: NoiseParams,
 }
 
+/// 字段基本操作
 impl SubstanceDistribution {
-    #[instrument(skip_all)]
     pub(crate) fn new(
         substance_type: SubstanceType,
         map_size: MapSize,
@@ -61,7 +60,10 @@ impl SubstanceDistribution {
     pub(crate) fn noise_params(&self) -> &NoiseParams {
         &self.noise_params
     }
+}
 
+/// 扩散逻辑
+impl SubstanceDistribution {
     /// 对整个网格执行扩散逻辑的主函数。
     /// 1. 使用 `compute_changes` 并行计算所有单元格及其邻居的变化量。
     /// 2. 使用 `apply_changes` 串行地将变化量应用到分布中，从而更新每个单元格的状态。
@@ -233,7 +235,6 @@ impl PartialEq for SubstanceDistribution {
 }
 
 impl NoiseGeneratable for SubstanceDistribution {
-    #[instrument(skip_all)]
     fn generate_simplex_noise(&mut self) {
         // 初始化Simplex噪声生成器，使用指定的种子确保噪声的可重复性
         let simplex = OpenSimplex::new(self.noise_params.seed);
@@ -267,7 +268,6 @@ impl NoiseGeneratable for SubstanceDistribution {
 impl Statistical for SubstanceDistribution {
     type Item = HexUnit;
 
-    #[instrument(skip_all)]
     fn min(&self) -> Self::Item {
         self.distribution
             .par_iter()
@@ -276,7 +276,6 @@ impl Statistical for SubstanceDistribution {
             .clone()
     }
 
-    #[instrument(skip_all)]
     fn max(&self) -> Self::Item {
         self.distribution
             .par_iter()
@@ -285,13 +284,11 @@ impl Statistical for SubstanceDistribution {
             .clone()
     }
 
-    #[instrument(skip_all)]
     fn mean(&self) -> f64 {
         let sum: usize = self.distribution.par_iter().map(|unit| unit.mole()).sum();
         sum as f64 / self.distribution.len() as f64
     }
 
-    #[instrument(skip_all)]
     fn variance(&self) -> f64 {
         let mean = self.mean();
         let sum_of_squares: f64 = self

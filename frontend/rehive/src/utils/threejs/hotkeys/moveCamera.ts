@@ -34,7 +34,12 @@ export function registerMoveCameraHotkey(
 					const xValue = parseFloat(formData.xValue);
 					const yValue = parseFloat(formData.yValue);
 
-					if (!isNaN(xValue) && !isNaN(yValue)) {
+					if (
+						!isNaN(xValue) &&
+						!isNaN(yValue) &&
+						xValue >= 0 &&
+						yValue >= 0
+					) {
 						const { calculateHexagonCenter } = useHexagonStore();
 						const { x: newX, y: newY } = calculateHexagonCenter(
 							yValue,

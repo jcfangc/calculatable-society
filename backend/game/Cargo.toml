@@ -8,6 +8,7 @@ num = { version = "*", features = ["serde"] }
 tracing = "*"
 validator = "*"
 utils = { path = "../utils" }
+my-proc-macro = { path = "../my-proc-macro" }
 sqlx = { version = "*", features = ["runtime-tokio-rustls", "macros", "uuid"] }
 rayon = "*"
 tokio = { version = "*", features = ["sync"] }

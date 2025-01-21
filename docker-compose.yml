@@ -11,6 +11,14 @@
     ports:
       - "8000:8000"
     command: [ "tail", "-f", "/dev/null" ] # 保持容器运行
+    environment:
+      DATABASE_HOST: ${DATABASE_HOST}
+      DATABASE_PORT: ${DATABASE_PORT}
+      DATABASE_USER: ${POSTGRES_USER}
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+      DATABASE_NAME: ${POSTGRES_DB}
+    depends_on:
+      - postgresql # 确保后端在数据库启动后再运行
 
   frontend:
     privileged: true # 启用特权模式
@@ -27,7 +35,29 @@
       - "5174:5174" # 避免端口冲突
     command: [ "tail", "-f", "/dev/null" ] # 保持容器运行
     environment:
-      - NODE_ENV=development # 设置环境变量
+      NODE_ENV: ${NODE_ENV}
+
+  postgresql:
+    build:
+      context: ./database # 自定义的 Dockerfile 目录
+      dockerfile: Dockerfile
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - ./database/data:/var/lib/postgresql/data
+      - ./database/logs:/var/log/postgresql # 挂载日志目录
+      - ./database/init-scripts:/docker-entrypoint-initdb.d/
+    networks:
+      - dev-network
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "${POSTGRES_USER}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5432:5432"
 
 networks:
   dev-network:

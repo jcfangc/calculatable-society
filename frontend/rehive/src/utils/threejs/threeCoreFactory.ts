@@ -4,7 +4,7 @@ import { createScene } from "./three-cores/createScene";
 import { createCamera } from "./three-cores/createCamera";
 import { createRenderer } from "./three-cores/createRenderer";
 import { createFlyControls } from "./three-cores/createFlyControls";
-import { createRenderLoopManager } from "./three-cores/renderLoop";
+import { createRenderLoopManager } from "./three-cores/createRenderLoopManager";
 import { disposeResources } from "./three-cores/disposeResources";
 import { Ref } from "vue";
 
