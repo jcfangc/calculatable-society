@@ -39,3 +39,6 @@ frontend/.pnpm-store/
 
 # Ignore all database files
 database/*
+
+# Ignore all redis files
+redis/*

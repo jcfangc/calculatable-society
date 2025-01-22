@@ -15,7 +15,7 @@ pub(crate) struct Landscape {
 impl Landscape {
     pub(crate) fn new(map_size: MapSize) -> Self {
         // 更新全局上下文中的 map_size
-        GameContext::update_global_map_size(map_size.clone());
+        GameContext::update_game_map_size(map_size.clone());
 
         // 创建新的 Landscape
         Self {

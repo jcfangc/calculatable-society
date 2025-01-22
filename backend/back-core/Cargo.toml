@@ -1,0 +1,27 @@
+[package]
+name = "back-core"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+async-trait = "*"
+dotenvy = "*"
+futures = "*"
+once_cell = "*"
+sqlx = { version = "*", features = [
+    "runtime-tokio-rustls",
+    "macros",
+    "uuid",
+    "postgres",
+] }
+share-and-commute = { path = "../share-and-commute" }
+tokio = { version = "*", features = ["full"] }
+tokio-stream = "*"
+tracing = "*"
+thiserror = "*"
+uuid = "*"
+my-proc-macro = { path = "../my-proc-macro" }
+redis = { version = "*", features = ["aio"] }
+
+[dev-dependencies]
+tokio = { version = "1.41", features = ["full", "macros"] }

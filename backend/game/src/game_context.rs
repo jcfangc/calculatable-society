@@ -2,10 +2,12 @@ use crate::environment::cartesian_vec_2d::CartesianVec2D;
 use crate::environment::map_size::MapSize;
 use my_proc_macro::Literal;
 use once_cell::sync::Lazy;
+use share_and_commute::errors::context_error::ContextError;
 use std::sync::{Arc, RwLock};
-use std::sync::{PoisonError, RwLockReadGuard, RwLockWriteGuard};
 use thiserror::Error;
 use uuid::Uuid;
+
+pub type GameContextError = ContextError<GameContext>;
 
 /// 全局游戏上下文实例
 static GAME_CONTEXT: Lazy<Arc<RwLock<GameContext>>> =
@@ -44,36 +46,34 @@ impl GameContext {
     }
 }
 
-// ========================================
-// 更新游戏上下文相关方法
-// ========================================
+// update
 impl GameContext {
     /// 通用更新方法
-    fn update_global<F>(update_fn: F)
+    fn update_game<F>(update_fn: F)
     where
         F: FnOnce(&mut GameContext),
     {
-        let global_context = GAME_CONTEXT.clone();
-        let mut context = global_context.write().expect("未能获取读锁");
+        let game_context = GAME_CONTEXT.clone();
+        let mut context = game_context
+            .write()
+            .expect("未能获取读锁，更新游戏上下文失败");
         update_fn(&mut context);
     }
 
-    pub fn update_global_map_size(map_size: MapSize) {
-        Self::update_global(|context| context.map_size = Some(map_size));
+    pub fn update_game_map_size(map_size: MapSize) {
+        Self::update_game(|context| context.map_size = Some(map_size));
     }
 
-    pub fn update_global_civilization_id(civilization_id: Uuid) {
-        Self::update_global(|context| context.civilization_id = Some(civilization_id));
+    pub fn update_game_civilization_id(civilization_id: Uuid) {
+        Self::update_game(|context| context.civilization_id = Some(civilization_id));
     }
 
-    pub fn update_global_gravity_const(gravity_const: f64) {
-        Self::update_global(|context| context.gravity_const = Some(gravity_const));
+    pub fn update_game_gravity_const(gravity_const: f64) {
+        Self::update_game(|context| context.gravity_const = Some(gravity_const));
     }
 }
 
-// ========================================
-// 设置游戏上下文相关方法
-// ========================================
+// with
 impl GameContext {
     pub fn with_map_size(mut self, map_size: MapSize) -> Self {
         self.map_size = Some(map_size);
@@ -91,10 +91,7 @@ impl GameContext {
     }
 }
 
-// ========================================
-// 获取游戏上下文相关方法
-// ========================================
-/// GameContext 提供了访问全局上下文的方法和工具。
+// get
 impl GameContext {
     /// 访问全局上下文并执行指定操作。
     ///
@@ -122,7 +119,7 @@ impl GameContext {
     ///
     /// ### 返回值
     /// 返回字段值。
-    fn get_global_optional_field<T, F>(field_accessor: F, field_name: &'static str) -> T
+    fn get_optional_field<T, F>(field_accessor: F, field_name: &'static str) -> T
     where
         F: FnOnce(&GameContext) -> Option<T>,
     {
@@ -139,7 +136,7 @@ impl GameContext {
     ///
     /// ### 返回值
     /// 返回字段值。
-    fn get_global_field<T, F>(field_accessor: F) -> T
+    fn get_field<T, F>(field_accessor: F) -> T
     where
         F: FnOnce(&GameContext) -> T,
     {
@@ -151,7 +148,7 @@ impl GameContext {
     /// ### 返回值
     /// 返回地图大小的 `MapSize` 对象。
     pub fn get_map_size() -> MapSize {
-        Self::get_global_optional_field(|ctx| ctx.map_size.clone(), GameContext::MAP_SIZE)
+        Self::get_optional_field(|ctx| ctx.map_size.clone(), GameContext::MAP_SIZE)
     }
 
     /// 获取文明 ID。
@@ -159,7 +156,7 @@ impl GameContext {
     /// ### 返回值
     /// 返回文明的 `Uuid`。
     pub fn get_civilization_id() -> Uuid {
-        Self::get_global_optional_field(|ctx| ctx.civilization_id, GameContext::CIVILIZATION_ID)
+        Self::get_optional_field(|ctx| ctx.civilization_id, GameContext::CIVILIZATION_ID)
     }
 
     /// 获取重力常数。
@@ -167,7 +164,7 @@ impl GameContext {
     /// ### 返回值
     /// 返回重力常数的值。
     pub fn get_gravity_const() -> f64 {
-        Self::get_global_optional_field(|ctx| ctx.gravity_const, GameContext::GRAVITY_CONST)
+        Self::get_optional_field(|ctx| ctx.gravity_const, GameContext::GRAVITY_CONST)
     }
 
     /// 获取 X 基向量。
@@ -175,7 +172,7 @@ impl GameContext {
     /// ### 返回值
     /// 返回 X 基向量的 `CartesianCoord` 对象。
     pub fn get_x_base_vector() -> CartesianVec2D {
-        Self::get_global_field(|ctx| ctx.x_base_vector)
+        Self::get_field(|ctx| ctx.x_base_vector)
     }
 
     /// 获取 Y 基向量。
@@ -183,21 +180,6 @@ impl GameContext {
     /// ### 返回值
     /// 返回 Y 基向量的 `CartesianCoord` 对象。
     pub fn get_y_base_vector() -> CartesianVec2D {
-        Self::get_global_field(|ctx| ctx.y_base_vector)
+        Self::get_field(|ctx| ctx.y_base_vector)
     }
-}
-
-#[derive(Debug, Error)]
-pub enum GameContextError {
-    /// 获取全局上下文的读锁失败
-    #[error("Failed to acquire a read lock on the global game context")]
-    ReadLockFailed(#[source] PoisonError<RwLockReadGuard<'static, GameContext>>),
-
-    /// 获取全局上下文的写锁失败
-    #[error("Failed to acquire a write lock on the global game context")]
-    WriteLockFailed(#[source] PoisonError<RwLockWriteGuard<'static, GameContext>>),
-
-    /// 请求的上下文数据尚未设置（例如 map_size 或 civilization_id）
-    #[error("Requested context data not available: {0}")]
-    ContextFieldNotSet(&'static str),
 }

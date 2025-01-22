@@ -17,8 +17,12 @@
       DATABASE_USER: ${POSTGRES_USER}
       DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
       DATABASE_NAME: ${POSTGRES_DB}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
     depends_on:
       - postgresql # 确保后端在数据库启动后再运行
+      - redis # 确保后端在 Redis 启动后再运行
 
   frontend:
     privileged: true # 启用特权模式
@@ -45,6 +49,7 @@
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
+    hostname: ${DATABASE_HOST}
     volumes:
       - ./database/data:/var/lib/postgresql/data
       - ./database/logs:/var/log/postgresql # 挂载日志目录
@@ -57,7 +62,31 @@
       timeout: 5s
       retries: 5
     ports:
-      - "5432:5432"
+      - "5432:${DATABASE_PORT}"
+
+  redis:
+    build:
+      context: ./redis # 指定自定义 Dockerfile 的上下文目录
+    hostname: ${REDIS_HOST}
+    volumes:
+      - ./redis/data:/data # 持久化数据目录
+      - ./redis/conf/redis.conf:/usr/local/etc/redis/redis.conf # 挂载自定义配置
+    networks:
+      - dev-network
+    ports:
+      - "6379:${REDIS_PORT}" # Redis 默认端口
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD} # 从 .env 文件获取密码
+    entrypoint:
+      - sh
+      - -c
+      - >
+        echo "requirepass $REDIS_PASSWORD" >> /usr/local/etc/redis/redis.conf && echo "bind 0.0.0.0" >> /usr/local/etc/redis/redis.conf && echo "pidfile \"\"" >> /usr/local/etc/redis/redis.conf && redis-server /usr/local/etc/redis/redis.conf
+    healthcheck:
+      test: [ "CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping" ] # 带密码的健康检查
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 networks:
   dev-network:

@@ -1,5 +1,5 @@
 [workspace]
-members = ["game", "back_core", "log", "utils", "auth", "my-proc-macro"]
+members = ["game", "back-core", "log", "my-proc-macro", "share-and-commute"]
 
 [package]
 name = "re-hive"
@@ -11,7 +11,7 @@ edition = "2021"
 tokio = { version = "*", features = ["full"] }
 axum = { version = "*", features = [] }
 log = { path = "./log" }
-back_core = { path = "./back_core" }
+back-core = { path = "./back-core" }
 tracing = "*"
 
 [[bin]]

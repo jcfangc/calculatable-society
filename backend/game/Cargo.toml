@@ -7,12 +7,12 @@ edition = "2021"
 num = { version = "*", features = ["serde"] }
 tracing = "*"
 validator = "*"
-utils = { path = "../utils" }
 my-proc-macro = { path = "../my-proc-macro" }
 sqlx = { version = "*", features = ["runtime-tokio-rustls", "macros", "uuid"] }
+share-and-commute = { path = "../share-and-commute" }
 rayon = "*"
 tokio = { version = "*", features = ["sync"] }
-back_core = { path = "../back_core" }
+back-core = { path = "../back-core" }
 futures = "*"
 noise = "*"
 ndarray = { version = "*", features = ["rayon", "serde"] }

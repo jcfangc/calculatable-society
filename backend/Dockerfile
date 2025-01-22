@@ -11,11 +11,14 @@ ENV LC_ALL=zh_CN.UTF-8
 # 创建应用程序目录
 WORKDIR /backend_app
 
+# 安装必要工具、PostgreSQL 客户端、Redis CLI 和本地化支持
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     ca-certificates \
     gnupg \
-    locales && \
+    locales \
+    redis-tools \
+    iputils-ping && \
     mkdir -p /etc/apt/keyrings && \
     curl -sSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /etc/apt/keyrings/postgresql.gpg && \
     echo "deb [signed-by=/etc/apt/keyrings/postgresql.gpg] http://apt.postgresql.org/pub/repos/apt bullseye-pgdg main" > /etc/apt/sources.list.d/pgdg.list && \
@@ -25,7 +28,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     locale-gen zh_CN.UTF-8 && \
     update-locale LANG=zh_CN.UTF-8 LANGUAGE=zh_CN.UTF-8 LC_ALL=zh_CN.UTF-8 && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* && \
+    rustup component add rustfmt
 
 
 # 暴露端口

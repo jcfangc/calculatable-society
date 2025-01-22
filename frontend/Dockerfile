@@ -12,6 +12,8 @@ RUN apt update && apt install -y net-tools curl lsof && \
     pnpm add -g vite @vue/cli typescript sass && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# 挂载
+
 
 # 设置工作目录
 WORKDIR /frontend_app
